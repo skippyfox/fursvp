@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace fursvp.api.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class EventController : ControllerBase
     {
         private readonly ILogger<EventController> _logger;
@@ -38,22 +38,19 @@ namespace fursvp.api.Controllers
         }
 
         [HttpPost]
-        public Event CreateEvent(string emailAddress, string name)
+        public Event CreateEvent([FromBody] Member organizer)
         {
-            var @event = _eventService.CreateNewEvent(emailAddress, emailAddress, name);
+            var @event = _eventService.CreateNewEvent(organizer.EmailAddress, organizer.EmailAddress, organizer.Name);
             _eventRepository.Insert(@event);
             return @event;
         }
 
         [HttpPost]
         [Route("{eventId}/member")]
-        public Event AddMember(Guid eventId, string emailAddress, string name)
+        public Event AddMember(Guid eventId, [FromBody] Member member)
         {
             var @event = _eventRepository.GetById(eventId);
-            var member = new Member {
-                EmailAddress = emailAddress,
-                Name = name
-            };
+            member.IsAttending = true;
             _eventService.AddMember(@event, member);
             _eventRepository.Update(@event);
             return @event;
