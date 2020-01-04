@@ -12,7 +12,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Swashbuckle.AspNetCore.SwaggerUI;
 
 namespace fursvp.api
 {
@@ -31,7 +30,6 @@ namespace fursvp.api
             services.AddControllers();
             services.AddSingleton<IEventService, EventService>();
             services.AddSingleton<IRepository<Event>, FakeEventRepository>();
-            services.AddSwaggerGen();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
