@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -29,7 +31,9 @@ namespace fursvp.api
         {
             services.AddControllers();
             services.AddSingleton<IEventService, EventService>();
-            services.AddSingleton<IRepository<Event>, FakeEventRepository>();
+            services.AddSingleton<IRepository<Event>, FakeEventRepository>(); 
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            services.AddScoped<IUrlHelper>(x => x.GetRequiredService<IUrlHelperFactory>().GetUrlHelper(x.GetService<IActionContextAccessor>().ActionContext));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

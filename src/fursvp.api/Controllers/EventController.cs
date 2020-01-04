@@ -13,9 +13,9 @@ namespace fursvp.api.Controllers
     [Route("api/[controller]")]
     public class EventController : ControllerBase
     {
-        private readonly ILogger<EventController> _logger;
-        private readonly IRepository<Event> _eventRepository;
-        private readonly IEventService _eventService;
+        private ILogger<EventController> _logger { get; }
+        private IRepository<Event> _eventRepository { get; }
+        private IEventService _eventService { get; }
 
         public EventController(ILogger<EventController> logger, IEventService eventService, IRepository<Event> eventRepository)
         {
@@ -38,22 +38,22 @@ namespace fursvp.api.Controllers
         }
 
         [HttpPost]
-        public Event CreateEvent([FromBody] Member organizer)
+        public IActionResult CreateEvent([FromBody] Member organizer)
         {
             var @event = _eventService.CreateNewEvent(organizer.EmailAddress, organizer.EmailAddress, organizer.Name);
             _eventRepository.Insert(@event);
-            return @event;
+            return CreatedAtAction(nameof(GetEvent), new { id = @event.Id }, @event);
         }
 
         [HttpPost]
         [Route("{eventId}/member")]
-        public Event AddMember(Guid eventId, [FromBody] Member member)
+        public IActionResult AddMember(Guid eventId, [FromBody] Member member)
         {
             var @event = _eventRepository.GetById(eventId);
             member.IsAttending = true;
             _eventService.AddMember(@event, member);
             _eventRepository.Update(@event);
-            return @event;
+            return CreatedAtAction(nameof(GetEvent), new { id = @event.Id }, @event);
         }
     }
 }
