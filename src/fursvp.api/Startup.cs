@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using fursvp.api.Middleware;
 using fursvp.data;
 using fursvp.domain;
+using fursvp.domain.Authorization;
+using fursvp.domain.Validation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -31,14 +34,42 @@ namespace fursvp.api
         {
             services.AddControllers();
             services.AddSingleton<IEventService, EventService>();
-            services.AddSingleton<IRepository<Event>, FakeEventRepository>(); 
+            ConfigureRepositoryServices(services);
+            services.AddSingleton<IValidateEmail, ValidateEmail>();
+            services.AddSingleton<IProvideDateTime, UtcDateTimeProvider>();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddScoped<IUrlHelper>(x => x.GetRequiredService<IUrlHelperFactory>().GetUrlHelper(x.GetService<IActionContextAccessor>().ActionContext));
+            services.AddLogging(lc => lc.AddConsole());
+        }
+
+        private void ConfigureRepositoryServices(IServiceCollection services)
+        {
+            services.AddSingleton<IRepository<Event>>(s => {
+                var baseEventRepository = new FakeEventRepository();
+                var dateTimeProvider = s.GetRequiredService<IProvideDateTime>();
+                var validateEmail = s.GetRequiredService<IValidateEmail>();
+                var validateMember = new ValidateMember(validateEmail);
+                var validateEvent = new ValidateEvent(dateTimeProvider, validateMember);
+
+                var eventService = s.GetRequiredService<IEventService>();
+                var authorizeEvent = new AuthorizeEvent(
+                    new AuthorizeMemberAsAuthor(), 
+                    new AuthorizeMemberAsOrganizer(), 
+                    new AuthorizeMemberAsAttendee(), 
+                    new AuthorizeFrozenMemberAsAttendee(), 
+                    eventService);
+
+                var authEventRepository = new RepositoryWithAuthorization<Event>(baseEventRepository, authorizeEvent);
+
+                return new RepositoryWithValidation<Event>(authEventRepository, validateEvent);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseMiddleware<NotAuthorizedExceptionHandlingMiddleware>();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -48,12 +79,11 @@ namespace fursvp.api
 
             app.UseRouting();
 
-            app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+
         }
     }
 }

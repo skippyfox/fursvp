@@ -6,6 +6,6 @@ namespace fursvp.domain.Validation
 {
     public interface IValidateEmail
     {
-        void Validate(string emailAddress);
+        void Validate(string address);
     }
 }

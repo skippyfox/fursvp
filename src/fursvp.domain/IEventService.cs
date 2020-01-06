@@ -3,6 +3,7 @@
     public interface IEventService
     {
         void AddMember(Event @event, Member member);
-        Event CreateNewEvent(string authenticatedEmailAddress, string emailAddress, string name);
+        Event CreateNewEvent(string emailAddress, string name);
+        bool RsvpOpen(Event @event);
     }
 }

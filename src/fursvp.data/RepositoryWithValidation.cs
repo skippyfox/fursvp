@@ -10,9 +10,9 @@ namespace fursvp.data
     public class RepositoryWithValidation<T> : IRepository<T> where T : IEntity<T>
     {
         private IRepository<T> _decorated { get; }
-        private IValidateEntity<T> _validator { get; }
+        private IValidate<T> _validator { get; }
 
-        public RepositoryWithValidation(IRepository<T> decorated, IValidateEntity<T> validator)
+        public RepositoryWithValidation(IRepository<T> decorated, IValidate<T> validator)
         {
             _decorated = decorated;
             _validator = validator;
@@ -23,7 +23,7 @@ namespace fursvp.data
 
         public void Insert(T entity)
         {
-            _validator.ValidateState(default(T), entity);
+            _validator.ValidateState(default, entity);
 
             _decorated.Insert(entity);
         }
@@ -44,7 +44,7 @@ namespace fursvp.data
         {
             var entity = _decorated.GetById(guid);
 
-            _validator.ValidateDelete(entity);
+            _validator.ValidateState(entity, default);
 
             _decorated.Delete(guid);
         }

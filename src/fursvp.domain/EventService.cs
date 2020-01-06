@@ -7,13 +7,17 @@ namespace fursvp.domain
 {
     public class EventService : IEventService
     {
-        public Event CreateNewEvent(string authenticatedEmailAddress, string emailAddress, string name)
+        private IProvideDateTime _dateTimeProvider { get; }
+        public EventService(IProvideDateTime dateTimeProvider)
         {
-            if (authenticatedEmailAddress != emailAddress)
-                throw new UnauthenticatedUserException();
+            _dateTimeProvider = dateTimeProvider;
+        }
 
+        public Event CreateNewEvent(string emailAddress, string name)
+        {
             var author = new Member
             {
+                Id = Guid.NewGuid(),
                 EmailAddress = emailAddress,
                 IsAuthor = true,
                 IsOrganizer = true,
@@ -32,7 +36,13 @@ namespace fursvp.domain
 
         public void AddMember(Event @event, Member member)
         {
+            member.Id = Guid.NewGuid();
             @event.Members.Add(member);
+        }
+
+        public bool RsvpOpen(Event @event)
+        {
+            return @event.RsvpOpen && _dateTimeProvider.Now < @event.RsvpClosesAt;
         }
 
         //TODO: Update with authentication check

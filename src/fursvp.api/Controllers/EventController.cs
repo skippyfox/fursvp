@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using fursvp.api.Requests;
 using fursvp.data;
 using fursvp.domain;
 using Microsoft.AspNetCore.Mvc;
@@ -38,19 +39,29 @@ namespace fursvp.api.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateEvent([FromBody] Member organizer)
+        public IActionResult CreateEvent([FromBody] NewMemberRequest author)
         {
-            var @event = _eventService.CreateNewEvent(organizer.EmailAddress, organizer.EmailAddress, organizer.Name);
+            var @event = _eventService.CreateNewEvent(author.EmailAddress, author.Name);
             _eventRepository.Insert(@event);
             return CreatedAtAction(nameof(GetEvent), new { id = @event.Id }, @event);
         }
 
         [HttpPost]
         [Route("{eventId}/member")]
-        public IActionResult AddMember(Guid eventId, [FromBody] Member member)
+        public IActionResult AddMember(Guid eventId, [FromBody] NewMemberRequest newMember)
         {
             var @event = _eventRepository.GetById(eventId);
-            member.IsAttending = true;
+            if (@event == null)
+                return NotFound("Event not found with id " + eventId);
+            if (@event.Members.Any(m => m.EmailAddress.ToLower() == newMember.EmailAddress.ToLower()))
+                return BadRequest("Email address already exists in member list.");
+
+            var member = new Member
+            {
+                IsAttending = true,
+                EmailAddress = newMember.EmailAddress,
+                Name = newMember.Name
+            };
             _eventService.AddMember(@event, member);
             _eventRepository.Update(@event);
             return CreatedAtAction(nameof(GetEvent), new { id = @event.Id }, @event);

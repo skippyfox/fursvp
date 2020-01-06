@@ -10,7 +10,7 @@ namespace fursvp.domain
         public int Version { get; set; }
         public DateTime StartsAt { get; set; }
         public DateTime EndsAt { get; set; }
-        public TimeZoneInfo TimeZone { get; set; }
+        public string TimeZoneId { get; set; }
         public ICollection<Member> Members { get; set; } = new Collection<Member>();
         public ICollection<FormPrompt> Form { get; set; } = new Collection<FormPrompt>();
         public string Name { get; set; } = string.Empty;
