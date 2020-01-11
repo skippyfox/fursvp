@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using fursvp.api.Middleware;
+using fursvp.api.Filters;
 using fursvp.data;
 using fursvp.domain;
 using fursvp.domain.Authorization;
@@ -39,7 +39,15 @@ namespace fursvp.api
             services.AddSingleton<IProvideDateTime, UtcDateTimeProvider>();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddScoped<IUrlHelper>(x => x.GetRequiredService<IUrlHelperFactory>().GetUrlHelper(x.GetService<IActionContextAccessor>().ActionContext));
-            services.AddLogging(lc => lc.AddConsole());
+            services.AddLogging(lc =>
+            {
+                lc.ClearProviders();
+                lc.AddConsole();
+            });
+            services.AddMvc(options =>
+            {
+                options.Filters.Add(typeof(ApiExceptionFilter));
+            });
         }
 
         private void ConfigureRepositoryServices(IServiceCollection services)
@@ -68,7 +76,7 @@ namespace fursvp.api
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseMiddleware<NotAuthorizedExceptionHandlingMiddleware>();
+            //app.UseMiddleware<NotAuthorizedExceptionHandlingMiddleware>();
 
             if (env.IsDevelopment())
             {
