@@ -26,7 +26,7 @@ namespace fursvp.api.Controllers
         }
 
         [HttpGet]
-        public List<Event> GetEvents()
+        public async Task<List<Event>> GetEvents()
         {
             return _eventRepository.GetAll().ToList();
         }

@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Google.Cloud.Firestore" Version="1.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\fursvp.domain\fursvp.domain.csproj" />
   </ItemGroup>
 
