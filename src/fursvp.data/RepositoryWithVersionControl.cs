@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace fursvp.data
 {
@@ -15,21 +16,21 @@ namespace fursvp.data
             _decorated = decorated;
         }
 
-        public void Delete(Guid guid) => _decorated.Delete(guid);
-        public IQueryable<T> GetAll() => _decorated.GetAll();
-        public T GetById(Guid guid) => _decorated.GetById(guid);
-        public void Insert(T entity) => _decorated.Insert(entity);
+        public async Task Delete(Guid guid) => await _decorated.Delete(guid);
+        public async Task<IQueryable<T>> GetAll() => await _decorated.GetAll();
+        public async Task<T> GetById(Guid guid) => await _decorated.GetById(guid);
+        public async Task Insert(T entity) => await _decorated.Insert(entity);
 
-        public void Update(T entity)
+        public async Task Update(T entity)
         {
-            var oldEntity = _decorated.GetById(entity.Id);
+            var oldEntity = await _decorated.GetById(entity.Id);
             
             if (oldEntity.Version != entity.Version)
                 throw new VersionControlException<T>("Entity versions do not match.");
 
             entity.Version++;
 
-            _decorated.Update(entity);
+            await _decorated.Update(entity);
         }
     }
 }

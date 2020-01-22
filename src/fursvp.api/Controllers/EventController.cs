@@ -28,29 +28,29 @@ namespace fursvp.api.Controllers
         [HttpGet]
         public async Task<List<Event>> GetEvents()
         {
-            return _eventRepository.GetAll().ToList();
+            return (await _eventRepository.GetAll()).ToList();
         }
 
         [HttpGet]
         [Route("{id}")]
-        public Event GetEvent(Guid id)
+        public Task<Event> GetEvent(Guid id)
         {
             return _eventRepository.GetById(id);
         }
 
         [HttpPost]
-        public IActionResult CreateEvent([FromBody] NewMemberRequest author)
+        public async Task<IActionResult> CreateEvent([FromBody] NewMemberRequest author)
         {
             var @event = _eventService.CreateNewEvent(author.EmailAddress, author.Name);
-            _eventRepository.Insert(@event);
+            await _eventRepository.Insert(@event);
             return CreatedAtAction(nameof(GetEvent), new { id = @event.Id }, @event);
         }
 
         [HttpPut]
         [Route("{eventId}")]
-        public IActionResult UpdateEvent(Guid eventId, [FromBody] UpdateEventRequest request)
+        public async Task<IActionResult> UpdateEvent(Guid eventId, [FromBody] UpdateEventRequest request)
         {
-            var @event = _eventRepository.GetById(eventId);
+            var @event = await _eventRepository.GetById(eventId);
             if (@event == null)
                 return NotFound("Event not found with id " + eventId);
 
@@ -62,43 +62,43 @@ namespace fursvp.api.Controllers
             @event.StartsAt = request.StartsAt;
             @event.EndsAt = request.EndsAt;
 
-            _eventRepository.Update(@event);
+            await _eventRepository.Update(@event);
             return Ok(@event);
         }
 
         [HttpPost]
         [Route("{eventId}/publish")]
-        public IActionResult PublishEvent(Guid eventId)
+        public async Task<IActionResult> PublishEvent(Guid eventId)
         {
-            var @event = _eventRepository.GetById(eventId);
+            var @event = await _eventRepository.GetById(eventId);
             if (@event == null)
                 return NotFound("Event not found with id " + eventId);
 
             @event.IsPublished = true;
 
-            _eventRepository.Update(@event);
+            await _eventRepository.Update(@event);
             return Ok(@event);
         }
 
         [HttpDelete]
         [Route("{eventId}/publish")]
-        public IActionResult UnpublishEvent(Guid eventId)
+        public async Task<IActionResult> UnpublishEvent(Guid eventId)
         {
-            var @event = _eventRepository.GetById(eventId);
+            var @event = await _eventRepository.GetById(eventId);
             if (@event == null)
                 return NotFound("Event not found with id " + eventId);
 
             @event.IsPublished = true;
 
-            _eventRepository.Update(@event);
+            await _eventRepository.Update(@event);
             return Ok(@event);
         }
 
         [HttpPost]
         [Route("{eventId}/member")]
-        public IActionResult AddMember(Guid eventId, [FromBody] NewMemberRequest newMember)
+        public async Task<IActionResult> AddMember(Guid eventId, [FromBody] NewMemberRequest newMember)
         {
-            var @event = _eventRepository.GetById(eventId);
+            var @event = await _eventRepository.GetById(eventId);
             if (@event == null)
                 return NotFound("Event not found with id " + eventId);
             if (@event.Members.Any(m => m.EmailAddress.ToLower() == newMember.EmailAddress.ToLower()))
@@ -111,15 +111,15 @@ namespace fursvp.api.Controllers
                 Name = newMember.Name
             };
             _eventService.AddMember(@event, member);
-            _eventRepository.Update(@event);
+            await _eventRepository.Update(@event);
             return CreatedAtAction(nameof(GetEvent), new { id = @event.Id }, @event);
         }
 
         [HttpPut]
         [Route("{eventId}/member/{memberId}")]
-        public IActionResult UpdateMember(Guid eventId, Guid memberId, [FromBody] UpdateMemberRequest updateMember) 
+        public async Task<IActionResult> UpdateMember(Guid eventId, Guid memberId, [FromBody] UpdateMemberRequest updateMember) 
         {
-            var @event = _eventRepository.GetById(eventId);
+            var @event = await _eventRepository.GetById(eventId);
             if (@event == null)
                 return NotFound("Event not found with id " + eventId);
             if (!updateMember.IsAttending && !updateMember.IsOrganizer)
@@ -132,15 +132,15 @@ namespace fursvp.api.Controllers
             member.IsAttending = updateMember.IsAttending;
             member.IsOrganizer = updateMember.IsOrganizer;
 
-            _eventRepository.Update(@event);
+            await _eventRepository.Update(@event);
             return Ok(@event);
         }
 
         [HttpDelete]
         [Route("{eventId}/member/{memberId}")]
-        public IActionResult RemoveMember(Guid eventId, Guid memberId)
+        public async Task<IActionResult> RemoveMember(Guid eventId, Guid memberId)
         {
-            var @event = _eventRepository.GetById(eventId);
+            var @event = await _eventRepository.GetById(eventId);
             if (@event == null)
                 return NotFound("Event not found with id " + eventId);
 
@@ -150,7 +150,7 @@ namespace fursvp.api.Controllers
 
             @event.Members.Remove(member);
 
-            _eventRepository.Update(@event);
+            await _eventRepository.Update(@event);
             return NoContent();
         }
     }

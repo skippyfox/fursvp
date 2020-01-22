@@ -5,7 +5,7 @@ A tool for communities to create quick and easy public sign-up sheets with no ac
 Fursvp gives your community a central hub for organizers and members to plan events in the real world. At the most basic level, it allows organizers to quickly create a page for an event in just a few steps, and attendees do not need to create an account to sign up or see who else is coming.
 
 ## Who can use this?
-This tool is intended to replace the closed-source Fursvp.com that is currently in use by furry fandom communities. Other communities or subcommunities are welcome to build and deploy for their own use. The design is intended to be containerized and able to run with a nosql database on the "free" tier of major cloud hosting platforms like Azure, GCP and AWS.
+This tool is intended to replace the closed-source Fursvp.com that is currently in use by furry fandom communities. Other communities or subcommunities are welcome to build and deploy for their own use. The design is intended to be containerized and able to run with a nosql database on the "free" tier of major cloud hosting platforms like Google Cloud Platform and AWS.
 
 ## What about other apps like Meetup.com, Facebook events and Google Forms?
 Although these tools are similar, and many organizers may find them suitable as they are, each of them has some shortcoming that Fursvp aims to make up for.
@@ -18,7 +18,7 @@ Google Forms is an almost perfect RSVP tool. It lacks two notable features: A pu
 - Browser and mobile browser web UIs
 - Standalone backend API that can be used by multiple or custom UIs
 - Accessible and easy to use: Setting up an event is easy; signing up for an event is trivial. No account creation required.
-- Containerized codebase - able to run with a nosql database on the "free" tier of major cloud hosting platforms
+- Containerized codebase - able to run with a nosql database on the "free" tier of Google Cloud Platform or AWS
 - Customizable event pages (details, activities, rules, contact info); no knowledge of CSS, HTML, formatting or graphic design necessary
 - Email-based identification for control panel access
 
@@ -39,7 +39,9 @@ Google Forms is an almost perfect RSVP tool. It lacks two notable features: A pu
 - Third-party payment integration for ticket purchases
 
 ## How do I get started? How can I help?
-If you're reading this is the first part of 2020, this source is not yet functional! We could probably use some help! If you'd like to be a contributor, well, THANKS! Having outside help is the biggest reasons this project is open source. Check the Issues section to see what's still needed. You'll likely want to have a copy of Visual Studio handy to get started.
+If you're reading this is the first part of 2020, this source is not yet functional! We could probably use some help! If you'd like to be a contributor, well, THANKS! Having outside help is the biggest reasons this project is open source. Check the Issues section to see what's still needed.
+
+You'll likely want to have a copy of Visual Studio handy to get started. You can work against a Google Firestore database by copying your service account key to %appdata%\Microsoft\UserSecrets\fursvp\firestore.json.
 
 We don't have an established set of Contributing Guidelines yet, but we do have a [Code of Conduct](CODE_OF_CONDUCT.md). [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 

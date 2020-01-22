@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace fursvp.data
 {
@@ -18,35 +19,35 @@ namespace fursvp.data
             _validator = validator;
         }
 
-        public IQueryable<T> GetAll() => _decorated.GetAll();
-        public T GetById(Guid guid) => _decorated.GetById(guid);
+        public async Task<IQueryable<T>> GetAll() => await _decorated.GetAll();
+        public async Task<T> GetById(Guid guid) => await _decorated.GetById(guid);
 
-        public void Insert(T entity)
+        public async Task Insert(T entity)
         {
             _validator.ValidateState(default, entity);
 
-            _decorated.Insert(entity);
+            await _decorated.Insert(entity);
         }
 
-        public void Update(T updatedEntity)
+        public async Task Update(T updatedEntity)
         {
-            var oldEntity = _decorated.GetById(updatedEntity.Id);
+            var oldEntity = await _decorated.GetById(updatedEntity.Id);
 
             if (oldEntity == null)
                 throw new ValidationException<T>("Must provide a valid id");
 
             _validator.ValidateState(oldEntity, updatedEntity);
 
-            _decorated.Update(updatedEntity);
+            await _decorated.Update(updatedEntity);
         }
 
-        public void Delete(Guid guid)
+        public async Task Delete(Guid guid)
         {
-            var entity = _decorated.GetById(guid);
+            var entity = await _decorated.GetById(guid);
 
             _validator.ValidateState(entity, default);
 
-            _decorated.Delete(guid);
+            await _decorated.Delete(guid);
         }
     }
 }

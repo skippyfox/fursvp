@@ -3,16 +3,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace fursvp.data
 {
-    public class FakeEventRepository : IRepository<Event>
+    public class InMemoryEventRepository : IRepository<Event>
     {
         private List<Event> _events { get; } = new List<Event>();
 
-        public void Delete(Guid guid)
+        public Task Delete(Guid guid)
         {
-            throw new NotImplementedException();
+            _events.RemoveAll(e => e.Id == guid);
+            return Task.CompletedTask;
         }
 
         private Event DeepCopy(Event @event) 
@@ -48,25 +50,27 @@ namespace fursvp.data
             };
         }
         
-        public IQueryable<Event> GetAll()
+        public Task<IQueryable<Event>> GetAll()
         {
-            return _events.Select(DeepCopy).AsQueryable();
+            return Task.FromResult(_events.Select(DeepCopy).AsQueryable());
         }
 
-        public Event GetById(Guid guid)
+        public Task<Event> GetById(Guid guid)
         {
-            return DeepCopy(_events.FirstOrDefault(e => e.Id == guid));
+            return Task.FromResult(DeepCopy(_events.FirstOrDefault(e => e.Id == guid)));
         }
 
-        public void Insert(Event entity)
+        public Task Insert(Event entity)
         {
             _events.Add(entity);
+            return Task.CompletedTask;
         }
 
-        public void Update(Event entity)
+        public Task Update(Event entity)
         {
             _events.RemoveAll(e => e.Id == entity.Id);
             Insert(entity);
+            return Task.CompletedTask;
         }
     }
 }
