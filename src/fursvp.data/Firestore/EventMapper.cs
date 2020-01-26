@@ -1,25 +1,36 @@
-﻿using fursvp.domain;
-using fursvp.domain.Forms;
-using Google.Cloud.Firestore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿// <copyright file="EventMapper.cs" company="skippyfox">
+// Copyright (c) skippyfox. All rights reserved.
+// Licensed under the MIT license. See the license.md file in the project root for full license information.
+// </copyright>
 
-namespace fursvp.data.Firestore
+namespace Fursvp.Data.Firestore
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Fursvp.Domain;
+    using Fursvp.Domain.Forms;
+    using Google.Cloud.Firestore;
+
     public class EventMapper : IDictionaryMapper<Event>
     {
-        private IFormPromptFactory _formPromptFactory { get; }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EventMapper"/> class.
+        /// </summary>
+        /// <param name="formPromptFactory">An instance of <see cref="IFormPromptFactory"/>.</param>
         public EventMapper(IFormPromptFactory formPromptFactory)
         {
-            _formPromptFactory = formPromptFactory;
+            this.FormPromptFactory = formPromptFactory;
         }
+
+        private IFormPromptFactory FormPromptFactory { get; }
 
         public Event FromDictionary(Dictionary<string, object> dictionary)
         {
-            if (dictionary == null) return null;
+            if (dictionary == null)
+            {
+                return null;
+            }
 
             var result = new Event
             {
@@ -42,11 +53,10 @@ namespace fursvp.data.Firestore
                         Responses = (List<string>)m["Responses"],
                     }).ToList(),
                 }).ToList(),
-                Form = ((List<object>)dictionary["Form"]).Cast<Dictionary<string, object>>().Select(r => _formPromptFactory.GetFormPrompt(
+                Form = ((List<object>)dictionary["Form"]).Cast<Dictionary<string, object>>().Select(r => this.FormPromptFactory.GetFormPrompt(
                     discriminator: (string)r["Behavior"],
                     prompt: (string)r["Prompt"],
-                    options: (List<string>)r["Options"]
-                    )).ToList(),
+                    options: (List<string>)r["Options"])).ToList(),
                 Name = (string)dictionary["Name"],
                 OtherDetails = (string)dictionary["OtherDetails"],
                 Location = (string)dictionary["Location"],
@@ -69,23 +79,32 @@ namespace fursvp.data.Firestore
             { nameof(@event.StartsAt), @event.StartsAt.ToUniversalTime() },
             { nameof(@event.EndsAt), @event.EndsAt.ToUniversalTime() },
             { nameof(@event.TimeZoneId), @event.TimeZoneId },
-            { nameof(@event.Members), @event.Members.Select(m => new Dictionary<string, object> {
-                { nameof(m.Id), m.Id.ToString() },
-                { nameof(m.EmailAddress), m.EmailAddress },
-                { nameof(m.Name), m.Name },
-                { nameof(m.IsAttending), m.IsAttending },
-                { nameof(m.IsOrganizer), m.IsOrganizer },
-                { nameof(m.IsAuthor), m.IsAuthor },
-                { nameof(m.Responses), m.Responses.Select(r => new Dictionary<string, object> {
-                    { nameof(r.Prompt), r.Prompt },
-                    { nameof(r.Responses), r.Responses.ToList() },
-                }).ToList()},
-            }).ToList()},
-            { nameof(@event.Form), @event.Form.Select(f => new Dictionary<string, object> {
-                { nameof(f.Behavior), f.Behavior },
-                { nameof(f.Prompt), f.Prompt },
-                { nameof(f.Options), f.Options.ToList() },
-            }).ToList()},
+            {
+                nameof(@event.Members), @event.Members.Select(m => new Dictionary<string, object>
+                {
+                    { nameof(m.Id), m.Id.ToString() },
+                    { nameof(m.EmailAddress), m.EmailAddress },
+                    { nameof(m.Name), m.Name },
+                    { nameof(m.IsAttending), m.IsAttending },
+                    { nameof(m.IsOrganizer), m.IsOrganizer },
+                    { nameof(m.IsAuthor), m.IsAuthor },
+                    {
+                        nameof(m.Responses), m.Responses.Select(r => new Dictionary<string, object>
+                        {
+                            { nameof(r.Prompt), r.Prompt },
+                            { nameof(r.Responses), r.Responses.ToList() },
+                        }).ToList()
+                    },
+                }).ToList()
+            },
+            {
+                nameof(@event.Form), @event.Form.Select(f => new Dictionary<string, object>
+                {
+                    { nameof(f.Behavior), f.Behavior },
+                    { nameof(f.Prompt), f.Prompt },
+                    { nameof(f.Options), f.Options.ToList() },
+                }).ToList()
+            },
             { nameof(@event.Name), @event.Name },
             { nameof(@event.OtherDetails), @event.OtherDetails },
             { nameof(@event.Location), @event.Location },

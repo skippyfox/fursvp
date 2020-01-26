@@ -1,16 +1,17 @@
-﻿using fursvp.helpers;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// <copyright file="AuthorizeMemberAsAuthor.cs" company="skippyfox">
+// Copyright (c) skippyfox. All rights reserved.
+// Licensed under the MIT license. See the license.md file in the project root for full license information.
+// </copyright>
 
-namespace fursvp.domain.Authorization
+namespace Fursvp.Domain.Authorization
 {
     public class AuthorizeMemberAsAuthor : IAuthorize<Member>
     {
-        private Assertions<NotAuthorizedException<Event>> _assert { get; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AuthorizeMemberAsAuthor"/> class.
+        /// </summary>
         public AuthorizeMemberAsAuthor()
         {
-            _assert = new Assertions<NotAuthorizedException<Event>>();
         }
 
         public void Authorize(string actor, Member oldState, Member newState)

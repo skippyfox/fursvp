@@ -1,38 +1,43 @@
-﻿using fursvp.domain.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿// <copyright file="ApiExceptionFilter.cs" company="skippyfox">
+// Copyright (c) skippyfox. All rights reserved.
+// Licensed under the MIT license. See the license.md file in the project root for full license information.
+// </copyright>
 
-namespace fursvp.api.Filters
+namespace Fursvp.Api.Filters
 {
+    using Fursvp.Domain.Authorization;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Filters;
+    using Microsoft.Extensions.Logging;
+
     public class ApiExceptionFilter : ExceptionFilterAttribute
     {
-        private ILogger<ApiExceptionFilter> _logger { get; }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ApiExceptionFilter"/> class.
+        /// </summary>
+        /// <param name="logger">The application event logger.</param>
         public ApiExceptionFilter(ILogger<ApiExceptionFilter> logger)
         {
-            _logger = logger;
+            this.Logger = logger;
         }
+
+        private ILogger<ApiExceptionFilter> Logger { get; }
 
         public override void OnException(ExceptionContext context)
         {
             if (context.Exception is NotAuthorizedException authEx)
             {
-                OnException(context, StatusCodes.Status401Unauthorized, authEx.GetType().Name, authEx.Message, authEx.Type.Name);
+                this.OnException(context, StatusCodes.Status401Unauthorized, authEx.GetType().Name, authEx.Message, authEx.Type.Name);
 
-                _logger?.LogInformation(authEx, authEx.Message);
+                this.Logger?.LogInformation(authEx, authEx.Message);
             }
             else
             {
                 var ex = context.Exception;
-                OnException(context, StatusCodes.Status500InternalServerError, ex.GetType().Name, ex.Message, null);
+                this.OnException(context, StatusCodes.Status500InternalServerError, ex.GetType().Name, ex.Message, null);
 
-                _logger?.LogError(ex, ex.Message);
+                this.Logger?.LogError(ex, ex.Message);
             }
 
             base.OnException(context);

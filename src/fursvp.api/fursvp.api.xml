@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Fursvp.Api</name>
+    </assembly>
+    <members>
+        <member name="M:Fursvp.Api.Controllers.EventController.#ctor(Microsoft.Extensions.Logging.ILogger{Fursvp.Api.Controllers.EventController},Fursvp.Domain.IEventService,Fursvp.Data.IRepository{Fursvp.Domain.Event})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Api.Controllers.EventController"/> class.
+            </summary>
+            <param name="logger">The application event logger.</param>
+            <param name="eventService">The instance of <see cref="T:Fursvp.Domain.IEventService"/> used to create and update Events.</param>
+            <param name="eventRepository">The instance of <see cref="T:Fursvp.Data.IRepository`1"/> used for Event persistence.</param>
+        </member>
+        <member name="M:Fursvp.Api.Controllers.TimeZonesController.#ctor(Microsoft.Extensions.Logging.ILogger{Fursvp.Api.Controllers.EventController})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Api.Controllers.TimeZonesController"/> class.
+            </summary>
+            <param name="logger">The application event logger.</param>
+        </member>
+        <member name="M:Fursvp.Api.Filters.ApiExceptionFilter.#ctor(Microsoft.Extensions.Logging.ILogger{Fursvp.Api.Filters.ApiExceptionFilter})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Api.Filters.ApiExceptionFilter"/> class.
+            </summary>
+            <param name="logger">The application event logger.</param>
+        </member>
+        <member name="T:Fursvp.Api.Program">
+            <summary>
+            The entry point for Fursvp.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Api.Program.Main(System.String[])">
+            <summary>
+            The main entry point for the program.
+            </summary>
+            <param name="args">Arguments provided by the command line.</param>
+        </member>
+        <member name="M:Fursvp.Api.Program.CreateHostBuilder(System.String[])">
+            <summary>
+            Builds a .net core web host builder to be run.
+            </summary>
+            <param name="args">The command line args for the builder.</param>
+            <returns>The .net core web host builder.</returns>
+        </member>
+        <member name="T:Fursvp.Api.Requests.UpdateMemberRequest">
+            <summary>
+            The request object to be serialized from the body of API calls pertaining to inserting or updating Member info.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Requests.UpdateMemberRequest.IsAttending">
+            <summary>
+            Gets or sets a value indicating whether an event member is attending the event.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Requests.UpdateMemberRequest.IsOrganizer">
+            <summary>
+            Gets or sets a value indicating whether an event member is an organizer.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Api.Startup.#ctor(Microsoft.Extensions.Configuration.IConfiguration,Microsoft.AspNetCore.Hosting.IWebHostEnvironment)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Api.Startup"/> class.
+            </summary>
+            <param name="configuration">An instance of <see cref="T:Microsoft.Extensions.Configuration.IConfiguration"/>.</param>
+            <param name="environment">The <see cref="T:Microsoft.AspNetCore.Hosting.IWebHostEnvironment"/> instance containing environment specific settings.</param>
+        </member>
+        <member name="M:Fursvp.Api.Startup.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            This method gets called by the runtime. Use this method to add services to the container.
+            </summary>
+            <param name="services">The container in which components are registered.</param>
+        </member>
+        <member name="M:Fursvp.Api.Startup.Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder,Microsoft.AspNetCore.Hosting.IWebHostEnvironment)">
+            <summary>
+            This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+            </summary>
+            <param name="app">The <see cref="T:Microsoft.AspNetCore.Builder.IApplicationBuilder"/> instance to configure.</param>
+            <param name="env">The <see cref="T:Microsoft.AspNetCore.Hosting.IWebHostEnvironment"/> instance containing environment specific settings.</param>
+        </member>
+    </members>
+</doc>

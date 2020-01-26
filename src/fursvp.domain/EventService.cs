@@ -1,17 +1,25 @@
-﻿using fursvp.domain.Validation;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// <copyright file="EventService.cs" company="skippyfox">
+// Copyright (c) skippyfox. All rights reserved.
+// Licensed under the MIT license. See the license.md file in the project root for full license information.
+// </copyright>
 
-namespace fursvp.domain
+namespace Fursvp.Domain
 {
+    using System;
+    using System.Collections.Generic;
+
     public class EventService : IEventService
     {
-        private IProvideDateTime _dateTimeProvider { get; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EventService"/> class.
+        /// </summary>
+        /// <param name="dateTimeProvider">An instance of <see cref="IProvideDateTime"/>.</param>
         public EventService(IProvideDateTime dateTimeProvider)
         {
-            _dateTimeProvider = dateTimeProvider;
+            this.DateTimeProvider = dateTimeProvider;
         }
+
+        private IProvideDateTime DateTimeProvider { get; }
 
         public Event CreateNewEvent(string emailAddress, string name)
         {
@@ -22,13 +30,13 @@ namespace fursvp.domain
                 IsAuthor = true,
                 IsOrganizer = true,
                 IsAttending = true,
-                Name = name
+                Name = name,
             };
 
             var @event = new Event()
             {
                 Id = Guid.NewGuid(),
-                Members = new List<Member> { author }
+                Members = new List<Member> { author },
             };
 
             return @event;
@@ -42,11 +50,11 @@ namespace fursvp.domain
 
         public bool RsvpOpen(Event @event)
         {
-            return @event.RsvpOpen && _dateTimeProvider.Now < @event.RsvpClosesAt;
+            return @event.RsvpOpen && this.DateTimeProvider.Now < @event.RsvpClosesAt;
         }
 
-        //TODO: Update with authentication check
+        // TODO: Update with authentication check
 
-        //TODO: Update/Remove Members
+        // TODO: Update/Remove Members
     }
 }

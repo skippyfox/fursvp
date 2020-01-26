@@ -1,14 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// <copyright file="VersionControlException.cs" company="skippyfox">
+// Copyright (c) skippyfox. All rights reserved.
+// Licensed under the MIT license. See the license.md file in the project root for full license information.
+// </copyright>
 
-namespace fursvp.data
+namespace Fursvp.Data
 {
+    using System;
+
     public class VersionControlException : Exception
     {
-        public VersionControlException(string message, Type type) : base(message)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="VersionControlException"/> class.
+        /// </summary>
+        /// <param name="message">The message that describes the error.</param>
+        /// <param name="type">The type of which the compared versions do not match.</param>
+        public VersionControlException(string message, Type type)
+            : base(message)
         {
-            Type = type;
+            this.Type = type;
         }
 
         public Type Type { get; }
@@ -16,7 +25,12 @@ namespace fursvp.data
 
     public class VersionControlException<T> : VersionControlException
     {
-        public VersionControlException(string message) : base(message, typeof(T))
+        /// <summary>
+        /// Initializes a new instance of the <see cref="VersionControlException{T}"/> class.
+        /// </summary>
+        /// <param name="message">The message that describes the error.</param>
+        public VersionControlException(string message)
+            : base(message, typeof(T))
         {
         }
     }

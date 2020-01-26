@@ -1,15 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+﻿// <copyright file="UpdateMemberRequest.cs" company="skippyfox">
+// Copyright (c) skippyfox. All rights reserved.
+// Licensed under the MIT license. See the license.md file in the project root for full license information.
+// </copyright>
 
-namespace fursvp.api.Requests
+namespace Fursvp.Api.Requests
 {
+    using System.ComponentModel.DataAnnotations;
+
+    /// <summary>
+    /// The request object to be serialized from the body of API calls pertaining to inserting or updating Member info.
+    /// </summary>
     public class UpdateMemberRequest
     {
+        /// <summary>
+        /// Gets or sets a value indicating whether an event member is attending the event.
+        /// </summary>
         [Required]
         public bool IsAttending { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether an event member is an organizer.
+        /// </summary>
         [Required]
         public bool IsOrganizer { get; set; }
     }

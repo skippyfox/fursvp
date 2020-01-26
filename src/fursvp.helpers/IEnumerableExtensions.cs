@@ -1,18 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿// <copyright file="IEnumerableExtensions.cs" company="skippyfox">
+// Copyright (c) skippyfox. All rights reserved.
+// Licensed under the MIT license. See the license.md file in the project root for full license information.
+// </copyright>
 
-namespace fursvp.helpers
+namespace Fursvp.Helpers
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    /// <summary>
+    /// Contains extension methods for IEnumerable types.
+    /// </summary>
     public static class IEnumerableExtensions
     {
-        private class Match<TKey, TObject>
-        {
-            public TKey Key { get; set; }
-            public TObject Value { get; set; }
-            public bool Matched { get; set; }
-        }
-
         /// <summary>
         /// Correlates the elements of two sequences based on matching keys.
         /// </summary>
@@ -28,16 +29,35 @@ namespace fursvp.helpers
         /// <returns>An IEnumerable that has elements of type TResult that are obtained by performing a full outer join on two sequences.</returns>
         public static IEnumerable<TResult> FullJoin<TOuter, TInner, TKey, TResult>(
             this IEnumerable<TOuter> outer,
-            IEnumerable<TInner> inner, 
+            IEnumerable<TInner> inner,
             Func<TOuter, TKey> outerKeySelector,
             Func<TInner, TKey> innerKeySelector,
             Func<TOuter, TInner, TResult> resultSelector)
         {
-            if (outer == null) throw new ArgumentNullException(nameof(outer));
-            if (inner == null) throw new ArgumentNullException(nameof(inner));
-            if (outerKeySelector == null) throw new ArgumentNullException(nameof(outerKeySelector));
-            if (innerKeySelector == null) throw new ArgumentNullException(nameof(innerKeySelector));
-            if (resultSelector == null) throw new ArgumentNullException(nameof(resultSelector));
+            if (outer == null)
+            {
+                throw new ArgumentNullException(nameof(outer));
+            }
+
+            if (inner == null)
+            {
+                throw new ArgumentNullException(nameof(inner));
+            }
+
+            if (outerKeySelector == null)
+            {
+                throw new ArgumentNullException(nameof(outerKeySelector));
+            }
+
+            if (innerKeySelector == null)
+            {
+                throw new ArgumentNullException(nameof(innerKeySelector));
+            }
+
+            if (resultSelector == null)
+            {
+                throw new ArgumentNullException(nameof(resultSelector));
+            }
 
             var results = new List<TResult>();
 
@@ -66,6 +86,15 @@ namespace fursvp.helpers
             {
                 yield return resultSelector(default, i.Value);
             }
+        }
+
+        private class Match<TKey, TObject>
+        {
+            public TKey Key { get; set; }
+
+            public TObject Value { get; set; }
+
+            public bool Matched { get; set; }
         }
     }
 }

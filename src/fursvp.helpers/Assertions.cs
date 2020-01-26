@@ -1,27 +1,45 @@
-﻿using System;
-using System.Reflection;
+﻿// <copyright file="Assertions.cs" company="skippyfox">
+// Copyright (c) skippyfox. All rights reserved.
+// Licensed under the MIT license. See the license.md file in the project root for full license information.
+// </copyright>
 
-namespace fursvp.helpers
+namespace Fursvp.Helpers
 {
-    public class Assertions<TException> where TException : Exception
-    {
-        private ConstructorInfo _ctor { get; }
+    using System;
+    using System.Reflection;
 
+    /// <summary>
+    /// A helper class that can throws an exception in the event of an unexpected result.
+    /// </summary>
+    /// <typeparam name="TException">The type of Exception to throw when an assert fails.</typeparam>
+    public class Assertions<TException>
+        where TException : Exception
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Assertions{TException}"/> class.
+        /// </summary>
         public Assertions()
         {
             var type = typeof(TException);
-            _ctor = type.GetConstructor(new[] { typeof(string) });
-            if (_ctor == null)
+            this.Ctor = type.GetConstructor(new[] { typeof(string) });
+            if (this.Ctor == null)
             {
                 throw new ArgumentException($"{type.Name} does not have a (string) constructor.");
             }
         }
 
+        private ConstructorInfo Ctor { get; }
+
+        /// <summary>
+        /// Throws an exception when an evaluation result is false.
+        /// </summary>
+        /// <param name="evaluation">The result that is expected to have evaluated to true.</param>
+        /// <param name="reason">The Exception message used when the result is not true and an Exception is thrown.</param>
         public void That(bool evaluation, string reason)
         {
             if (!evaluation)
             {
-                throw (TException)_ctor.Invoke(new[] { reason });
+                throw (TException)this.Ctor.Invoke(new[] { reason });
             }
         }
     }

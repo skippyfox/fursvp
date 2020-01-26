@@ -1,12 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// <copyright file="MultipleChoicePrompt.cs" company="skippyfox">
+// Copyright (c) skippyfox. All rights reserved.
+// Licensed under the MIT license. See the license.md file in the project root for full license information.
+// </copyright>
 
-namespace fursvp.domain.Forms
+namespace Fursvp.Domain.Forms
 {
     public class MultipleChoicePrompt : FormPrompt
     {
-        public MultipleChoicePrompt() : base(nameof(MultipleChoicePrompt))
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MultipleChoicePrompt"/> class.
+        /// </summary>
+        public MultipleChoicePrompt()
+            : base(nameof(MultipleChoicePrompt))
         {
         }
     }

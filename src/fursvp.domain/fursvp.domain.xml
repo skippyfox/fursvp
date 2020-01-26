@@ -1,0 +1,203 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Fursvp.Domain</name>
+    </assembly>
+    <members>
+        <member name="M:Fursvp.Domain.Authorization.AuthorizeEvent.#ctor(Fursvp.Domain.Authorization.IAuthorize{Fursvp.Domain.Member},Fursvp.Domain.Authorization.IAuthorize{Fursvp.Domain.Member},Fursvp.Domain.Authorization.IAuthorize{Fursvp.Domain.Member},Fursvp.Domain.Authorization.IAuthorize{Fursvp.Domain.Member},Fursvp.Domain.IEventService)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.AuthorizeEvent"/> class.
+            </summary>
+            <param name="authorizeMemberAsAuthor">The <see cref="T:Fursvp.Domain.Authorization.IAuthorize`1"/> used to authorize Member state changes when the authenticated user is the Event's author.</param>
+            <param name="authorizeMemberAsOrganizer">The <see cref="T:Fursvp.Domain.Authorization.IAuthorize`1"/> used to authorize Member state changes when the authenticated user is an organizer of the Event.</param>
+            <param name="authorizeMemberAsAttendee">The <see cref="T:Fursvp.Domain.Authorization.IAuthorize`1"/> used to authorize Member state changes when the authenticated user is an attendee and RSVPs are open.</param>
+            <param name="authorizeFrozenMemberAsAttendee">The <see cref="T:Fursvp.Domain.Authorization.IAuthorize`1"/> used to authorize Member state changes when the authenticated user is an attendee and RVSPs are not open.</param>
+            <param name="eventService">An instance of <see cref="T:Fursvp.Domain.IEventService"/> used to evaluate an Event's state.</param>
+        </member>
+        <member name="M:Fursvp.Domain.Authorization.AuthorizeFrozenMemberAsAttendee.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.AuthorizeFrozenMemberAsAttendee"/> class.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Domain.Authorization.AuthorizeMemberAsAttendee.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.AuthorizeMemberAsAttendee"/> class.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Domain.Authorization.AuthorizeMemberAsAuthor.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.AuthorizeMemberAsAuthor"/> class.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Domain.Authorization.AuthorizeMemberAsOrganizer.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.AuthorizeMemberAsOrganizer"/> class.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Domain.Authorization.NotAuthorizedException.#ctor(System.String,System.Type)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.NotAuthorizedException"/> class.
+            </summary>
+            <param name="message">The message that describes the error.</param>
+            <param name="type">The type for which the change is not authorized.</param>
+        </member>
+        <member name="M:Fursvp.Domain.Authorization.NotAuthorizedException.#ctor(System.String,System.Type,System.Exception)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.NotAuthorizedException"/> class.
+            </summary>
+            <param name="message">The message that describes the error.</param>
+            <param name="type">The type for which the change is not authorized.</param>
+            <param name="innerException">The exception that is the cause of the current exception, or a null reference (Nothing in Visual Basic) if no inner exception is specified.</param>
+        </member>
+        <member name="M:Fursvp.Domain.Authorization.NotAuthorizedException`1.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.NotAuthorizedException`1"/> class.
+            </summary>
+            <param name="message">The message that describes the error.</param>
+        </member>
+        <member name="M:Fursvp.Domain.Authorization.NotAuthorizedException`1.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.NotAuthorizedException`1"/> class.
+            </summary>
+            <param name="message">The message that describes the error.</param>
+            <param name="innerException">The exception that is the cause of the current exception, or a null reference (Nothing in Visual Basic) if no inner exception is specified.</param>
+        </member>
+        <member name="M:Fursvp.Domain.EventService.#ctor(Fursvp.Domain.IProvideDateTime)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.EventService"/> class.
+            </summary>
+            <param name="dateTimeProvider">An instance of <see cref="T:Fursvp.Domain.IProvideDateTime"/>.</param>
+        </member>
+        <member name="M:Fursvp.Domain.Forms.FormPrompt.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.Forms.FormPrompt"/> class.
+            </summary>
+            <param name="behavior">The descriminator that indicates which implementation of FormPrompt to persist.</param>
+        </member>
+        <member name="P:Fursvp.Domain.Forms.FormPrompt.Behavior">
+            <summary>
+            Gets the discriminator for implementations of FormPrompt.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Domain.Forms.FormPromptFactory.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.Forms.FormPromptFactory"/> class.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Domain.Forms.MultipleChoicePrompt.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.Forms.MultipleChoicePrompt"/> class.
+            </summary>
+        </member>
+        <member name="T:Fursvp.Domain.Member">
+            <summary>
+            A Member of an Event.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Member.Id">
+            <summary>
+            Gets or sets the globally unique identifier for an event member.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Member.EmailAddress">
+            <summary>
+            Gets or sets the email address for an event member.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Member.Name">
+            <summary>
+            Gets or sets the display name for an event member.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Member.IsAttending">
+            <summary>
+            Gets or sets a value indicating whether an event member is attending the event.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Member.IsOrganizer">
+            <summary>
+            Gets or sets a value indicating whether an event member is an organizer for the event.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Member.IsAuthor">
+            <summary>
+            Gets or sets a value indicating whether an event member is the author of the event.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Member.Responses">
+            <summary>
+            Gets or sets the collection of form responses for an event attendee.
+            </summary>
+        </member>
+        <member name="T:Fursvp.Domain.Validation.IValidate`1">
+            <summary>
+            Compares and validates the transition between two states (instances of type T). For use with Domain validation, not endpoint request validation.
+            </summary>
+            <typeparam name="T">The type of which two instances are to be compared.</typeparam>
+        </member>
+        <member name="M:Fursvp.Domain.Validation.IValidate`1.ValidateState(`0,`0)">
+            <summary>
+            Compares two instances of T and throws an exception if the transition from oldState to newState is not valid.
+            </summary>
+            <param name="oldState">The old state.</param>
+            <param name="newState">The new state.</param>
+        </member>
+        <member name="M:Fursvp.Domain.Validation.ValidateEvent.#ctor(Fursvp.Domain.IProvideDateTime,Fursvp.Domain.Validation.IValidate{Fursvp.Domain.Member})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.Validation.ValidateEvent"/> class.
+            </summary>
+            <param name="dateTimeProvider">An instance of <see cref="T:Fursvp.Domain.IProvideDateTime"/>.</param>
+            <param name="validateMember">An instance of <see cref="T:Fursvp.Domain.Validation.IValidate`1"/> to provide Member state validation.</param>
+        </member>
+        <member name="M:Fursvp.Domain.Validation.ValidateMember.#ctor(Fursvp.Domain.Validation.IValidateEmail)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.Validation.ValidateMember"/> class.
+            </summary>
+            <param name="validateEmail">An instance of <see cref="T:Fursvp.Domain.Validation.IValidateEmail"/> to provide email validation.</param>
+        </member>
+        <member name="T:Fursvp.Domain.Validation.ValidationException">
+            <summary>
+            Thrown when the attempted transition between two states of the same type is not valid. For use with Domain validation, not endpoint request validation.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Domain.Validation.ValidationException.#ctor(System.String,System.Type)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.Validation.ValidationException"/> class.
+            </summary>
+            <param name="message">The message that describes the error.</param>
+            <param name="type">The type of which the compared states are invalid.</param>
+        </member>
+        <member name="M:Fursvp.Domain.Validation.ValidationException.#ctor(System.String,System.Type,System.Exception)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.Validation.ValidationException"/> class.
+            </summary>
+            <param name="message">The message that describes the error.</param>
+            <param name="type">The type of which the compared states are invalid.</param>
+            <param name="innerException">The exception that is the cause of the current exception, or a null reference (Nothing in Visual Basic) if no inner exception is specified.</param>
+        </member>
+        <member name="P:Fursvp.Domain.Validation.ValidationException.Type">
+            <summary>
+            Gets the type of which the compared states are invalid.
+            </summary>
+        </member>
+        <member name="T:Fursvp.Domain.Validation.ValidationException`1">
+            <summary>
+            Thrown when the attempted transition between two states (instances of type T) is not valid. For use with Domain validation, not endpoint request validation.
+            </summary>
+            <typeparam name="T">The type of which the compared states are invalid.</typeparam>
+        </member>
+        <member name="M:Fursvp.Domain.Validation.ValidationException`1.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.Validation.ValidationException`1"/> class.
+            </summary>
+            <param name="message">The message that describes the error.</param>
+        </member>
+        <member name="M:Fursvp.Domain.Validation.ValidationException`1.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.Validation.ValidationException`1"/> class.
+            </summary>
+            <param name="message">The message that describes the error.</param>
+            <param name="innerException">The exception that is the cause of the current exception, or a null reference (Nothing in Visual Basic) if no inner exception is specified.</param>
+        </member>
+    </members>
+</doc>
