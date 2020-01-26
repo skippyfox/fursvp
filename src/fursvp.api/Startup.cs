@@ -4,8 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using fursvp.api.Filters;
 using fursvp.data;
+using fursvp.data.Firestore;
 using fursvp.domain;
 using fursvp.domain.Authorization;
+using fursvp.domain.Forms;
 using fursvp.domain.Validation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -53,7 +55,8 @@ namespace fursvp.api
         private void ConfigureRepositoryServices(IServiceCollection services)
         {
             services.AddSingleton<IRepository<Event>>(s => {
-                var baseEventRepository = new InMemoryEventRepository(); //new FirestoreRepository<Event>();
+                //var baseEventRepository = new InMemoryEventRepository();
+                var baseEventRepository = new FirestoreRepository<Event>(new EventMapper(new FormPromptFactory()));
                 var dateTimeProvider = s.GetRequiredService<IProvideDateTime>();
                 var validateEmail = s.GetRequiredService<IValidateEmail>();
                 var validateMember = new ValidateMember(validateEmail);

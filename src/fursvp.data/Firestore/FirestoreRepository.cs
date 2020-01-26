@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using fursvp.domain;
 using Google.Cloud.Firestore;
 
-namespace fursvp.data
+namespace fursvp.data.Firestore
 {
     public class FirestoreRepository<T> : IRepository<T>
         where T : IEntity<T>
@@ -14,11 +14,13 @@ namespace fursvp.data
         private FirestoreDb Db { get; }
         private const string ProjectId = "fursvp-dev";
         private CollectionReference _collection { get; }
+        private IDictionaryMapper<T> _mapper { get; }
 
-        public FirestoreRepository()
+        public FirestoreRepository(IDictionaryMapper<T> mapper)
         {
             Db = FirestoreDb.Create(ProjectId);
             _collection = Db.Collection(typeof(T).Name);
+            _mapper = mapper;
         }
 
         private DocumentReference Document(Guid id) => _collection.Document(id.ToString());
@@ -29,21 +31,21 @@ namespace fursvp.data
             //TODO: Can we instantiate some IQueryable<T> that can query the DB with filter on enumerator get?
             // https://cloud.google.com/firestore/docs/query-data/queries
             QuerySnapshot snapshot = await _collection.GetSnapshotAsync();
-            return snapshot.Documents.Select(d => d.ConvertTo<T>()).AsQueryable();
+            return snapshot.Documents.Select(d => _mapper.FromDictionary(d.ToDictionary())).AsQueryable();
         }
 
         public async Task<T> GetById(Guid guid)
         {
             var snapshot = await Document(guid).GetSnapshotAsync();
             if (snapshot.Exists)
-                return snapshot.ConvertTo<T>();
+                return _mapper.FromDictionary(snapshot.ToDictionary());
 
             return default;
         }
 
-        public Task Insert(T entity) => Document(entity).CreateAsync(entity);
+        public Task Insert(T entity) => Document(entity).CreateAsync(_mapper.ToDictionary(entity));
 
-        public Task Update(T entity) => Document(entity).SetAsync(entity, SetOptions.Overwrite);
+        public Task Update(T entity) => Document(entity).SetAsync(_mapper.ToDictionary(entity), SetOptions.Overwrite);
 
         public Task Delete(Guid guid) => Document(guid).DeleteAsync();
     }
