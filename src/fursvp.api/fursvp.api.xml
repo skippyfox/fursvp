@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <doc>
     <assembly>
-        <name>Fursvp.Api</name>
+        <name>fursvp.api</name>
     </assembly>
     <members>
         <member name="M:Fursvp.Api.Controllers.EventController.#ctor(Microsoft.Extensions.Logging.ILogger{Fursvp.Api.Controllers.EventController},Fursvp.Domain.IEventService,Fursvp.Data.IRepository{Fursvp.Domain.Event})">
