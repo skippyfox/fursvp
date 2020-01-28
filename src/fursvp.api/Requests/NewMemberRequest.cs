@@ -7,12 +7,21 @@ namespace Fursvp.Api.Requests
 {
     using System.ComponentModel.DataAnnotations;
 
+    /// <summary>
+    /// The object provided in the request body representing a new Member for an Event.
+    /// </summary>
     public class NewMemberRequest
     {
+        /// <summary>
+        /// Gets or sets the Email Address for the new Member.
+        /// </summary>
         [Required]
         [EmailAddress]
         public string EmailAddress { get; set; }
 
+        /// <summary>
+        /// Gets or sets the display name for the new Member.
+        /// </summary>
         [Required]
         public string Name { get; set; }
     }

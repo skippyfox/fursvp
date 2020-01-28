@@ -7,6 +7,9 @@ namespace Fursvp.Data
 {
     using System;
 
+    /// <summary>
+    /// An exception that is thrown when persistence logic encounters a Version conflict.
+    /// </summary>
     public class VersionControlException : Exception
     {
         /// <summary>
@@ -20,9 +23,16 @@ namespace Fursvp.Data
             this.Type = type;
         }
 
+        /// <summary>
+        /// Gets the context of the exception.
+        /// </summary>
         public Type Type { get; }
     }
 
+    /// <summary>
+    /// An exception that is thrown when persistence logic encounters a Version conflict.
+    /// </summary>
+    /// <typeparam name="T">The context of the exception.</typeparam>
     public class VersionControlException<T> : VersionControlException
     {
         /// <summary>

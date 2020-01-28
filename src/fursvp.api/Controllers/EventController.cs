@@ -15,6 +15,9 @@ namespace Fursvp.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
 
+    /// <summary>
+    /// Manages Events.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class EventController : ControllerBase
@@ -38,12 +41,21 @@ namespace Fursvp.Api.Controllers
 
         private IEventService EventService { get; }
 
+        /// <summary>
+        /// Retrieves details for all Events.
+        /// </summary>
+        /// <returns>A list of objects representing each Event.</returns>
         [HttpGet]
         public async Task<List<Event>> GetEvents()
         {
             return (await this.EventRepository.GetAll()).ToList();
         }
 
+        /// <summary>
+        /// Retrieves details for an Event.
+        /// </summary>
+        /// <param name="id">The globally unique identifier of the Event to update.</param>
+        /// <returns>An object representing the Event matching the id.</returns>
         [HttpGet]
         [Route("{id}")]
         public Task<Event> GetEvent(Guid id)
@@ -51,6 +63,11 @@ namespace Fursvp.Api.Controllers
             return this.EventRepository.GetById(id);
         }
 
+        /// <summary>
+        /// Creates a new Event.
+        /// </summary>
+        /// <param name="author">The <see cref="NewMemberRequest"/> for the author of the Event.</param>
+        /// <returns>201 Created on success.</returns>
         [HttpPost]
         public async Task<IActionResult> CreateEvent([FromBody] NewMemberRequest author)
         {
@@ -59,6 +76,12 @@ namespace Fursvp.Api.Controllers
             return this.CreatedAtAction(nameof(this.GetEvent), new { id = @event.Id }, @event);
         }
 
+        /// <summary>
+        /// Updates an Event.
+        /// </summary>
+        /// <param name="eventId">The globally unique identifier of the Event to update.</param>
+        /// <param name="request">The <see cref="UpdateEventRequest" /> containing new Event details.</param>
+        /// <returns>200 Ok on success, or 404 Not Found if the Event Id is not found.</returns>
         [HttpPut]
         [Route("{eventId}")]
         public async Task<IActionResult> UpdateEvent(Guid eventId, [FromBody] UpdateEventRequest request)
@@ -81,6 +104,11 @@ namespace Fursvp.Api.Controllers
             return this.Ok(@event);
         }
 
+        /// <summary>
+        /// Updates an Event so that it is publicly visible.
+        /// </summary>
+        /// <param name="eventId">The globally unique identifier for the Event.</param>
+        /// <returns>200 Ok on success, or 404 Not Found if the Event Id is not found.</returns>
         [HttpPost]
         [Route("{eventId}/publish")]
         public async Task<IActionResult> PublishEvent(Guid eventId)
@@ -97,6 +125,11 @@ namespace Fursvp.Api.Controllers
             return this.Ok(@event);
         }
 
+        /// <summary>
+        /// Updates an Event so that it is no longer publicly visible.
+        /// </summary>
+        /// <param name="eventId">The globally unique identifier for the Event.</param>
+        /// <returns>200 Ok on success, or 404 Not Found if the Event Id is not found.</returns>
         [HttpDelete]
         [Route("{eventId}/publish")]
         public async Task<IActionResult> UnpublishEvent(Guid eventId)
@@ -113,6 +146,12 @@ namespace Fursvp.Api.Controllers
             return this.Ok(@event);
         }
 
+        /// <summary>
+        /// Adds a new member to an Event's signups.
+        /// </summary>
+        /// <param name="eventId">The globally unique identifier for the Event.</param>
+        /// <param name="newMember">The <see cref="NewMemberRequest" /> containing member data to be added.</param>
+        /// <returns>201 Created on success, 404 Not Found if the Event Id is not found, or 400 Bad Request if the member's email address already exists in the event.</returns>
         [HttpPost]
         [Route("{eventId}/member")]
         public async Task<IActionResult> AddMember(Guid eventId, [FromBody] NewMemberRequest newMember)
@@ -139,6 +178,13 @@ namespace Fursvp.Api.Controllers
             return this.CreatedAtAction(nameof(this.GetEvent), new { id = @event.Id }, @event);
         }
 
+        /// <summary>
+        /// Updates the member's info for an Event.
+        /// </summary>
+        /// <param name="eventId">The globally unique identifier for the Event.</param>
+        /// <param name="memberId">The globally unique identifier for the Event's Member to be updated.</param>
+        /// <param name="updateMember">The <see cref="UpdateMemberRequest" /> containing member data to be updated.</param>
+        /// <returns>200 Ok on success, 404 Not Found if either the Event Id or Member Id are not found, or 400 Bad Request if the member is not either attending or an organizer.</returns>
         [HttpPut]
         [Route("{eventId}/member/{memberId}")]
         public async Task<IActionResult> UpdateMember(Guid eventId, Guid memberId, [FromBody] UpdateMemberRequest updateMember)
@@ -167,6 +213,12 @@ namespace Fursvp.Api.Controllers
             return this.Ok(@event);
         }
 
+        /// <summary>
+        /// Removes a Member from an Event's sign-ups.
+        /// </summary>
+        /// <param name="eventId">The globally unique identifier for the Event.</param>
+        /// <param name="memberId">The globally unique identifier for the Event's Member to be removed.</param>
+        /// <returns>204 No Content on success, or 404 Not Found if either the Event Id or Member Id are not found.</returns>
         [HttpDelete]
         [Route("{eventId}/member/{memberId}")]
         public async Task<IActionResult> RemoveMember(Guid eventId, Guid memberId)

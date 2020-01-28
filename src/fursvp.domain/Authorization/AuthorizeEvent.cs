@@ -8,6 +8,9 @@ namespace Fursvp.Domain.Authorization
     using System.Linq;
     using Fursvp.Helpers;
 
+    /// <summary>
+    /// Checks for authorization by a given actor to perform a change to an Event.
+    /// </summary>
     public class AuthorizeEvent : IAuthorize<Event>
     {
         /// <summary>
@@ -45,6 +48,12 @@ namespace Fursvp.Domain.Authorization
 
         private IEventService EventService { get; }
 
+        /// <summary>
+        /// Performs the authorization check for a state change.
+        /// </summary>
+        /// <param name="actor">The user role for which to check for authorization.</param>
+        /// <param name="oldState">The initial state of the Event.</param>
+        /// <param name="newState">The new state of the Event.</param>
         public void Authorize(string actor, Event oldState, Event newState)
         {
             var actingMember = (oldState ?? newState)?.Members?.FirstOrDefault(m => m.EmailAddress == actor);

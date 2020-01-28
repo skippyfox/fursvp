@@ -12,6 +12,9 @@ namespace Fursvp.Data.Firestore
     using Fursvp.Domain.Forms;
     using Google.Cloud.Firestore;
 
+    /// <summary>
+    /// Converts between the Event domain object and <see cref="Dictionary{String, Object}" />.
+    /// </summary>
     public class EventMapper : IDictionaryMapper<Event>
     {
         /// <summary>
@@ -25,6 +28,11 @@ namespace Fursvp.Data.Firestore
 
         private IFormPromptFactory FormPromptFactory { get; }
 
+        /// <summary>
+        /// Converts from Dictionary to Event.
+        /// </summary>
+        /// <param name="dictionary">The dictionary object that will be converted to Event.</param>
+        /// <returns>The Event object on success, or null when dictionary is null.</returns>
         public Event FromDictionary(Dictionary<string, object> dictionary)
         {
             if (dictionary == null)
@@ -72,6 +80,11 @@ namespace Fursvp.Data.Firestore
             return result;
         }
 
+        /// <summary>
+        /// Converts from Event to Dictionary.
+        /// </summary>
+        /// <param name="event">The Event to convert.</param>
+        /// <returns>The Dictionary of variables.</returns>
         public Dictionary<string, object> ToDictionary(Event @event) => new Dictionary<string, object>
         {
             { nameof(@event.Id), @event.Id.ToString() },

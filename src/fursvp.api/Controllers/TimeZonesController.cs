@@ -10,6 +10,9 @@ namespace Fursvp.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
 
+    /// <summary>
+    /// The Web Api Controller used to get Time Zone details.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class TimeZonesController
@@ -25,6 +28,10 @@ namespace Fursvp.Api.Controllers
 
         private ILogger<EventController> Logger { get; }
 
+        /// <summary>
+        /// Gets a list of all Time Zones by their unique Id and DisplayName.
+        /// </summary>
+        /// <returns>An <see cref="IActionResult"/> for the web response.</returns>
         [HttpGet]
         public IActionResult GetTimeZones()
         {

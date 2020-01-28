@@ -22,6 +22,9 @@ namespace Fursvp.Api
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
 
+    /// <summary>
+    /// Fursvp .NET Core Web Api initialization routines.
+    /// </summary>
     public class Startup
     {
         /// <summary>

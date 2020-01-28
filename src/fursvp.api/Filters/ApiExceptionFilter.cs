@@ -11,6 +11,9 @@ namespace Fursvp.Api.Filters
     using Microsoft.AspNetCore.Mvc.Filters;
     using Microsoft.Extensions.Logging;
 
+    /// <summary>
+    /// Intercepts http and https calls when an exception is thrown.
+    /// </summary>
     public class ApiExceptionFilter : ExceptionFilterAttribute
     {
         /// <summary>
@@ -24,6 +27,10 @@ namespace Fursvp.Api.Filters
 
         private ILogger<ApiExceptionFilter> Logger { get; }
 
+        /// <summary>
+        /// Handle an Exception caught by MVC. Called by MVC when an otherwise uncaught exception is thrown.
+        /// </summary>
+        /// <param name="context">The Exception context.</param>
         public override void OnException(ExceptionContext context)
         {
             if (context.Exception is NotAuthorizedException authEx)

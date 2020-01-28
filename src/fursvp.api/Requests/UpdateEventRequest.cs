@@ -8,24 +8,48 @@ namespace Fursvp.Api.Requests
     using System;
     using System.ComponentModel.DataAnnotations;
 
+    /// <summary>
+    /// The object provided in the request body representing an updated Event.
+    /// </summary>
     public class UpdateEventRequest
     {
+        /// <summary>
+        /// Gets or sets the locaiton of the Event.
+        /// </summary>
         [Required]
         public string Location { get; set; }
 
+        /// <summary>
+        /// Gets or sets the Event Name.
+        /// </summary>
         [Required]
         public string Name { get; set; }
 
+        /// <summary>
+        /// Gets or sets miscellaneous information about an Event.
+        /// </summary>
         public string OtherDetails { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether RSVPs for an Event are open before RsvpClosesAt.
+        /// </summary>
         [Required]
         public bool RsvpOpen { get; set; }
 
+        /// <summary>
+        /// Gets or sets the date and time at which RSVPs for the Event are scheduled to close.
+        /// </summary>
         public DateTime RsvpClosesAt { get; set; }
 
+        /// <summary>
+        /// Gets or sets the date and time at which the Event is scheduled to start.
+        /// </summary>
         [Required]
         public DateTime StartsAt { get; set; }
 
+        /// <summary>
+        /// Gets or sets the date and time at which the Event is scheduled to end.
+        /// </summary>
         [Required]
         public DateTime EndsAt { get; set; }
     }
