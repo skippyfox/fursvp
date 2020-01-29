@@ -7,6 +7,9 @@ namespace Fursvp.Domain.Authorization
 {
     using System;
 
+    /// <summary>
+    /// An Exception that represents an unauthorized attempt at an action.
+    /// </summary>
     public class NotAuthorizedException : Exception
     {
         /// <summary>
@@ -32,9 +35,16 @@ namespace Fursvp.Domain.Authorization
             this.Type = type;
         }
 
+        /// <summary>
+        /// Gets the type for which the change is not authorized.
+        /// </summary>
         public Type Type { get; }
     }
 
+    /// <summary>
+    /// An Exception that represents an unauthorized attempt at an action.
+    /// </summary>
+    /// <typeparam name="T">The type against which the action is not authorized.</typeparam>
     public class NotAuthorizedException<T> : NotAuthorizedException
     {
         /// <summary>

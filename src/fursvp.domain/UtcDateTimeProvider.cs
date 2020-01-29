@@ -7,10 +7,19 @@ namespace Fursvp.Domain
 {
     using System;
 
+    /// <summary>
+    /// Provides commonly requested DateTime values as UTC times.
+    /// </summary>
     public class UtcDateTimeProvider : IProvideDateTime
     {
+        /// <summary>
+        /// Gets DateTime.UtcNow.
+        /// </summary>
         public DateTime Now => DateTime.UtcNow;
 
+        /// <summary>
+        /// Gets DateTime.UtcNow.Date.
+        /// </summary>
         public DateTime Today => DateTime.UtcNow.Date;
     }
 }

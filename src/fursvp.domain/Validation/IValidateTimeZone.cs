@@ -5,8 +5,15 @@
 
 namespace Fursvp.Domain.Validation
 {
+    /// <summary>
+    /// Provides logic to ensure that a TimeZoneId string can be resolved to an instance of TimeZoneInfo.
+    /// </summary>
     public interface IValidateTimeZone
     {
+        /// <summary>
+        /// Throws an exception if a TimeZoneId string cannot be resolved to an instance of TimeZoneInfo.
+        /// </summary>
+        /// <param name="id">The TimeZoneId.</param>
         void Validate(string id);
     }
 }

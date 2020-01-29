@@ -10,6 +10,9 @@ namespace Fursvp.Domain.Forms
     using System.Linq;
     using System.Reflection;
 
+    /// <summary>
+    /// Provides instantiation logic for <see cref="FormPrompt"/> implementations based on a discriminator value.
+    /// </summary>
     public class FormPromptFactory : IFormPromptFactory
     {
         /// <summary>
@@ -24,6 +27,13 @@ namespace Fursvp.Domain.Forms
 
         private Dictionary<string, Type> FormPrompts { get; }
 
+        /// <summary>
+        /// Initializes a new instance of the abstract <see cref="FormPrompt"/> using an implementation determined by a discriminator value.
+        /// </summary>
+        /// <param name="discriminator">The discriminator value.</param>
+        /// <param name="prompt">The text prompt or question.</param>
+        /// <param name="options">The collection of text choices.</param>
+        /// <returns>The newly instantiated <see cref="FormPrompt"/> implementation.</returns>
         public FormPrompt GetFormPrompt(string discriminator, string prompt, ICollection<string> options)
         {
             var instance = (FormPrompt)Activator.CreateInstance(this.FormPrompts[discriminator]);

@@ -5,8 +5,15 @@
 
 namespace Fursvp.Domain.Validation
 {
+    /// <summary>
+    /// Provides logic to ensure that an email address string is valid.
+    /// </summary>
     public interface IValidateEmail
     {
+        /// <summary>
+        /// Throws an Exception if the email address string is not considered valid.
+        /// </summary>
+        /// <param name="address">The email address.</param>
         void Validate(string address);
     }
 }

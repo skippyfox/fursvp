@@ -9,7 +9,7 @@ namespace Fursvp.Domain.Authorization
     using Fursvp.Helpers;
 
     /// <summary>
-    /// Checks for authorization by a given actor to perform a change to an Event.
+    /// Checks for authorization by a given actor to create or perform a change to an Event.
     /// </summary>
     public class AuthorizeEvent : IAuthorize<Event>
     {
@@ -49,7 +49,7 @@ namespace Fursvp.Domain.Authorization
         private IEventService EventService { get; }
 
         /// <summary>
-        /// Performs the authorization check for a state change.
+        /// Performs the authorization check for a state change and throws an exception if the check fails.
         /// </summary>
         /// <param name="actor">The user role for which to check for authorization.</param>
         /// <param name="oldState">The initial state of the Event.</param>

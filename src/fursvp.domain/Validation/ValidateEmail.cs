@@ -8,8 +8,15 @@ namespace Fursvp.Domain.Validation
     using System;
     using System.Net.Mail;
 
+    /// <summary>
+    /// Provides logic to ensure that an email address string is valid based on <see cref="MailAddress"/> constructor validation.
+    /// </summary>
     public class ValidateEmail : IValidateEmail
     {
+        /// <summary>
+        /// Throws an Exception if the email address string is not considered valid based on <see cref="MailAddress"/> constructor validation.
+        /// </summary>
+        /// <param name="address">The email address.</param>
         public void Validate(string address)
         {
             try

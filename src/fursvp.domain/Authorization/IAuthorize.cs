@@ -5,8 +5,18 @@
 
 namespace Fursvp.Domain.Authorization
 {
+    /// <summary>
+    /// Checks for authorization by a given actor to perform a change to an object of type T.
+    /// </summary>
+    /// <typeparam name="T">The type against which an attempted action must be authorized.</typeparam>
     public interface IAuthorize<T>
     {
+        /// <summary>
+        /// Performs the authorization check for a state change and throws an exception if the check fails.
+        /// </summary>
+        /// <param name="actor">The user role for which to check for authorization.</param>
+        /// <param name="oldState">The initial object state.</param>
+        /// <param name="newState">The new object state.</param>
         void Authorize(string actor, T oldState, T newState);
     }
 }

@@ -7,6 +7,9 @@ namespace Fursvp.Domain.Authorization
 {
     using Fursvp.Helpers;
 
+    /// <summary>
+    /// Checks for authorization by a given event organizer to create or perform a change to a Member.
+    /// </summary>
     public class AuthorizeMemberAsOrganizer : IAuthorize<Member>
     {
         /// <summary>
@@ -19,6 +22,12 @@ namespace Fursvp.Domain.Authorization
 
         private Assertions<NotAuthorizedException<Event>> Assert { get; }
 
+        /// <summary>
+        /// Performs the authorization check for a state change and throws an exception if the check fails.
+        /// </summary>
+        /// <param name="actor">The user role for which to check for authorization.</param>
+        /// <param name="oldState">The initial state of the Member.</param>
+        /// <param name="newState">The new state of the Member.</param>
         public void Authorize(string actor, Member oldState, Member newState)
         {
             if (oldState != null && (oldState.IsOrganizer || oldState.IsAuthor))

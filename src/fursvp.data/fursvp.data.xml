@@ -4,11 +4,30 @@
         <name>Fursvp.Data</name>
     </assembly>
     <members>
+        <member name="T:Fursvp.Data.Firestore.EventMapper">
+            <summary>
+            Converts between the Event domain object and <see cref="T:System.Collections.Generic.Dictionary`2" />.
+            </summary>
+        </member>
         <member name="M:Fursvp.Data.Firestore.EventMapper.#ctor(Fursvp.Domain.Forms.IFormPromptFactory)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Data.Firestore.EventMapper"/> class.
             </summary>
             <param name="formPromptFactory">An instance of <see cref="T:Fursvp.Domain.Forms.IFormPromptFactory"/>.</param>
+        </member>
+        <member name="M:Fursvp.Data.Firestore.EventMapper.FromDictionary(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Converts from Dictionary to Event.
+            </summary>
+            <param name="dictionary">The dictionary object that will be converted to Event.</param>
+            <returns>The Event object on success, or null when dictionary is null.</returns>
+        </member>
+        <member name="M:Fursvp.Data.Firestore.EventMapper.ToDictionary(Fursvp.Domain.Event)">
+            <summary>
+            Converts from Event to Dictionary.
+            </summary>
+            <param name="event">The Event to convert.</param>
+            <returns>The Dictionary of variables.</returns>
         </member>
         <member name="T:Fursvp.Data.Firestore.FirestoreRepository`1">
             <summary>
@@ -55,6 +74,26 @@
             </summary>
             <param name="guid">The globally unique identifier for the entity.</param>
             <returns>An asynchronous <see cref="T:System.Threading.Tasks.Task`1"/>.</returns>
+        </member>
+        <member name="T:Fursvp.Data.Firestore.IDictionaryMapper`1">
+            <summary>
+            Provides conversion between <see cref="T:System.Collections.Generic.Dictionary`2"/> and type T for useu with Firestore.
+            </summary>
+            <typeparam name="T">The Entity to be converted.</typeparam>
+        </member>
+        <member name="M:Fursvp.Data.Firestore.IDictionaryMapper`1.ToDictionary(`0)">
+            <summary>
+            Converts an Entity of type T to <see cref="T:System.Collections.Generic.Dictionary`2"/>.
+            </summary>
+            <param name="object">An instance of the entity to convert to Dictionary.</param>
+            <returns>The dictionary converted from the entity.</returns>
+        </member>
+        <member name="M:Fursvp.Data.Firestore.IDictionaryMapper`1.FromDictionary(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Converts an Entity of <see cref="T:System.Collections.Generic.Dictionary`2"/> to type T.
+            </summary>
+            <param name="dictionary">An instance of the dictionary to convert between two types.</param>
+            <returns>The dictionary converted from the entity.</returns>
         </member>
         <member name="T:Fursvp.Data.InMemoryEventRepository">
             <summary>
@@ -281,12 +320,28 @@
             <param name="entity">The entity to persist to the repository.</param>
             <returns>An asynchronous <see cref="T:System.Threading.Tasks.Task`1"/>.</returns>
         </member>
+        <member name="T:Fursvp.Data.VersionControlException">
+            <summary>
+            An exception that is thrown when persistence logic encounters a Version conflict.
+            </summary>
+        </member>
         <member name="M:Fursvp.Data.VersionControlException.#ctor(System.String,System.Type)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Data.VersionControlException"/> class.
             </summary>
             <param name="message">The message that describes the error.</param>
             <param name="type">The type of which the compared versions do not match.</param>
+        </member>
+        <member name="P:Fursvp.Data.VersionControlException.Type">
+            <summary>
+            Gets the context of the exception.
+            </summary>
+        </member>
+        <member name="T:Fursvp.Data.VersionControlException`1">
+            <summary>
+            An exception that is thrown when persistence logic encounters a Version conflict.
+            </summary>
+            <typeparam name="T">The context of the exception.</typeparam>
         </member>
         <member name="M:Fursvp.Data.VersionControlException`1.#ctor(System.String)">
             <summary>

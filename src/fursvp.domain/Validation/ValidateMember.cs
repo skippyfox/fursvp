@@ -8,6 +8,9 @@ namespace Fursvp.Domain.Validation
     using System;
     using Fursvp.Helpers;
 
+    /// <summary>
+    /// Compares and validates the transition between two states (instances of <see cref="Member"/>). For use with Domain Member validation, not endpoint request validation.
+    /// </summary>
     public class ValidateMember : IValidate<Member>
     {
         /// <summary>
@@ -24,6 +27,11 @@ namespace Fursvp.Domain.Validation
 
         private Assertions<ValidationException<Member>> Assert { get; }
 
+        /// <summary>
+        /// Compares two instances of <see cref="Member"/> and throws an exception if the transition from oldState to newState is not valid.
+        /// </summary>
+        /// <param name="oldState">The old state.</param>
+        /// <param name="newState">The new state.</param>
         public void ValidateState(Member oldState, Member newState)
         {
             if (oldState == null && newState == null)

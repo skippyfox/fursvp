@@ -8,6 +8,9 @@ namespace Fursvp.Domain.Forms
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
 
+    /// <summary>
+    /// Represents a question and a list of possible answers.
+    /// </summary>
     public abstract class FormPrompt
     {
         /// <summary>
@@ -24,8 +27,14 @@ namespace Fursvp.Domain.Forms
         /// </summary>
         public string Behavior { get; }
 
+        /// <summary>
+        /// Gets or sets the text prompt or question.
+        /// </summary>
         public string Prompt { get; set; }
 
+        /// <summary>
+        /// Gets or sets the collection of text choices.
+        /// </summary>
         public ICollection<string> Options { get; set; } = new Collection<string>();
     }
 }

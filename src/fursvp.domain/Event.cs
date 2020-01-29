@@ -21,7 +21,7 @@ namespace Fursvp.Domain
         public Guid Id { get; set; }
 
         /// <summary>
-        /// Gets or sets the Version number used by Event persistence logic.
+        /// Gets or sets the Version of this entity used for database version control.
         /// </summary>
         public int Version { get; set; }
 

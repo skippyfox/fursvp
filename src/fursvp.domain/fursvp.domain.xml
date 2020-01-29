@@ -4,6 +4,11 @@
         <name>Fursvp.Domain</name>
     </assembly>
     <members>
+        <member name="T:Fursvp.Domain.Authorization.AuthorizeEvent">
+            <summary>
+            Checks for authorization by a given actor to create or perform a change to an Event.
+            </summary>
+        </member>
         <member name="M:Fursvp.Domain.Authorization.AuthorizeEvent.#ctor(Fursvp.Domain.Authorization.IAuthorize{Fursvp.Domain.Member},Fursvp.Domain.Authorization.IAuthorize{Fursvp.Domain.Member},Fursvp.Domain.Authorization.IAuthorize{Fursvp.Domain.Member},Fursvp.Domain.Authorization.IAuthorize{Fursvp.Domain.Member},Fursvp.Domain.IEventService)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.AuthorizeEvent"/> class.
@@ -14,9 +19,35 @@
             <param name="authorizeFrozenMemberAsAttendee">The <see cref="T:Fursvp.Domain.Authorization.IAuthorize`1"/> used to authorize Member state changes when the authenticated user is an attendee and RVSPs are not open.</param>
             <param name="eventService">An instance of <see cref="T:Fursvp.Domain.IEventService"/> used to evaluate an Event's state.</param>
         </member>
+        <member name="M:Fursvp.Domain.Authorization.AuthorizeEvent.Authorize(System.String,Fursvp.Domain.Event,Fursvp.Domain.Event)">
+            <summary>
+            Performs the authorization check for a state change and throws an exception if the check fails.
+            </summary>
+            <param name="actor">The user role for which to check for authorization.</param>
+            <param name="oldState">The initial state of the Event.</param>
+            <param name="newState">The new state of the Event.</param>
+        </member>
+        <member name="T:Fursvp.Domain.Authorization.AuthorizeFrozenMemberAsAttendee">
+            <summary>
+            Checks for authorization by a given event attendee to create or perform a change to a Member that is frozen based on its Event's settings.
+            </summary>
+        </member>
         <member name="M:Fursvp.Domain.Authorization.AuthorizeFrozenMemberAsAttendee.#ctor">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.AuthorizeFrozenMemberAsAttendee"/> class.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Domain.Authorization.AuthorizeFrozenMemberAsAttendee.Authorize(System.String,Fursvp.Domain.Member,Fursvp.Domain.Member)">
+            <summary>
+            Performs the authorization check for a state change and throws an exception if the check fails.
+            </summary>
+            <param name="actor">The user role for which to check for authorization.</param>
+            <param name="oldState">The initial state of the Member.</param>
+            <param name="newState">The new state of the Member.</param>
+        </member>
+        <member name="T:Fursvp.Domain.Authorization.AuthorizeMemberAsAttendee">
+            <summary>
+            Checks for authorization by a given event attendee to create or perform a change to a Member.
             </summary>
         </member>
         <member name="M:Fursvp.Domain.Authorization.AuthorizeMemberAsAttendee.#ctor">
@@ -24,14 +55,67 @@
             Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.AuthorizeMemberAsAttendee"/> class.
             </summary>
         </member>
+        <member name="M:Fursvp.Domain.Authorization.AuthorizeMemberAsAttendee.Authorize(System.String,Fursvp.Domain.Member,Fursvp.Domain.Member)">
+            <summary>
+            Performs the authorization check for a state change and throws an exception if the check fails.
+            </summary>
+            <param name="actor">The user role for which to check for authorization.</param>
+            <param name="oldState">The initial state of the Member.</param>
+            <param name="newState">The new state of the Member.</param>
+        </member>
+        <member name="T:Fursvp.Domain.Authorization.AuthorizeMemberAsAuthor">
+            <summary>
+            Checks for authorization by a given event author to create or perform a change to a Member.
+            </summary>
+        </member>
         <member name="M:Fursvp.Domain.Authorization.AuthorizeMemberAsAuthor.#ctor">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.AuthorizeMemberAsAuthor"/> class.
             </summary>
         </member>
+        <member name="M:Fursvp.Domain.Authorization.AuthorizeMemberAsAuthor.Authorize(System.String,Fursvp.Domain.Member,Fursvp.Domain.Member)">
+            <summary>
+            Performs the authorization check for a state change and throws an exception if the check fails.
+            </summary>
+            <param name="actor">The user role for which to check for authorization.</param>
+            <param name="oldState">The initial state of the Member.</param>
+            <param name="newState">The new state of the Member.</param>
+        </member>
+        <member name="T:Fursvp.Domain.Authorization.AuthorizeMemberAsOrganizer">
+            <summary>
+            Checks for authorization by a given event organizer to create or perform a change to a Member.
+            </summary>
+        </member>
         <member name="M:Fursvp.Domain.Authorization.AuthorizeMemberAsOrganizer.#ctor">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.AuthorizeMemberAsOrganizer"/> class.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Domain.Authorization.AuthorizeMemberAsOrganizer.Authorize(System.String,Fursvp.Domain.Member,Fursvp.Domain.Member)">
+            <summary>
+            Performs the authorization check for a state change and throws an exception if the check fails.
+            </summary>
+            <param name="actor">The user role for which to check for authorization.</param>
+            <param name="oldState">The initial state of the Member.</param>
+            <param name="newState">The new state of the Member.</param>
+        </member>
+        <member name="T:Fursvp.Domain.Authorization.IAuthorize`1">
+            <summary>
+            Checks for authorization by a given actor to perform a change to an object of type T.
+            </summary>
+            <typeparam name="T">The type against which an attempted action must be authorized.</typeparam>
+        </member>
+        <member name="M:Fursvp.Domain.Authorization.IAuthorize`1.Authorize(System.String,`0,`0)">
+            <summary>
+            Performs the authorization check for a state change and throws an exception if the check fails.
+            </summary>
+            <param name="actor">The user role for which to check for authorization.</param>
+            <param name="oldState">The initial object state.</param>
+            <param name="newState">The new object state.</param>
+        </member>
+        <member name="T:Fursvp.Domain.Authorization.NotAuthorizedException">
+            <summary>
+            An Exception that represents an unauthorized attempt at an action.
             </summary>
         </member>
         <member name="M:Fursvp.Domain.Authorization.NotAuthorizedException.#ctor(System.String,System.Type)">
@@ -49,6 +133,17 @@
             <param name="type">The type for which the change is not authorized.</param>
             <param name="innerException">The exception that is the cause of the current exception, or a null reference (Nothing in Visual Basic) if no inner exception is specified.</param>
         </member>
+        <member name="P:Fursvp.Domain.Authorization.NotAuthorizedException.Type">
+            <summary>
+            Gets the type for which the change is not authorized.
+            </summary>
+        </member>
+        <member name="T:Fursvp.Domain.Authorization.NotAuthorizedException`1">
+            <summary>
+            An Exception that represents an unauthorized attempt at an action.
+            </summary>
+            <typeparam name="T">The type against which the action is not authorized.</typeparam>
+        </member>
         <member name="M:Fursvp.Domain.Authorization.NotAuthorizedException`1.#ctor(System.String)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.NotAuthorizedException`1"/> class.
@@ -62,11 +157,113 @@
             <param name="message">The message that describes the error.</param>
             <param name="innerException">The exception that is the cause of the current exception, or a null reference (Nothing in Visual Basic) if no inner exception is specified.</param>
         </member>
+        <member name="T:Fursvp.Domain.Event">
+            <summary>
+            The Domain Event representing the settings and current state of an Event.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Event.Id">
+            <summary>
+            Gets or sets the globally unique identifier for the Event.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Event.Version">
+            <summary>
+            Gets or sets the Version of this entity used for database version control.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Event.StartsAt">
+            <summary>
+            Gets or sets the date and time at which the Event is scheduled to start.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Event.EndsAt">
+            <summary>
+            Gets or sets he date and time at which the Event is scheduled to end.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Event.TimeZoneId">
+            <summary>
+            Gets or sets the Event's Time Zone Id.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Event.Members">
+            <summary>
+            Gets or sets the collection of Members associated with this Event.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Event.Form">
+            <summary>
+            Gets or sets form responses for an Event.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Event.Name">
+            <summary>
+            Gets or sets the Event Name.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Event.OtherDetails">
+            <summary>
+            Gets or sets miscellaneous information about an Event.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Event.Location">
+            <summary>
+            Gets or sets the location of the Event.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Event.RsvpOpen">
+            <summary>
+            Gets or sets a value indicating whether RSVPs for an Event are open before RsvpClosesAt.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Event.RsvpClosesAt">
+            <summary>
+            Gets or sets the date and time at which RSVPs for the Event are scheduled to close.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Event.IsPublished">
+            <summary>
+            Gets or sets a value indicating whether an Event is publicly visible.
+            </summary>
+        </member>
+        <member name="T:Fursvp.Domain.EventService">
+            <summary>
+            Provides business logic for creation and updates of an instance of <see cref="T:Fursvp.Domain.Event"/>.
+            </summary>
+        </member>
         <member name="M:Fursvp.Domain.EventService.#ctor(Fursvp.Domain.IProvideDateTime)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Domain.EventService"/> class.
             </summary>
             <param name="dateTimeProvider">An instance of <see cref="T:Fursvp.Domain.IProvideDateTime"/>.</param>
+        </member>
+        <member name="M:Fursvp.Domain.EventService.CreateNewEvent(System.String,System.String)">
+            <summary>
+            Creates a new <see cref="T:Fursvp.Domain.Event"/>.
+            </summary>
+            <param name="emailAddress">The Event author's email address.</param>
+            <param name="name">The Event author's name.</param>
+            <returns>The newly created <see cref="T:Fursvp.Domain.Event"/>.</returns>
+        </member>
+        <member name="M:Fursvp.Domain.EventService.AddMember(Fursvp.Domain.Event,Fursvp.Domain.Member)">
+            <summary>
+            Adds a <see cref="T:Fursvp.Domain.Member"/> to an <see cref="T:Fursvp.Domain.Event"/>.
+            </summary>
+            <param name="event">The <see cref="T:Fursvp.Domain.Event"/> to add a new <see cref="T:Fursvp.Domain.Member"/> to.</param>
+            <param name="member">The <see cref="T:Fursvp.Domain.Member"/> to be added to an existing <see cref="T:Fursvp.Domain.Event"/>.</param>
+        </member>
+        <member name="M:Fursvp.Domain.EventService.RsvpOpen(Fursvp.Domain.Event)">
+            <summary>
+            Determines whether attendees can RSVP to an <see cref="T:Fursvp.Domain.Event"/>.
+            </summary>
+            <param name="event">The <see cref="T:Fursvp.Domain.Event"/>.</param>
+            <returns>True if attendees can currently RSVP, otherwise False.</returns>
+        </member>
+        <member name="T:Fursvp.Domain.Forms.FormPrompt">
+            <summary>
+            Represents a question and a list of possible answers.
+            </summary>
         </member>
         <member name="M:Fursvp.Domain.Forms.FormPrompt.#ctor(System.String)">
             <summary>
@@ -79,14 +276,130 @@
             Gets the discriminator for implementations of FormPrompt.
             </summary>
         </member>
+        <member name="P:Fursvp.Domain.Forms.FormPrompt.Prompt">
+            <summary>
+            Gets or sets the text prompt or question.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Forms.FormPrompt.Options">
+            <summary>
+            Gets or sets the collection of text choices.
+            </summary>
+        </member>
+        <member name="T:Fursvp.Domain.Forms.FormPromptFactory">
+            <summary>
+            Provides instantiation logic for <see cref="T:Fursvp.Domain.Forms.FormPrompt"/> implementations based on a discriminator value.
+            </summary>
+        </member>
         <member name="M:Fursvp.Domain.Forms.FormPromptFactory.#ctor">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Domain.Forms.FormPromptFactory"/> class.
             </summary>
         </member>
+        <member name="M:Fursvp.Domain.Forms.FormPromptFactory.GetFormPrompt(System.String,System.String,System.Collections.Generic.ICollection{System.String})">
+            <summary>
+            Initializes a new instance of the abstract <see cref="T:Fursvp.Domain.Forms.FormPrompt"/> using an implementation determined by a discriminator value.
+            </summary>
+            <param name="discriminator">The discriminator value.</param>
+            <param name="prompt">The text prompt or question.</param>
+            <param name="options">The collection of text choices.</param>
+            <returns>The newly instantiated <see cref="T:Fursvp.Domain.Forms.FormPrompt"/> implementation.</returns>
+        </member>
+        <member name="T:Fursvp.Domain.Forms.FormResponses">
+            <summary>
+            Represents a question and a list of responses to that question.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Forms.FormResponses.Prompt">
+            <summary>
+            Gets or sets the text prompt or question.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Forms.FormResponses.Responses">
+            <summary>
+            Gets or sets the collection of text responses to the question.
+            </summary>
+        </member>
+        <member name="T:Fursvp.Domain.Forms.IFormPromptFactory">
+            <summary>
+            Provides instantiation logic for <see cref="T:Fursvp.Domain.Forms.FormPrompt"/> implementations based on a discriminator value.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Domain.Forms.IFormPromptFactory.GetFormPrompt(System.String,System.String,System.Collections.Generic.ICollection{System.String})">
+            <summary>
+            Initializes a new instance of the abstract <see cref="T:Fursvp.Domain.Forms.FormPrompt"/> using an implementation determined by a discriminator value.
+            </summary>
+            <param name="discriminator">The discriminator value.</param>
+            <param name="prompt">The text prompt or question.</param>
+            <param name="options">The collection of text choices.</param>
+            <returns>The newly instantiated <see cref="T:Fursvp.Domain.Forms.FormPrompt"/> implementation.</returns>
+        </member>
+        <member name="T:Fursvp.Domain.Forms.MultipleChoicePrompt">
+            <summary>
+            Represents a question and a list of multiple choice answers where any number of answers may be chosen.
+            </summary>
+        </member>
         <member name="M:Fursvp.Domain.Forms.MultipleChoicePrompt.#ctor">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Domain.Forms.MultipleChoicePrompt"/> class.
+            </summary>
+        </member>
+        <member name="T:Fursvp.Domain.IEntity`1">
+            <summary>
+            A persistable domain entity or root aggregate that can be identified by a Global Unique Identifier and an integer Version.
+            </summary>
+            <typeparam name="T">The domain entity type.</typeparam>
+        </member>
+        <member name="P:Fursvp.Domain.IEntity`1.Id">
+            <summary>
+            Gets or sets the global unique identifier for a persistable instance of the entity.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.IEntity`1.Version">
+            <summary>
+            Gets or sets the Version of this entity used for database version control.
+            </summary>
+        </member>
+        <member name="T:Fursvp.Domain.IEventService">
+            <summary>
+            Provides business logic for creation and updates of an instance of <see cref="T:Fursvp.Domain.Event"/>.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Domain.IEventService.AddMember(Fursvp.Domain.Event,Fursvp.Domain.Member)">
+            <summary>
+            Adds a <see cref="T:Fursvp.Domain.Member"/> to an <see cref="T:Fursvp.Domain.Event"/>.
+            </summary>
+            <param name="event">The <see cref="T:Fursvp.Domain.Event"/> to add a new <see cref="T:Fursvp.Domain.Member"/> to.</param>
+            <param name="member">The <see cref="T:Fursvp.Domain.Member"/> to be added to an existing <see cref="T:Fursvp.Domain.Event"/>.</param>
+        </member>
+        <member name="M:Fursvp.Domain.IEventService.CreateNewEvent(System.String,System.String)">
+            <summary>
+            Creates a new <see cref="T:Fursvp.Domain.Event"/>.
+            </summary>
+            <param name="emailAddress">The Event author's email address.</param>
+            <param name="name">The Event author's name.</param>
+            <returns>The newly created <see cref="T:Fursvp.Domain.Event"/>.</returns>
+        </member>
+        <member name="M:Fursvp.Domain.IEventService.RsvpOpen(Fursvp.Domain.Event)">
+            <summary>
+            Determines whether attendees can RSVP to an <see cref="T:Fursvp.Domain.Event"/>.
+            </summary>
+            <param name="event">The <see cref="T:Fursvp.Domain.Event"/>.</param>
+            <returns>True if attendees can currently RSVP, otherwise False.</returns>
+        </member>
+        <member name="T:Fursvp.Domain.IProvideDateTime">
+            <summary>
+            Provides commonly requested DateTime values.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.IProvideDateTime.Now">
+            <summary>
+            Gets the current DateTime.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.IProvideDateTime.Today">
+            <summary>
+            Gets the Date for the current DateTime.
             </summary>
         </member>
         <member name="T:Fursvp.Domain.Member">
@@ -129,6 +442,21 @@
             Gets or sets the collection of form responses for an event attendee.
             </summary>
         </member>
+        <member name="T:Fursvp.Domain.UtcDateTimeProvider">
+            <summary>
+            Provides commonly requested DateTime values as UTC times.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.UtcDateTimeProvider.Now">
+            <summary>
+            Gets DateTime.UtcNow.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.UtcDateTimeProvider.Today">
+            <summary>
+            Gets DateTime.UtcNow.Date.
+            </summary>
+        </member>
         <member name="T:Fursvp.Domain.Validation.IValidate`1">
             <summary>
             Compares and validates the transition between two states (instances of type T). For use with Domain validation, not endpoint request validation.
@@ -142,18 +470,87 @@
             <param name="oldState">The old state.</param>
             <param name="newState">The new state.</param>
         </member>
-        <member name="M:Fursvp.Domain.Validation.ValidateEvent.#ctor(Fursvp.Domain.IProvideDateTime,Fursvp.Domain.Validation.IValidate{Fursvp.Domain.Member})">
+        <member name="T:Fursvp.Domain.Validation.IValidateEmail">
+            <summary>
+            Provides logic to ensure that an email address string is valid.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Domain.Validation.IValidateEmail.Validate(System.String)">
+            <summary>
+            Throws an Exception if the email address string is not considered valid.
+            </summary>
+            <param name="address">The email address.</param>
+        </member>
+        <member name="T:Fursvp.Domain.Validation.IValidateTimeZone">
+            <summary>
+            Provides logic to ensure that a TimeZoneId string can be resolved to an instance of TimeZoneInfo.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Domain.Validation.IValidateTimeZone.Validate(System.String)">
+            <summary>
+            Throws an exception if a TimeZoneId string cannot be resolved to an instance of TimeZoneInfo.
+            </summary>
+            <param name="id">The TimeZoneId.</param>
+        </member>
+        <member name="T:Fursvp.Domain.Validation.ValidateEmail">
+            <summary>
+            Provides logic to ensure that an email address string is valid based on <see cref="T:System.Net.Mail.MailAddress"/> constructor validation.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Domain.Validation.ValidateEmail.Validate(System.String)">
+            <summary>
+            Throws an Exception if the email address string is not considered valid based on <see cref="T:System.Net.Mail.MailAddress"/> constructor validation.
+            </summary>
+            <param name="address">The email address.</param>
+        </member>
+        <member name="T:Fursvp.Domain.Validation.ValidateEvent">
+            <summary>
+            Compares and validates the transition between two states (instances of <see cref="T:Fursvp.Domain.Event"/>). For use with Domain Event validation, not endpoint request validation.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Domain.Validation.ValidateEvent.#ctor(Fursvp.Domain.IProvideDateTime,Fursvp.Domain.Validation.IValidate{Fursvp.Domain.Member},Fursvp.Domain.Validation.IValidateTimeZone)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Domain.Validation.ValidateEvent"/> class.
             </summary>
             <param name="dateTimeProvider">An instance of <see cref="T:Fursvp.Domain.IProvideDateTime"/>.</param>
             <param name="validateMember">An instance of <see cref="T:Fursvp.Domain.Validation.IValidate`1"/> to provide Member state validation.</param>
+            <param name="validateTimeZone">An instance of <see cref="T:Fursvp.Domain.Validation.IValidateTimeZone"/> to provide time zone validation.</param>
+        </member>
+        <member name="M:Fursvp.Domain.Validation.ValidateEvent.ValidateState(Fursvp.Domain.Event,Fursvp.Domain.Event)">
+            <summary>
+            Compares two instances of <see cref="T:Fursvp.Domain.Event"/> and throws an exception if the transition from oldState to newState is not valid.
+            </summary>
+            <param name="oldState">The old state.</param>
+            <param name="newState">The new state.</param>
+        </member>
+        <member name="T:Fursvp.Domain.Validation.ValidateMember">
+            <summary>
+            Compares and validates the transition between two states (instances of <see cref="T:Fursvp.Domain.Member"/>). For use with Domain Member validation, not endpoint request validation.
+            </summary>
         </member>
         <member name="M:Fursvp.Domain.Validation.ValidateMember.#ctor(Fursvp.Domain.Validation.IValidateEmail)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Domain.Validation.ValidateMember"/> class.
             </summary>
             <param name="validateEmail">An instance of <see cref="T:Fursvp.Domain.Validation.IValidateEmail"/> to provide email validation.</param>
+        </member>
+        <member name="M:Fursvp.Domain.Validation.ValidateMember.ValidateState(Fursvp.Domain.Member,Fursvp.Domain.Member)">
+            <summary>
+            Compares two instances of <see cref="T:Fursvp.Domain.Member"/> and throws an exception if the transition from oldState to newState is not valid.
+            </summary>
+            <param name="oldState">The old state.</param>
+            <param name="newState">The new state.</param>
+        </member>
+        <member name="T:Fursvp.Domain.Validation.ValidateTimeZone">
+            <summary>
+            Provides logic to ensure that a TimeZoneId string can be resolved to an instance of TimeZoneInfo.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Domain.Validation.ValidateTimeZone.Validate(System.String)">
+            <summary>
+            Throws an exception if a TimeZoneId string cannot be resolved to an instance of TimeZoneInfo.
+            </summary>
+            <param name="id">The TimeZoneId.</param>
         </member>
         <member name="T:Fursvp.Domain.Validation.ValidationException">
             <summary>

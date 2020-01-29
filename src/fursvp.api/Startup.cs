@@ -97,7 +97,8 @@ namespace Fursvp.Api
                 var dateTimeProvider = s.GetRequiredService<IProvideDateTime>();
                 var validateEmail = s.GetRequiredService<IValidateEmail>();
                 var validateMember = new ValidateMember(validateEmail);
-                var validateEvent = new ValidateEvent(dateTimeProvider, validateMember);
+                var validateTimeZone = new ValidateTimeZone();
+                var validateEvent = new ValidateEvent(dateTimeProvider, validateMember, validateTimeZone);
 
                 var eventService = s.GetRequiredService<IEventService>();
                 var authorizeEvent = new AuthorizeEvent(

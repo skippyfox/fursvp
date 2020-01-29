@@ -9,6 +9,9 @@ namespace Fursvp.Domain.Validation
     using System.Linq;
     using Fursvp.Helpers;
 
+    /// <summary>
+    /// Compares and validates the transition between two states (instances of <see cref="Event"/>). For use with Domain Event validation, not endpoint request validation.
+    /// </summary>
     public class ValidateEvent : IValidate<Event>
     {
         /// <summary>
@@ -16,12 +19,16 @@ namespace Fursvp.Domain.Validation
         /// </summary>
         /// <param name="dateTimeProvider">An instance of <see cref="IProvideDateTime"/>.</param>
         /// <param name="validateMember">An instance of <see cref="IValidate{Member}"/> to provide Member state validation.</param>
-        public ValidateEvent(IProvideDateTime dateTimeProvider, IValidate<Member> validateMember)
+        /// <param name="validateTimeZone">An instance of <see cref="IValidateTimeZone"/> to provide time zone validation.</param>
+        public ValidateEvent(IProvideDateTime dateTimeProvider, IValidate<Member> validateMember, IValidateTimeZone validateTimeZone)
         {
             this.DateTimeProvider = dateTimeProvider;
             this.ValidateMember = validateMember;
+            this.ValidateTimeZone = validateTimeZone;
             this.Assert = new Assertions<ValidationException<Event>>();
         }
+
+        private IValidateTimeZone ValidateTimeZone { get; }
 
         private IProvideDateTime DateTimeProvider { get; }
 
@@ -29,6 +36,11 @@ namespace Fursvp.Domain.Validation
 
         private Assertions<ValidationException<Event>> Assert { get; }
 
+        /// <summary>
+        /// Compares two instances of <see cref="Event"/> and throws an exception if the transition from oldState to newState is not valid.
+        /// </summary>
+        /// <param name="oldState">The old state.</param>
+        /// <param name="newState">The new state.</param>
         public void ValidateState(Event oldState, Event newState)
         {
             if (oldState == null && newState == null)
@@ -71,6 +83,7 @@ namespace Fursvp.Domain.Validation
                 }
 
                 this.Assert.That(newState.TimeZoneId != null, "Time Zone is required.");
+                this.ValidateTimeZone.Validate(newState.TimeZoneId);
             }
         }
     }

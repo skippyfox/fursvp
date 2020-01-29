@@ -5,6 +5,7 @@
 
 namespace Fursvp.Domain
 {
+    using Fursvp.Domain.Forms;
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;

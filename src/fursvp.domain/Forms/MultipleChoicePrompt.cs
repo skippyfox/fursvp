@@ -5,6 +5,9 @@
 
 namespace Fursvp.Domain.Forms
 {
+    /// <summary>
+    /// Represents a question and a list of multiple choice answers where any number of answers may be chosen.
+    /// </summary>
     public class MultipleChoicePrompt : FormPrompt
     {
         /// <summary>
