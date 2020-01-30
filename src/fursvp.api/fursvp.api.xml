@@ -4,6 +4,22 @@
         <name>fursvp.api</name>
     </assembly>
     <members>
+        <member name="T:Fursvp.Api.ClaimsPrincipalUserAccessor">
+            <summary>
+            Provides information about a user via claims based authentication.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Api.ClaimsPrincipalUserAccessor.#ctor(Microsoft.AspNetCore.Http.IHttpContextAccessor)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Api.ClaimsPrincipalUserAccessor"/> class.
+            </summary>
+            <param name="httpContextAccessor">The HttpContextAccessor.</param>
+        </member>
+        <member name="P:Fursvp.Api.ClaimsPrincipalUserAccessor.User">
+            <summary>
+            Gets the authenticated user, or null if the user is not authenticated.
+            </summary>
+        </member>
         <member name="T:Fursvp.Api.Controllers.EventController">
             <summary>
             Manages Events.
@@ -118,6 +134,24 @@
             </summary>
             <param name="context">The Exception context.</param>
         </member>
+        <member name="T:Fursvp.Api.Filters.DebugModeOnlyFilter">
+            <summary>
+            Intercepts http and https calls and throws an exception if the current environment is not a Development environment.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Api.Filters.DebugModeOnlyFilter.#ctor(Microsoft.Extensions.Logging.ILogger{Fursvp.Api.Filters.ApiExceptionFilter},Microsoft.AspNetCore.Hosting.IWebHostEnvironment)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Api.Filters.DebugModeOnlyFilter"/> class.
+            </summary>
+            <param name="logger">The application event logger.</param>
+            <param name="env">The web hosting environment.</param>
+        </member>
+        <member name="M:Fursvp.Api.Filters.DebugModeOnlyFilter.OnActionExecuting(Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext)">
+            <summary>
+            Throws an exception if the environment is not Development.
+            </summary>
+            <param name="context">The ActionExecutingContext.</param>
+        </member>
         <member name="T:Fursvp.Api.Program">
             <summary>
             The entry point for Fursvp.
@@ -138,7 +172,7 @@
         </member>
         <member name="T:Fursvp.Api.Requests.NewMemberRequest">
             <summary>
-            The object provided in the request body representing a new Member for an Event.
+            The request model representing a new Member for an Event.
             </summary>
         </member>
         <member name="P:Fursvp.Api.Requests.NewMemberRequest.EmailAddress">
@@ -153,7 +187,7 @@
         </member>
         <member name="T:Fursvp.Api.Requests.UpdateEventRequest">
             <summary>
-            The object provided in the request body representing an updated Event.
+            The request model representing an updated Event.
             </summary>
         </member>
         <member name="P:Fursvp.Api.Requests.UpdateEventRequest.Location">
@@ -193,7 +227,7 @@
         </member>
         <member name="T:Fursvp.Api.Requests.UpdateMemberRequest">
             <summary>
-            The request object to be serialized from the body of API calls pertaining to inserting or updating Member info.
+            The request model pertaining to inserting or updating Member info.
             </summary>
         </member>
         <member name="P:Fursvp.Api.Requests.UpdateMemberRequest.IsAttending">

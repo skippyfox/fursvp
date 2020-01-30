@@ -14,9 +14,8 @@ namespace Fursvp.Domain.Authorization
         /// <summary>
         /// Performs the authorization check for a state change and throws an exception if the check fails.
         /// </summary>
-        /// <param name="actor">The user role for which to check for authorization.</param>
         /// <param name="oldState">The initial object state.</param>
         /// <param name="newState">The new object state.</param>
-        void Authorize(string actor, T oldState, T newState);
+        void Authorize(T oldState, T newState);
     }
 }

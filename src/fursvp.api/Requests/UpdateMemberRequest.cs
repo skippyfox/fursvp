@@ -8,7 +8,7 @@ namespace Fursvp.Api.Requests
     using System.ComponentModel.DataAnnotations;
 
     /// <summary>
-    /// The request object to be serialized from the body of API calls pertaining to inserting or updating Member info.
+    /// The request model pertaining to inserting or updating Member info.
     /// </summary>
     public class UpdateMemberRequest
     {

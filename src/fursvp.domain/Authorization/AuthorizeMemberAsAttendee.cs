@@ -5,6 +5,7 @@
 
 namespace Fursvp.Domain.Authorization
 {
+    using System;
     using System.Linq;
     using Fursvp.Helpers;
 
@@ -16,24 +17,27 @@ namespace Fursvp.Domain.Authorization
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthorizeMemberAsAttendee"/> class.
         /// </summary>
-        public AuthorizeMemberAsAttendee()
+        /// <param name="userAccessor">An instance of <see cref="IUserAccessor"/> used to get the authenticated user's information..</param>
+        public AuthorizeMemberAsAttendee(IUserAccessor userAccessor)
         {
             this.Assert = new Assertions<NotAuthorizedException<Event>>();
+            this.UserAccessor = userAccessor ?? throw new ArgumentNullException(nameof(userAccessor));
         }
 
         private Assertions<NotAuthorizedException<Event>> Assert { get; }
 
+        private IUserAccessor UserAccessor { get; }
+
         /// <summary>
         /// Performs the authorization check for a state change and throws an exception if the check fails.
         /// </summary>
-        /// <param name="actor">The user role for which to check for authorization.</param>
         /// <param name="oldState">The initial state of the Member.</param>
         /// <param name="newState">The new state of the Member.</param>
-        public void Authorize(string actor, Member oldState, Member newState)
+        public void Authorize(Member oldState, Member newState)
         {
             if (oldState != null)
             {
-                if (oldState.EmailAddress != actor)
+                if (oldState.EmailAddress != this.UserAccessor.User.EmailAddress)
                 {
                     this.Assert.That(newState != null, "Only an organizer can remove another member's info.");
                     this.Assert.That(oldState.EmailAddress == newState.EmailAddress, "Only an organizer can modify another member's info.");

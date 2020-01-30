@@ -5,6 +5,7 @@
 
 namespace Fursvp.Api
 {
+    using System.Text;
     using Fursvp.Api.Filters;
     using Fursvp.Data;
     using Fursvp.Data.Firestore;
@@ -12,6 +13,7 @@ namespace Fursvp.Api
     using Fursvp.Domain.Authorization;
     using Fursvp.Domain.Forms;
     using Fursvp.Domain.Validation;
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
@@ -21,6 +23,7 @@ namespace Fursvp.Api
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
+    using Microsoft.IdentityModel.Tokens;
 
     /// <summary>
     /// Fursvp .NET Core Web Api initialization routines.
@@ -48,6 +51,7 @@ namespace Fursvp.Api
         /// <param name="services">The container in which components are registered.</param>
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors();
             services.AddControllers();
             services.AddSingleton<IEventService, EventService>();
             this.ConfigureRepositoryServices(services);
@@ -63,6 +67,27 @@ namespace Fursvp.Api
             services.AddMvc(options =>
             {
                 options.Filters.Add(typeof(ApiExceptionFilter));
+            });
+
+            var key = Encoding.ASCII.GetBytes("Some secret goes here!"); // TODO
+
+            services.AddHttpContextAccessor(); // For authorization / access to user info.
+            services.AddSingleton<IUserAccessor, ClaimsPrincipalUserAccessor>();
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(x =>
+            {
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                };
             });
         }
 
@@ -82,6 +107,13 @@ namespace Fursvp.Api
 
             app.UseRouting();
 
+            app.UseCors(x => x
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader());
+
+            app.UseAuthentication();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
@@ -100,13 +132,16 @@ namespace Fursvp.Api
                 var validateTimeZone = new ValidateTimeZone();
                 var validateEvent = new ValidateEvent(dateTimeProvider, validateMember, validateTimeZone);
 
+                var userAccessor = s.GetRequiredService<IUserAccessor>();
+
                 var eventService = s.GetRequiredService<IEventService>();
                 var authorizeEvent = new AuthorizeEvent(
                     new AuthorizeMemberAsAuthor(),
-                    new AuthorizeMemberAsOrganizer(),
-                    new AuthorizeMemberAsAttendee(),
+                    new AuthorizeMemberAsOrganizer(userAccessor),
+                    new AuthorizeMemberAsAttendee(userAccessor),
                     new AuthorizeFrozenMemberAsAttendee(),
-                    eventService);
+                    eventService,
+                    userAccessor);
 
                 var authEventRepository = new RepositoryWithAuthorization<Event>(baseEventRepository, authorizeEvent);
 

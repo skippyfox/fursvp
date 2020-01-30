@@ -9,7 +9,7 @@
             Checks for authorization by a given actor to create or perform a change to an Event.
             </summary>
         </member>
-        <member name="M:Fursvp.Domain.Authorization.AuthorizeEvent.#ctor(Fursvp.Domain.Authorization.IAuthorize{Fursvp.Domain.Member},Fursvp.Domain.Authorization.IAuthorize{Fursvp.Domain.Member},Fursvp.Domain.Authorization.IAuthorize{Fursvp.Domain.Member},Fursvp.Domain.Authorization.IAuthorize{Fursvp.Domain.Member},Fursvp.Domain.IEventService)">
+        <member name="M:Fursvp.Domain.Authorization.AuthorizeEvent.#ctor(Fursvp.Domain.Authorization.IAuthorize{Fursvp.Domain.Member},Fursvp.Domain.Authorization.IAuthorize{Fursvp.Domain.Member},Fursvp.Domain.Authorization.IAuthorize{Fursvp.Domain.Member},Fursvp.Domain.Authorization.IAuthorize{Fursvp.Domain.Member},Fursvp.Domain.IEventService,Fursvp.Domain.Authorization.IUserAccessor)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.AuthorizeEvent"/> class.
             </summary>
@@ -18,12 +18,12 @@
             <param name="authorizeMemberAsAttendee">The <see cref="T:Fursvp.Domain.Authorization.IAuthorize`1"/> used to authorize Member state changes when the authenticated user is an attendee and RSVPs are open.</param>
             <param name="authorizeFrozenMemberAsAttendee">The <see cref="T:Fursvp.Domain.Authorization.IAuthorize`1"/> used to authorize Member state changes when the authenticated user is an attendee and RVSPs are not open.</param>
             <param name="eventService">An instance of <see cref="T:Fursvp.Domain.IEventService"/> used to evaluate an Event's state.</param>
+            <param name="userAccessor">An instance of <see cref="T:Fursvp.Domain.Authorization.IUserAccessor"/> used to get the authenticated user's information..</param>
         </member>
-        <member name="M:Fursvp.Domain.Authorization.AuthorizeEvent.Authorize(System.String,Fursvp.Domain.Event,Fursvp.Domain.Event)">
+        <member name="M:Fursvp.Domain.Authorization.AuthorizeEvent.Authorize(Fursvp.Domain.Event,Fursvp.Domain.Event)">
             <summary>
             Performs the authorization check for a state change and throws an exception if the check fails.
             </summary>
-            <param name="actor">The user role for which to check for authorization.</param>
             <param name="oldState">The initial state of the Event.</param>
             <param name="newState">The new state of the Event.</param>
         </member>
@@ -37,11 +37,10 @@
             Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.AuthorizeFrozenMemberAsAttendee"/> class.
             </summary>
         </member>
-        <member name="M:Fursvp.Domain.Authorization.AuthorizeFrozenMemberAsAttendee.Authorize(System.String,Fursvp.Domain.Member,Fursvp.Domain.Member)">
+        <member name="M:Fursvp.Domain.Authorization.AuthorizeFrozenMemberAsAttendee.Authorize(Fursvp.Domain.Member,Fursvp.Domain.Member)">
             <summary>
             Performs the authorization check for a state change and throws an exception if the check fails.
             </summary>
-            <param name="actor">The user role for which to check for authorization.</param>
             <param name="oldState">The initial state of the Member.</param>
             <param name="newState">The new state of the Member.</param>
         </member>
@@ -50,16 +49,16 @@
             Checks for authorization by a given event attendee to create or perform a change to a Member.
             </summary>
         </member>
-        <member name="M:Fursvp.Domain.Authorization.AuthorizeMemberAsAttendee.#ctor">
+        <member name="M:Fursvp.Domain.Authorization.AuthorizeMemberAsAttendee.#ctor(Fursvp.Domain.Authorization.IUserAccessor)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.AuthorizeMemberAsAttendee"/> class.
             </summary>
+            <param name="userAccessor">An instance of <see cref="T:Fursvp.Domain.Authorization.IUserAccessor"/> used to get the authenticated user's information..</param>
         </member>
-        <member name="M:Fursvp.Domain.Authorization.AuthorizeMemberAsAttendee.Authorize(System.String,Fursvp.Domain.Member,Fursvp.Domain.Member)">
+        <member name="M:Fursvp.Domain.Authorization.AuthorizeMemberAsAttendee.Authorize(Fursvp.Domain.Member,Fursvp.Domain.Member)">
             <summary>
             Performs the authorization check for a state change and throws an exception if the check fails.
             </summary>
-            <param name="actor">The user role for which to check for authorization.</param>
             <param name="oldState">The initial state of the Member.</param>
             <param name="newState">The new state of the Member.</param>
         </member>
@@ -73,11 +72,10 @@
             Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.AuthorizeMemberAsAuthor"/> class.
             </summary>
         </member>
-        <member name="M:Fursvp.Domain.Authorization.AuthorizeMemberAsAuthor.Authorize(System.String,Fursvp.Domain.Member,Fursvp.Domain.Member)">
+        <member name="M:Fursvp.Domain.Authorization.AuthorizeMemberAsAuthor.Authorize(Fursvp.Domain.Member,Fursvp.Domain.Member)">
             <summary>
             Performs the authorization check for a state change and throws an exception if the check fails.
             </summary>
-            <param name="actor">The user role for which to check for authorization.</param>
             <param name="oldState">The initial state of the Member.</param>
             <param name="newState">The new state of the Member.</param>
         </member>
@@ -86,16 +84,16 @@
             Checks for authorization by a given event organizer to create or perform a change to a Member.
             </summary>
         </member>
-        <member name="M:Fursvp.Domain.Authorization.AuthorizeMemberAsOrganizer.#ctor">
+        <member name="M:Fursvp.Domain.Authorization.AuthorizeMemberAsOrganizer.#ctor(Fursvp.Domain.Authorization.IUserAccessor)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.AuthorizeMemberAsOrganizer"/> class.
             </summary>
+            <param name="userAccessor">An instance of <see cref="T:Fursvp.Domain.Authorization.IUserAccessor"/> used to get the authenticated user's information..</param>
         </member>
-        <member name="M:Fursvp.Domain.Authorization.AuthorizeMemberAsOrganizer.Authorize(System.String,Fursvp.Domain.Member,Fursvp.Domain.Member)">
+        <member name="M:Fursvp.Domain.Authorization.AuthorizeMemberAsOrganizer.Authorize(Fursvp.Domain.Member,Fursvp.Domain.Member)">
             <summary>
             Performs the authorization check for a state change and throws an exception if the check fails.
             </summary>
-            <param name="actor">The user role for which to check for authorization.</param>
             <param name="oldState">The initial state of the Member.</param>
             <param name="newState">The new state of the Member.</param>
         </member>
@@ -105,13 +103,22 @@
             </summary>
             <typeparam name="T">The type against which an attempted action must be authorized.</typeparam>
         </member>
-        <member name="M:Fursvp.Domain.Authorization.IAuthorize`1.Authorize(System.String,`0,`0)">
+        <member name="M:Fursvp.Domain.Authorization.IAuthorize`1.Authorize(`0,`0)">
             <summary>
             Performs the authorization check for a state change and throws an exception if the check fails.
             </summary>
-            <param name="actor">The user role for which to check for authorization.</param>
             <param name="oldState">The initial object state.</param>
             <param name="newState">The new object state.</param>
+        </member>
+        <member name="T:Fursvp.Domain.Authorization.IUserAccessor">
+            <summary>
+            Accesses an <see cref="P:Fursvp.Domain.Authorization.IUserAccessor.User" /> instance.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Authorization.IUserAccessor.User">
+            <summary>
+            Gets the <see cref="P:Fursvp.Domain.Authorization.IUserAccessor.User"/>.
+            </summary>
         </member>
         <member name="T:Fursvp.Domain.Authorization.NotAuthorizedException">
             <summary>
@@ -156,6 +163,16 @@
             </summary>
             <param name="message">The message that describes the error.</param>
             <param name="innerException">The exception that is the cause of the current exception, or a null reference (Nothing in Visual Basic) if no inner exception is specified.</param>
+        </member>
+        <member name="T:Fursvp.Domain.Authorization.User">
+            <summary>
+            Provides information about a user.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Authorization.User.EmailAddress">
+            <summary>
+            Gets or sets the user's email address.
+            </summary>
         </member>
         <member name="T:Fursvp.Domain.Event">
             <summary>

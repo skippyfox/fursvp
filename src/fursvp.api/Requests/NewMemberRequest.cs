@@ -8,7 +8,7 @@ namespace Fursvp.Api.Requests
     using System.ComponentModel.DataAnnotations;
 
     /// <summary>
-    /// The object provided in the request body representing a new Member for an Event.
+    /// The request model representing a new Member for an Event.
     /// </summary>
     public class NewMemberRequest
     {

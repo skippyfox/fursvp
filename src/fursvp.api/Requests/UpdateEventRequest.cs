@@ -9,7 +9,7 @@ namespace Fursvp.Api.Requests
     using System.ComponentModel.DataAnnotations;
 
     /// <summary>
-    /// The object provided in the request body representing an updated Event.
+    /// The request model representing an updated Event.
     /// </summary>
     public class UpdateEventRequest
     {

@@ -54,8 +54,7 @@ namespace Fursvp.Data
         /// <returns>An asynchronous <see cref="Task{T}"/>.</returns>
         public async Task Insert(T entity)
         {
-            // TODO: Provide actor
-            this.Authorize.Authorize(string.Empty, default, entity);
+            this.Authorize.Authorize(default, entity);
 
             await this.Decorated.Insert(entity);
         }
@@ -74,8 +73,7 @@ namespace Fursvp.Data
                 throw new ValidationException<T>("Must provide a valid id");
             }
 
-            // TODO: Provide actor
-            this.Authorize.Authorize(string.Empty, oldEntity, updatedEntity);
+            this.Authorize.Authorize(oldEntity, updatedEntity);
 
             await this.Decorated.Update(updatedEntity);
         }
@@ -89,8 +87,7 @@ namespace Fursvp.Data
         {
             var entity = await this.Decorated.GetById(guid);
 
-            // TODO: Provide actor
-            this.Authorize.Authorize(string.Empty, entity, default);
+            this.Authorize.Authorize(entity, default);
 
             await this.Decorated.Delete(guid);
         }

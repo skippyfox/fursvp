@@ -21,12 +21,14 @@ namespace Fursvp.Domain.Authorization
         /// <param name="authorizeMemberAsAttendee">The <see cref="IAuthorize{Member}"/> used to authorize Member state changes when the authenticated user is an attendee and RSVPs are open.</param>
         /// <param name="authorizeFrozenMemberAsAttendee">The <see cref="IAuthorize{Member}"/> used to authorize Member state changes when the authenticated user is an attendee and RVSPs are not open.</param>
         /// <param name="eventService">An instance of <see cref="IEventService"/> used to evaluate an Event's state.</param>
+        /// <param name="userAccessor">An instance of <see cref="IUserAccessor"/> used to get the authenticated user's information..</param>
         public AuthorizeEvent(
             IAuthorize<Member> authorizeMemberAsAuthor,
             IAuthorize<Member> authorizeMemberAsOrganizer,
             IAuthorize<Member> authorizeMemberAsAttendee,
             IAuthorize<Member> authorizeFrozenMemberAsAttendee,
-            IEventService eventService)
+            IEventService eventService,
+            IUserAccessor userAccessor)
         {
             this.Assert = new Assertions<NotAuthorizedException<Event>>();
             this.AuthorizeMemberAsAuthor = authorizeMemberAsAuthor;
@@ -34,6 +36,7 @@ namespace Fursvp.Domain.Authorization
             this.AuthorizeMemberAsAttendee = authorizeMemberAsAttendee;
             this.AuthorizeFrozenMemberAsAttendee = authorizeFrozenMemberAsAttendee;
             this.EventService = eventService;
+            this.UserAccessor = userAccessor;
         }
 
         private Assertions<NotAuthorizedException<Event>> Assert { get; }
@@ -48,15 +51,16 @@ namespace Fursvp.Domain.Authorization
 
         private IEventService EventService { get; }
 
+        private IUserAccessor UserAccessor { get; }
+
         /// <summary>
         /// Performs the authorization check for a state change and throws an exception if the check fails.
         /// </summary>
-        /// <param name="actor">The user role for which to check for authorization.</param>
         /// <param name="oldState">The initial state of the Event.</param>
         /// <param name="newState">The new state of the Event.</param>
-        public void Authorize(string actor, Event oldState, Event newState)
+        public void Authorize(Event oldState, Event newState)
         {
-            var actingMember = (oldState ?? newState)?.Members?.FirstOrDefault(m => m.EmailAddress == actor);
+            var actingMember = (oldState ?? newState)?.Members?.FirstOrDefault(m => m.EmailAddress == this.UserAccessor.User.EmailAddress);
 
             if (newState == null)
             {
@@ -71,7 +75,7 @@ namespace Fursvp.Domain.Authorization
                 {
                     foreach (var memberState in oldState.Members.FullJoin(newState.Members, m => m.Id, m => m.Id, (old, @new) => new { old, @new }))
                     {
-                        authorizeMember.Authorize(actor, memberState.old, memberState.@new);
+                        authorizeMember.Authorize(memberState.old, memberState.@new);
                     }
                 }
 
