@@ -36,7 +36,7 @@ namespace Fursvp.Domain.Authorization
         {
             if (oldState != null && (oldState.IsOrganizer || oldState.IsAuthor))
             {
-                this.Assert.That(oldState.EmailAddress == this.UserAccessor.User.EmailAddress, "Only the Event Author can modify or remove another organizer's info.");
+                this.Assert.That(oldState.EmailAddress == this.UserAccessor.User?.EmailAddress, "Only the Event Author can modify or remove another organizer's info.");
             }
 
             if (newState != null)

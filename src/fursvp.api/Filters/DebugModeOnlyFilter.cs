@@ -39,6 +39,7 @@ namespace Fursvp.Api.Filters
         {
             if (!this.WebHostEnvironment.IsDevelopment())
             {
+                this.Logger.LogWarning("Attempt to access a debug-only controller.", context);
                 throw new NotAuthorizedException<string>(string.Empty);
             }
 

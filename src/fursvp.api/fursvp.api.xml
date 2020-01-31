@@ -20,6 +20,18 @@
             Gets the authenticated user, or null if the user is not authenticated.
             </summary>
         </member>
+        <member name="T:Fursvp.Api.Controllers.AuthController">
+            <summary>
+            Authentication controller.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Api.Controllers.AuthController.DebugAuth(System.String)">
+            <summary>
+            Instantly logs in a tester with the email address provided. For Debugging only.
+            </summary>
+            <param name="emailAddress">The email address to log in as.</param>
+            <returns>The generated token.</returns>
+        </member>
         <member name="T:Fursvp.Api.Controllers.EventController">
             <summary>
             Manages Events.

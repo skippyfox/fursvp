@@ -60,7 +60,7 @@ namespace Fursvp.Domain.Authorization
         /// <param name="newState">The new state of the Event.</param>
         public void Authorize(Event oldState, Event newState)
         {
-            var actingMember = (oldState ?? newState)?.Members?.FirstOrDefault(m => m.EmailAddress == this.UserAccessor.User.EmailAddress);
+            var actingMember = (oldState ?? newState)?.Members?.FirstOrDefault(m => m.EmailAddress == this.UserAccessor.User?.EmailAddress);
 
             if (newState == null)
             {

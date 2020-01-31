@@ -59,6 +59,7 @@ namespace Fursvp.Api
             services.AddSingleton<IProvideDateTime, UtcDateTimeProvider>();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddScoped<IUrlHelper>(x => x.GetRequiredService<IUrlHelperFactory>().GetUrlHelper(x.GetService<IActionContextAccessor>().ActionContext));
+            services.AddSingleton<DebugModeOnlyFilter>();
             services.AddLogging(lc =>
             {
                 lc.ClearProviders();
@@ -143,9 +144,9 @@ namespace Fursvp.Api
                     eventService,
                     userAccessor);
 
-                var authEventRepository = new RepositoryWithAuthorization<Event>(baseEventRepository, authorizeEvent);
+                var validateEventRepository = new RepositoryWithValidation<Event>(baseEventRepository, validateEvent);
 
-                return new RepositoryWithValidation<Event>(authEventRepository, validateEvent);
+                return new RepositoryWithAuthorization<Event>(validateEventRepository, authorizeEvent);
             });
         }
     }

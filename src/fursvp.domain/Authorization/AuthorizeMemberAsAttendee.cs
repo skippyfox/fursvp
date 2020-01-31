@@ -37,7 +37,7 @@ namespace Fursvp.Domain.Authorization
         {
             if (oldState != null)
             {
-                if (oldState.EmailAddress != this.UserAccessor.User.EmailAddress)
+                if (oldState.EmailAddress != this.UserAccessor.User?.EmailAddress)
                 {
                     this.Assert.That(newState != null, "Only an organizer can remove another member's info.");
                     this.Assert.That(oldState.EmailAddress == newState.EmailAddress, "Only an organizer can modify another member's info.");
