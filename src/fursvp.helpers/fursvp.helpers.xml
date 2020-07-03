@@ -22,6 +22,18 @@
             <param name="evaluation">The result that is expected to have evaluated to true.</param>
             <param name="reason">The Exception message used when the result is not true and an Exception is thrown.</param>
         </member>
+        <member name="T:Fursvp.Helpers.FursvpRandom">
+            <summary>
+            Helper methods for random behavior.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Helpers.FursvpRandom.CopyableButHardToGuessCode">
+            <summary>
+            No lucky guesses random code.
+            There are 414,208 possible combinations. An attacker knowing this algorithm would have a 1 in 82,841.6 chance (0.001207%) of getting 1 guess correct out of 5 guesses.
+            </summary>
+            <returns>A six digit numeric code that is easy to remember and copy by hand, but hard to guess randomly. Good for verification codes.</returns>
+        </member>
         <member name="T:Fursvp.Helpers.IEnumerableExtensions">
             <summary>
             Contains extension methods for IEnumerable types.

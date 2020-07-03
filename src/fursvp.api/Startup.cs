@@ -82,7 +82,7 @@ namespace Fursvp.Api
                 options.Filters.Add(typeof(ApiExceptionFilter));
             });
 
-            var key = Encoding.ASCII.GetBytes("Some secret goes here!"); // TODO
+            var key = Encoding.ASCII.GetBytes(this.Configuration["AuthorizationIssuerSigningKey"]);
 
             services.AddHttpContextAccessor(); // For authorization / access to user info.
             services.AddSingleton<IUserAccessor, ClaimsPrincipalUserAccessor>();

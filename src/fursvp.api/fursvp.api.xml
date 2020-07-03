@@ -25,12 +25,34 @@
             Authentication controller.
             </summary>
         </member>
+        <member name="M:Fursvp.Api.Controllers.AuthController.#ctor(Microsoft.Extensions.Configuration.IConfiguration,Microsoft.Extensions.Caching.Memory.IMemoryCache,Fursvp.Communication.IEmailer)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Api.Controllers.AuthController"/> class.
+            </summary>
+            <param name="configuration">The application configuration.</param>
+            <param name="memoryCache">The application memory cache.</param>
+            <param name="emailer">The instance of <see cref="T:Fursvp.Communication.IEmailer"/> used to suppress or send emails.</param>
+        </member>
         <member name="M:Fursvp.Api.Controllers.AuthController.DebugAuth(System.String)">
             <summary>
             Instantly logs in a tester with the email address provided. For Debugging only.
             </summary>
             <param name="emailAddress">The email address to log in as.</param>
             <returns>The generated token.</returns>
+        </member>
+        <member name="M:Fursvp.Api.Controllers.AuthController.VerifyEmail(fursvp.api.Requests.VerifyEmailRequest)">
+            <summary>
+            Logs in a tester with the email address provided by verifying a cached verification code.
+            </summary>
+            <param name="verifyEmailRequest">The email address and verification code.</param>
+            <returns>OkObjectResult with the generated token on success, UnauthorizedResult otherwise.</returns>
+        </member>
+        <member name="M:Fursvp.Api.Controllers.AuthController.VerifyEmail(System.String)">
+            <summary>
+            Sends a verification email and caches the verification code.
+            </summary>
+            <param name="emailAddress">The email address to log in as.</param>
+            <returns>An OkResult.</returns>
         </member>
         <member name="T:Fursvp.Api.Controllers.EventController">
             <summary>
@@ -276,6 +298,16 @@
             </summary>
             <param name="app">The <see cref="T:Microsoft.AspNetCore.Builder.IApplicationBuilder"/> instance to configure.</param>
             <param name="env">The <see cref="T:Microsoft.AspNetCore.Hosting.IWebHostEnvironment"/> instance containing environment specific settings.</param>
+        </member>
+        <member name="P:fursvp.api.Requests.VerifyEmailRequest.EmailAddress">
+            <summary>
+            Gets or sets the Email Address to verify.
+            </summary>
+        </member>
+        <member name="P:fursvp.api.Requests.VerifyEmailRequest.VerificationCode">
+            <summary>
+            Gets or sets the verification code.
+            </summary>
         </member>
     </members>
 </doc>
