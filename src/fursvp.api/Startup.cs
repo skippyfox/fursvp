@@ -57,8 +57,17 @@ namespace Fursvp.Api
             services.AddSingleton<IEventService, EventService>();
             this.ConfigureRepositoryServices(services);
             services.AddSingleton<IValidateEmail, ValidateEmail>();
-            services.AddSingleton<IEmailer, SendGridEmailer>();
-            services.Configure<SendGridOptions>(this.Configuration.GetSection(SendGridOptions.SendGrid));
+
+            if (this.Environment.IsDevelopment())
+            {
+                services.AddSingleton<IEmailer, SuppressAndLogEmailer>();
+            }
+            else
+            {
+                services.AddSingleton<IEmailer, SendGridEmailer>();
+                services.Configure<SendGridOptions>(this.Configuration.GetSection(SendGridOptions.SendGrid));
+            }
+
             services.AddSingleton<IProvideDateTime, UtcDateTimeProvider>();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddScoped<IUrlHelper>(x => x.GetRequiredService<IUrlHelperFactory>().GetUrlHelper(x.GetService<IActionContextAccessor>().ActionContext));

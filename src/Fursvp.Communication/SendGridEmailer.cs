@@ -19,10 +19,15 @@ namespace Fursvp.Communication
         public async Task SendAsync(Email email)
         {
             var client = new SendGridClient(_options.ApiKey);
+            var sendGridMessage = ConvertFrom(email);
+            var response = await client.SendEmailAsync(sendGridMessage).ConfigureAwait(false);
+        }
+
+        private SendGridMessage ConvertFrom(Email email)
+        {
             var from = new SendGrid.Helpers.Mail.EmailAddress(email.From.Address, email.From.Name);
             var to = new SendGrid.Helpers.Mail.EmailAddress(email.To.Address, email.To.Name);
-            var sendGridMessage = MailHelper.CreateSingleEmail(from, to, email.Subject, email.PlainTextContent, email.HtmlContent);
-            var response = await client.SendEmailAsync(sendGridMessage).ConfigureAwait(false);
+            return MailHelper.CreateSingleEmail(from, to, email.Subject, email.PlainTextContent, email.HtmlContent);
         }
     }
 }
