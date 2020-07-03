@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <UserSecretsId>7a8c36e4-47a7-4285-98f7-3311ee408636</UserSecretsId>
+    <UserSecretsId>fursvp</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileRunEnvironmentFiles>settings.env</DockerfileRunEnvironmentFiles>
   </PropertyGroup>
@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.5" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.9.10" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
@@ -34,6 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Fursvp.Communication\Fursvp.Communication.csproj" />
     <ProjectReference Include="..\fursvp.data\Fursvp.Data.csproj" />
     <ProjectReference Include="..\fursvp.domain\Fursvp.Domain.csproj" />
   </ItemGroup>

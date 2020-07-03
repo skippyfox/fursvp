@@ -10,6 +10,7 @@ namespace Fursvp.Api.Controllers
     using System.Linq;
     using System.Threading.Tasks;
     using Fursvp.Api.Requests;
+    using Fursvp.Communication;
     using Fursvp.Data;
     using Fursvp.Domain;
     using Microsoft.AspNetCore.Mvc;
@@ -28,11 +29,12 @@ namespace Fursvp.Api.Controllers
         /// <param name="logger">The application event logger.</param>
         /// <param name="eventService">The instance of <see cref="IEventService"/> used to create and update Events.</param>
         /// <param name="eventRepository">The instance of <see cref="IRepository{Event}"/> used for Event persistence.</param>
-        public EventController(ILogger<EventController> logger, IEventService eventService, IRepository<Event> eventRepository)
+        public EventController(ILogger<EventController> logger, IEventService eventService, IRepository<Event> eventRepository, IEmailer emailer)
         {
             this.Logger = logger;
             this.EventRepository = eventRepository;
             this.EventService = eventService;
+            this.Emailer = emailer;
         }
 
         private ILogger<EventController> Logger { get; }
@@ -40,6 +42,8 @@ namespace Fursvp.Api.Controllers
         private IRepository<Event> EventRepository { get; }
 
         private IEventService EventService { get; }
+
+        private IEmailer Emailer { get; }
 
         /// <summary>
         /// Retrieves details for all Events.

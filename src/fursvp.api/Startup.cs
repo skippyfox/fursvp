@@ -7,6 +7,7 @@ namespace Fursvp.Api
 {
     using System.Text;
     using Fursvp.Api.Filters;
+    using Fursvp.Communication;
     using Fursvp.Data;
     using Fursvp.Data.Firestore;
     using Fursvp.Domain;
@@ -56,6 +57,8 @@ namespace Fursvp.Api
             services.AddSingleton<IEventService, EventService>();
             this.ConfigureRepositoryServices(services);
             services.AddSingleton<IValidateEmail, ValidateEmail>();
+            services.AddSingleton<IEmailer, SendGridEmailer>();
+            services.Configure<SendGridOptions>(this.Configuration.GetSection(SendGridOptions.SendGrid));
             services.AddSingleton<IProvideDateTime, UtcDateTimeProvider>();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddScoped<IUrlHelper>(x => x.GetRequiredService<IUrlHelperFactory>().GetUrlHelper(x.GetService<IActionContextAccessor>().ActionContext));

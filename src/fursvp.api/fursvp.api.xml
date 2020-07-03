@@ -37,7 +37,7 @@
             Manages Events.
             </summary>
         </member>
-        <member name="M:Fursvp.Api.Controllers.EventController.#ctor(Microsoft.Extensions.Logging.ILogger{Fursvp.Api.Controllers.EventController},Fursvp.Domain.IEventService,Fursvp.Data.IRepository{Fursvp.Domain.Event})">
+        <member name="M:Fursvp.Api.Controllers.EventController.#ctor(Microsoft.Extensions.Logging.ILogger{Fursvp.Api.Controllers.EventController},Fursvp.Domain.IEventService,Fursvp.Data.IRepository{Fursvp.Domain.Event},Fursvp.Communication.IEmailer)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Api.Controllers.EventController"/> class.
             </summary>
