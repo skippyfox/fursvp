@@ -47,7 +47,7 @@
             <param name="verifyEmailRequest">The email address and verification code.</param>
             <returns>OkObjectResult with the generated token on success, UnauthorizedResult otherwise.</returns>
         </member>
-        <member name="M:Fursvp.Api.Controllers.AuthController.VerifyEmail(System.String)">
+        <member name="M:Fursvp.Api.Controllers.AuthController.SendVerificationCode(System.String)">
             <summary>
             Sends a verification email and caches the verification code.
             </summary>

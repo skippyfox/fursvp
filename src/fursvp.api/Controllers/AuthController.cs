@@ -86,7 +86,7 @@ namespace Fursvp.Api.Controllers
         /// <returns>An OkResult.</returns>
         [HttpPost]
         [Route("sendverificationcode")]
-        public async Task<IActionResult> VerifyEmail([FromBody]string emailAddress)
+        public async Task<IActionResult> SendVerificationCode([FromBody]string emailAddress)
         {
             var verificationCodeCacheKey = VerificationCodeCacheKey(emailAddress);
 
