@@ -40,19 +40,19 @@
             <param name="emailAddress">The email address to log in as.</param>
             <returns>The generated token.</returns>
         </member>
-        <member name="M:Fursvp.Api.Controllers.AuthController.VerifyEmail(fursvp.api.Requests.VerifyEmailRequest)">
+        <member name="M:Fursvp.Api.Controllers.AuthController.VerifyEmail(Fursvp.Api.Requests.VerifyEmailRequest)">
             <summary>
             Logs in a tester with the email address provided by verifying a cached verification code.
             </summary>
             <param name="verifyEmailRequest">The email address and verification code.</param>
             <returns>OkObjectResult with the generated token on success, UnauthorizedResult otherwise.</returns>
         </member>
-        <member name="M:Fursvp.Api.Controllers.AuthController.SendVerificationCode(System.String)">
+        <member name="M:Fursvp.Api.Controllers.AuthController.SendVerificationCode(Fursvp.Api.Requests.SendVerificationCodeRequest)">
             <summary>
             Sends a verification email and caches the verification code.
             </summary>
-            <param name="emailAddress">The email address to log in as.</param>
-            <returns>An OkResult.</returns>
+            <param name="sendVerificationCodeRequest">The email address to log in as.</param>
+            <returns>An OkResult on success or BadRequestResult on failure.</returns>
         </member>
         <member name="T:Fursvp.Api.Controllers.EventController">
             <summary>
@@ -219,6 +219,11 @@
             Gets or sets the display name for the new Member.
             </summary>
         </member>
+        <member name="P:Fursvp.Api.Requests.SendVerificationCodeRequest.EmailAddress">
+            <summary>
+            Gets or sets the Email Address to verify.
+            </summary>
+        </member>
         <member name="T:Fursvp.Api.Requests.UpdateEventRequest">
             <summary>
             The request model representing an updated Event.
@@ -274,6 +279,16 @@
             Gets or sets a value indicating whether an event member is an organizer.
             </summary>
         </member>
+        <member name="P:Fursvp.Api.Requests.VerifyEmailRequest.EmailAddress">
+            <summary>
+            Gets or sets the Email Address to verify.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Requests.VerifyEmailRequest.VerificationCode">
+            <summary>
+            Gets or sets the verification code.
+            </summary>
+        </member>
         <member name="T:Fursvp.Api.Startup">
             <summary>
             Fursvp .NET Core Web Api initialization routines.
@@ -298,16 +313,6 @@
             </summary>
             <param name="app">The <see cref="T:Microsoft.AspNetCore.Builder.IApplicationBuilder"/> instance to configure.</param>
             <param name="env">The <see cref="T:Microsoft.AspNetCore.Hosting.IWebHostEnvironment"/> instance containing environment specific settings.</param>
-        </member>
-        <member name="P:fursvp.api.Requests.VerifyEmailRequest.EmailAddress">
-            <summary>
-            Gets or sets the Email Address to verify.
-            </summary>
-        </member>
-        <member name="P:fursvp.api.Requests.VerifyEmailRequest.VerificationCode">
-            <summary>
-            Gets or sets the verification code.
-            </summary>
         </member>
     </members>
 </doc>

@@ -2,7 +2,7 @@
 {
     using System.ComponentModel.DataAnnotations;
 
-    public class VerifyEmailRequest
+    public class SendVerificationCodeRequest
     {
         /// <summary>
         /// Gets or sets the Email Address to verify.
@@ -10,11 +10,5 @@
         [Required]
         [EmailAddress]
         public string EmailAddress { get; set; }
-
-        /// <summary>
-        /// Gets or sets the verification code.
-        /// </summary>
-        [Required]
-        public string VerificationCode { get; set; }
     }
 }

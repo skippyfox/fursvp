@@ -11,7 +11,7 @@ namespace Fursvp.Api.Controllers
     using System.Text;
     using System.Threading.Tasks;
     using Fursvp.Api.Filters;
-    using fursvp.api.Requests;
+    using Fursvp.Api.Requests;
     using Fursvp.Communication;
     using Fursvp.Helpers;
     using Microsoft.AspNetCore.Mvc;
@@ -22,6 +22,7 @@ namespace Fursvp.Api.Controllers
     /// <summary>
     /// Authentication controller.
     /// </summary>
+    [ApiController]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
@@ -68,12 +69,17 @@ namespace Fursvp.Api.Controllers
         {
             var verificationCodeCacheKey = VerificationCodeCacheKey(verifyEmailRequest.EmailAddress);
 
-            if (this.memoryCache.TryGetValue(verificationCodeCacheKey, out string verificationCode)
-                && verificationCode == verifyEmailRequest.VerificationCode)
+            if (this.memoryCache.TryGetValue(verificationCodeCacheKey, out string verificationCode))
             {
-                // authentication successful so generate jwt token
-                var token = this.CreateVerificationToken(verifyEmailRequest.EmailAddress);
-                return this.Ok(token);
+                if (verificationCode == verifyEmailRequest.VerificationCode)
+                {
+                    // authentication successful.
+                    this.ExpireVerificationCode(verifyEmailRequest.EmailAddress);
+                    var token = this.CreateVerificationToken(verifyEmailRequest.EmailAddress);
+                    return this.Ok(token);
+                }
+
+                this.IncrementFailedVerificationAttemptsOrExpire(verifyEmailRequest.EmailAddress);
             }
 
             return this.Unauthorized();
@@ -82,19 +88,19 @@ namespace Fursvp.Api.Controllers
         /// <summary>
         /// Sends a verification email and caches the verification code.
         /// </summary>
-        /// <param name="emailAddress">The email address to log in as.</param>
-        /// <returns>An OkResult.</returns>
+        /// <param name="sendVerificationCodeRequest">The email address to log in as.</param>
+        /// <returns>An OkResult on success or BadRequestResult on failure.</returns>
         [HttpPost]
         [Route("sendverificationcode")]
-        public async Task<IActionResult> SendVerificationCode([FromBody]string emailAddress)
+        public async Task<IActionResult> SendVerificationCode([FromBody]SendVerificationCodeRequest sendVerificationCodeRequest)
         {
-            var verificationCodeCacheKey = VerificationCodeCacheKey(emailAddress);
+            var verificationCodeCacheKey = VerificationCodeCacheKey(sendVerificationCodeRequest.EmailAddress);
 
             string verificationCode = FursvpRandom.CopyableButHardToGuessCode();
 
-            this.memoryCache.Set(verificationCodeCacheKey, verificationCode);
+            this.memoryCache.Set(verificationCodeCacheKey, verificationCode, TimeSpan.FromMinutes(60)); // TODO - make this a config variable
 
-            var email = CreateVerificationEmail(emailAddress, verificationCode);
+            var email = CreateVerificationEmail(sendVerificationCodeRequest.EmailAddress, verificationCode);
 
             await this.emailer.SendAsync(email);
 
@@ -102,6 +108,8 @@ namespace Fursvp.Api.Controllers
         }
 
         private static string VerificationCodeCacheKey(string emailAddress) => $"VerificationCodeFor:{emailAddress}";
+
+        private static string VerificationAttemptsCacheKey(string emailAddress) => $"VerificationAttemptsFor:{emailAddress}";
 
         private static Email CreateVerificationEmail(string emailAddress, string verificationCode)
         {
@@ -121,6 +129,12 @@ If you didn't request this, simply ignore this message.",
             };
         }
 
+        private void ExpireVerificationCode(string emailAddress)
+        {
+            this.memoryCache.Remove(VerificationCodeCacheKey(emailAddress));
+            this.memoryCache.Remove(VerificationAttemptsCacheKey(emailAddress));
+        }
+
         private string CreateVerificationToken(string emailAddress)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -131,12 +145,28 @@ If you didn't request this, simply ignore this message.",
                 {
                     new Claim(ClaimTypes.Name, emailAddress),
                 }),
-                Expires = DateTime.UtcNow.AddDays(7),
+                Expires = DateTime.UtcNow.AddDays(7), // TODO - Make this configurable or not expiring (store token in cookie) if elected
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
             };
             var createdToken = tokenHandler.CreateToken(tokenDescriptor);
             var writtenToken = tokenHandler.WriteToken(createdToken);
             return writtenToken;
+        }
+
+        private void IncrementFailedVerificationAttemptsOrExpire(string emailAddress)
+        {
+            var verificationAttemptsCacheKey = VerificationAttemptsCacheKey(emailAddress);
+            this.memoryCache.TryGetValue(verificationAttemptsCacheKey, out int failedAttempts);
+            failedAttempts++;
+            if (failedAttempts >= 5) // TODO - make this a config variable
+            {
+                // We've hit the max allowed verification code attempts.
+                this.ExpireVerificationCode(emailAddress);
+            }
+            else
+            {
+                this.memoryCache.Set(verificationAttemptsCacheKey, failedAttempts, TimeSpan.FromMinutes(15)); // TODO - make this a config variable.
+            }
         }
     }
 }
