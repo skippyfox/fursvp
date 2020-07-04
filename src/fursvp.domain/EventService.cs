@@ -71,7 +71,5 @@ namespace Fursvp.Domain
         {
             return @event.RsvpOpen && this.DateTimeProvider.Now < @event.RsvpClosesAt;
         }
-
-        // TODO: Update/Remove Members
     }
 }

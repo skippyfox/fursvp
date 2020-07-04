@@ -23,7 +23,7 @@ namespace Fursvp.Domain.Authorization.ReadAuthorization
                 return true;
             }
 
-            const bool organizersCanViewUnpublishedEvent = false; // TODO - Do we want this?
+            const bool organizersCanViewUnpublishedEvent = false;
 
             var actingMember = @event.Members.FirstOrDefault(m => m.EmailAddress == this.userAccessor.User?.EmailAddress);
 
