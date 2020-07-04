@@ -77,11 +77,6 @@ namespace Fursvp.Domain.Validation
                 this.Assert.That(newState.EndsAt != default, "Event must have an end date and time.");
                 this.Assert.That(newState.StartsAt < newState.EndsAt, "Start time must be before End time.");
 
-                if (oldState?.IsPublished != true)
-                {
-                    this.Assert.That(newState.StartsAt > this.DateTimeProvider.Now, "Start time must be in the future.");
-                }
-
                 this.Assert.That(newState.TimeZoneId != null, "Time Zone is required.");
                 this.ValidateTimeZone.Validate(newState.TimeZoneId);
             }

@@ -52,5 +52,10 @@ namespace Fursvp.Api.Requests
         /// </summary>
         [Required]
         public DateTime EndsAt { get; set; }
+
+        /// <summary>
+        /// Gets or sets the time zone id for the event.
+        /// </summary>
+        public string TimeZoneId { get; set; }
     }
 }

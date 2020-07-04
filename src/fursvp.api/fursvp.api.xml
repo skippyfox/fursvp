@@ -264,6 +264,11 @@
             Gets or sets the date and time at which the Event is scheduled to end.
             </summary>
         </member>
+        <member name="P:Fursvp.Api.Requests.UpdateEventRequest.TimeZoneId">
+            <summary>
+            Gets or sets the time zone id for the event.
+            </summary>
+        </member>
         <member name="T:Fursvp.Api.Requests.UpdateMemberRequest">
             <summary>
             The request model pertaining to inserting or updating Member info.

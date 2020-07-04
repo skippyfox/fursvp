@@ -103,6 +103,7 @@ namespace Fursvp.Api.Controllers
             @event.RsvpClosesAt = request.RsvpClosesAt;
             @event.StartsAt = request.StartsAt;
             @event.EndsAt = request.EndsAt;
+            @event.TimeZoneId = request.TimeZoneId;
 
             await this.EventRepository.Update(@event);
             return this.Ok(@event);
