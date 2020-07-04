@@ -12,6 +12,8 @@ namespace Fursvp.Api
     using Fursvp.Data.Firestore;
     using Fursvp.Domain;
     using Fursvp.Domain.Authorization;
+    using Fursvp.Domain.Authorization.ReadAuthorization;
+    using Fursvp.Domain.Authorization.WriteAuthorization;
     using Fursvp.Domain.Forms;
     using Fursvp.Domain.Validation;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -71,6 +73,7 @@ namespace Fursvp.Api
             services.AddSingleton<IProvideDateTime, UtcDateTimeProvider>();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddScoped<IUrlHelper>(x => x.GetRequiredService<IUrlHelperFactory>().GetUrlHelper(x.GetService<IActionContextAccessor>().ActionContext));
+            services.AddTransient<PrivateContentFilter>();
             services.AddSingleton<DebugModeOnlyFilter>();
             services.AddLogging(lc =>
             {
@@ -80,12 +83,15 @@ namespace Fursvp.Api
             services.AddMvc(options =>
             {
                 options.Filters.Add(typeof(ApiExceptionFilter));
+                options.Filters.AddService<PrivateContentFilter>();
             });
 
             var key = Encoding.ASCII.GetBytes(this.Configuration["AuthorizationIssuerSigningKey"]);
 
             services.AddHttpContextAccessor(); // For authorization / access to user info.
             services.AddSingleton<IUserAccessor, ClaimsPrincipalUserAccessor>();
+            services.AddSingleton<IReadAuthorize<Event>, ReadAuthorizeEvent>();
+            services.AddSingleton<IReadAuthorize<Member>, ReadAuthorizeMember>();
             services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -148,15 +154,17 @@ namespace Fursvp.Api
                 var userAccessor = s.GetRequiredService<IUserAccessor>();
 
                 var eventService = s.GetRequiredService<IEventService>();
-                var authorizeEvent = new AuthorizeEvent(
-                    new AuthorizeMemberAsAuthor(),
-                    new AuthorizeMemberAsOrganizer(userAccessor),
-                    new AuthorizeMemberAsAttendee(userAccessor),
-                    new AuthorizeFrozenMemberAsAttendee(),
+                var authorizeEvent = new WriteAuthorizeEvent(
+                    new WriteAuthorizeMemberAsAuthor(),
+                    new WriteAuthorizeMemberAsOrganizer(userAccessor),
+                    new WriteAuthorizeMemberAsAttendee(userAccessor),
+                    new WriteAuthorizeFrozenMemberAsAttendee(),
                     eventService,
                     userAccessor);
 
-                var validateEventRepository = new RepositoryWithValidation<Event>(baseEventRepository, validateEvent);
+                var versionControlRepository = new RepositoryWithVersionControl<Event>(baseEventRepository);
+
+                var validateEventRepository = new RepositoryWithValidation<Event>(versionControlRepository, validateEvent);
 
                 return new RepositoryWithAuthorization<Event>(validateEventRepository, authorizeEvent);
             });

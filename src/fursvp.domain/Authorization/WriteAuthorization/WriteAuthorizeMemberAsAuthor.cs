@@ -3,17 +3,17 @@
 // Licensed under the MIT license. See the license.md file in the project root for full license information.
 // </copyright>
 
-namespace Fursvp.Domain.Authorization
+namespace Fursvp.Domain.Authorization.WriteAuthorization
 {
     /// <summary>
     /// Checks for authorization by a given event author to create or perform a change to a Member.
     /// </summary>
-    public class AuthorizeMemberAsAuthor : IAuthorize<Member>
+    public class WriteAuthorizeMemberAsAuthor : IWriteAuthorize<Member>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AuthorizeMemberAsAuthor"/> class.
+        /// Initializes a new instance of the <see cref="WriteAuthorizeMemberAsAuthor"/> class.
         /// </summary>
-        public AuthorizeMemberAsAuthor()
+        public WriteAuthorizeMemberAsAuthor()
         {
         }
 
@@ -22,7 +22,7 @@ namespace Fursvp.Domain.Authorization
         /// </summary>
         /// <param name="oldState">The initial state of the Member.</param>
         /// <param name="newState">The new state of the Member.</param>
-        public void Authorize(Member oldState, Member newState)
+        public void WriteAuthorize(Member oldState, Member newState)
         {
         }
     }

@@ -66,7 +66,7 @@ namespace Fursvp.Data
 
             if (oldEntity.Version != entity.Version)
             {
-                throw new VersionControlException<T>("Entity versions do not match.");
+                throw new VersionControlException<T>("Conflict detected.");
             }
 
             entity.Version++;

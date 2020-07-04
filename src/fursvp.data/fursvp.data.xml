@@ -186,12 +186,12 @@
             </summary>
             <typeparam name="T">The <see cref="T:Fursvp.Domain.IEntity`1"/> type.</typeparam>
         </member>
-        <member name="M:Fursvp.Data.RepositoryWithAuthorization`1.#ctor(Fursvp.Data.IRepository{`0},Fursvp.Domain.Authorization.IAuthorize{`0})">
+        <member name="M:Fursvp.Data.RepositoryWithAuthorization`1.#ctor(Fursvp.Data.IRepository{`0},Fursvp.Domain.Authorization.WriteAuthorization.IWriteAuthorize{`0})">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Data.RepositoryWithAuthorization`1"/> class.
             </summary>
             <param name="decorated">The instance of <see cref="T:Fursvp.Data.IRepository`1"/> to decorate.</param>
-            <param name="authorize">The instance of <see cref="T:Fursvp.Domain.Authorization.IAuthorize`1"/> to perform authorization.</param>
+            <param name="authorize">The instance of <see cref="T:Fursvp.Domain.Authorization.WriteAuthorization.IWriteAuthorize`1"/> to perform authorization.</param>
         </member>
         <member name="M:Fursvp.Data.RepositoryWithAuthorization`1.GetAll">
             <summary>

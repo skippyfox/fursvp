@@ -9,7 +9,7 @@ namespace Fursvp.Data
     using System.Linq;
     using System.Threading.Tasks;
     using Fursvp.Domain;
-    using Fursvp.Domain.Authorization;
+    using Fursvp.Domain.Authorization.WriteAuthorization;
     using Fursvp.Domain.Validation;
 
     /// <summary>
@@ -23,8 +23,8 @@ namespace Fursvp.Data
         /// Initializes a new instance of the <see cref="RepositoryWithAuthorization{T}"/> class.
         /// </summary>
         /// <param name="decorated">The instance of <see cref="IRepository{T}"/> to decorate.</param>
-        /// <param name="authorize">The instance of <see cref="IAuthorize{T}"/> to perform authorization.</param>
-        public RepositoryWithAuthorization(IRepository<T> decorated, IAuthorize<T> authorize)
+        /// <param name="authorize">The instance of <see cref="IWriteAuthorize{T}"/> to perform authorization.</param>
+        public RepositoryWithAuthorization(IRepository<T> decorated, IWriteAuthorize<T> authorize)
         {
             this.Decorated = decorated;
             this.Authorize = authorize;
@@ -32,7 +32,7 @@ namespace Fursvp.Data
 
         private IRepository<T> Decorated { get; }
 
-        private IAuthorize<T> Authorize { get; }
+        private IWriteAuthorize<T> Authorize { get; }
 
         /// <summary>
         /// Gets a result set containing all documents for the entity type by exposing the decorated method.
@@ -54,7 +54,7 @@ namespace Fursvp.Data
         /// <returns>An asynchronous <see cref="Task{T}"/>.</returns>
         public async Task Insert(T entity)
         {
-            this.Authorize.Authorize(default, entity);
+            this.Authorize.WriteAuthorize(default, entity);
 
             await this.Decorated.Insert(entity);
         }
@@ -73,7 +73,7 @@ namespace Fursvp.Data
                 throw new ValidationException<T>("Must provide a valid id");
             }
 
-            this.Authorize.Authorize(oldEntity, updatedEntity);
+            this.Authorize.WriteAuthorize(oldEntity, updatedEntity);
 
             await this.Decorated.Update(updatedEntity);
         }
@@ -87,7 +87,7 @@ namespace Fursvp.Data
         {
             var entity = await this.Decorated.GetById(guid);
 
-            this.Authorize.Authorize(entity, default);
+            this.Authorize.WriteAuthorize(entity, default);
 
             await this.Decorated.Delete(guid);
         }
