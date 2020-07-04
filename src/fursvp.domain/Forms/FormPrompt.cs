@@ -11,7 +11,7 @@ namespace Fursvp.Domain.Forms
     /// <summary>
     /// Represents a question and a list of possible answers.
     /// </summary>
-    public abstract class FormPrompt
+    public class FormPrompt
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FormPrompt"/> class.
@@ -31,6 +31,11 @@ namespace Fursvp.Domain.Forms
         /// Gets or sets the text prompt or question.
         /// </summary>
         public string Prompt { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether a response is required.
+        /// </summary>
+        public bool Required { get; set; }
 
         /// <summary>
         /// Gets or sets the collection of text choices.

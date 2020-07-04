@@ -9,11 +9,10 @@
             Converts between the Event domain object and <see cref="T:System.Collections.Generic.Dictionary`2" />.
             </summary>
         </member>
-        <member name="M:Fursvp.Data.Firestore.EventMapper.#ctor(Fursvp.Domain.Forms.IFormPromptFactory)">
+        <member name="M:Fursvp.Data.Firestore.EventMapper.#ctor">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Data.Firestore.EventMapper"/> class.
             </summary>
-            <param name="formPromptFactory">An instance of <see cref="T:Fursvp.Domain.Forms.IFormPromptFactory"/>.</param>
         </member>
         <member name="M:Fursvp.Data.Firestore.EventMapper.FromDictionary(System.Collections.Generic.Dictionary{System.String,System.Object})">
             <summary>
@@ -100,11 +99,10 @@
             An in-memory repository store for <see cref="T:Fursvp.Domain.Event"/>.
             </summary>
         </member>
-        <member name="M:Fursvp.Data.InMemoryEventRepository.#ctor(Fursvp.Domain.Forms.IFormPromptFactory)">
+        <member name="M:Fursvp.Data.InMemoryEventRepository.#ctor">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Data.InMemoryEventRepository"/> class for debugging and testing.
             </summary>
-            <param name="formPromptFactory">An instance of <see cref="T:Fursvp.Domain.Forms.IFormPromptFactory"/>.</param>
         </member>
         <member name="M:Fursvp.Data.InMemoryEventRepository.Delete(System.Guid)">
             <summary>

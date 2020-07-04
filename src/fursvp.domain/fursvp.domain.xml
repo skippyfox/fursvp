@@ -317,29 +317,15 @@
             Gets or sets the text prompt or question.
             </summary>
         </member>
+        <member name="P:Fursvp.Domain.Forms.FormPrompt.Required">
+            <summary>
+            Gets or sets a value indicating whether a response is required.
+            </summary>
+        </member>
         <member name="P:Fursvp.Domain.Forms.FormPrompt.Options">
             <summary>
             Gets or sets the collection of text choices.
             </summary>
-        </member>
-        <member name="T:Fursvp.Domain.Forms.FormPromptFactory">
-            <summary>
-            Provides instantiation logic for <see cref="T:Fursvp.Domain.Forms.FormPrompt"/> implementations based on a discriminator value.
-            </summary>
-        </member>
-        <member name="M:Fursvp.Domain.Forms.FormPromptFactory.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:Fursvp.Domain.Forms.FormPromptFactory"/> class.
-            </summary>
-        </member>
-        <member name="M:Fursvp.Domain.Forms.FormPromptFactory.GetFormPrompt(System.String,System.String,System.Collections.Generic.ICollection{System.String})">
-            <summary>
-            Initializes a new instance of the abstract <see cref="T:Fursvp.Domain.Forms.FormPrompt"/> using an implementation determined by a discriminator value.
-            </summary>
-            <param name="discriminator">The discriminator value.</param>
-            <param name="prompt">The text prompt or question.</param>
-            <param name="options">The collection of text choices.</param>
-            <returns>The newly instantiated <see cref="T:Fursvp.Domain.Forms.FormPrompt"/> implementation.</returns>
         </member>
         <member name="T:Fursvp.Domain.Forms.FormResponses">
             <summary>
@@ -354,40 +340,6 @@
         <member name="P:Fursvp.Domain.Forms.FormResponses.Responses">
             <summary>
             Gets or sets the collection of text responses to the question.
-            </summary>
-        </member>
-        <member name="T:Fursvp.Domain.Forms.IFormPromptFactory">
-            <summary>
-            Provides instantiation logic for <see cref="T:Fursvp.Domain.Forms.FormPrompt"/> implementations based on a discriminator value.
-            </summary>
-        </member>
-        <member name="M:Fursvp.Domain.Forms.IFormPromptFactory.GetFormPrompt(System.String,System.String,System.Collections.Generic.ICollection{System.String})">
-            <summary>
-            Initializes a new instance of the abstract <see cref="T:Fursvp.Domain.Forms.FormPrompt"/> using an implementation determined by a discriminator value.
-            </summary>
-            <param name="discriminator">The discriminator value.</param>
-            <param name="prompt">The text prompt or question.</param>
-            <param name="options">The collection of text choices.</param>
-            <returns>The newly instantiated <see cref="T:Fursvp.Domain.Forms.FormPrompt"/> implementation.</returns>
-        </member>
-        <member name="T:Fursvp.Domain.Forms.MultipleChoicePrompt">
-            <summary>
-            Represents a question and a list of multiple choice answers where any number of answers may be chosen.
-            </summary>
-        </member>
-        <member name="M:Fursvp.Domain.Forms.MultipleChoicePrompt.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:Fursvp.Domain.Forms.MultipleChoicePrompt"/> class.
-            </summary>
-        </member>
-        <member name="T:Fursvp.Domain.Forms.TextPrompt">
-            <summary>
-            Represents a question with an open ended text response.
-            </summary>
-        </member>
-        <member name="M:Fursvp.Domain.Forms.TextPrompt.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:Fursvp.Domain.Forms.TextPrompt"/> class.
             </summary>
         </member>
         <member name="T:Fursvp.Domain.IEntity`1">

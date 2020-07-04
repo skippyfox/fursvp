@@ -20,13 +20,9 @@ namespace Fursvp.Data
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryEventRepository"/> class for debugging and testing.
         /// </summary>
-        /// <param name="formPromptFactory">An instance of <see cref="IFormPromptFactory"/>.</param>
-        public InMemoryEventRepository(IFormPromptFactory formPromptFactory)
+        public InMemoryEventRepository()
         {
-            this.FormPromptFactory = formPromptFactory;
         }
-
-        private IFormPromptFactory FormPromptFactory { get; }
 
         private List<Event> Events { get; } = new List<Event>();
 
@@ -106,7 +102,7 @@ namespace Fursvp.Data
                         Responses = r.Responses.ToList(),
                     }).ToList(),
                 }).ToList(),
-                Form = @event.Form.Select(f => this.FormPromptFactory.GetFormPrompt(f.Behavior, f.Prompt, f.Options)).ToList(),
+                Form = @event.Form,
                 Name = @event.Name,
                 OtherDetails = @event.OtherDetails,
                 Location = @event.Location,

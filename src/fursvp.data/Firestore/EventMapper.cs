@@ -20,13 +20,9 @@ namespace Fursvp.Data.Firestore
         /// <summary>
         /// Initializes a new instance of the <see cref="EventMapper"/> class.
         /// </summary>
-        /// <param name="formPromptFactory">An instance of <see cref="IFormPromptFactory"/>.</param>
-        public EventMapper(IFormPromptFactory formPromptFactory)
+        public EventMapper()
         {
-            this.FormPromptFactory = formPromptFactory;
         }
-
-        private IFormPromptFactory FormPromptFactory { get; }
 
         /// <summary>
         /// Converts from Dictionary to Event.
@@ -61,10 +57,12 @@ namespace Fursvp.Data.Firestore
                         Responses = (List<string>)m["Responses"],
                     }).ToList(),
                 }).ToList(),
-                Form = ((List<object>)dictionary["Form"]).Cast<Dictionary<string, object>>().Select(r => this.FormPromptFactory.GetFormPrompt(
-                    discriminator: (string)r["Behavior"],
-                    prompt: (string)r["Prompt"],
-                    options: (List<string>)r["Options"])).ToList(),
+                Form = ((List<object>)dictionary["Form"]).Cast<Dictionary<string, object>>().Select(r => new FormPrompt((string)r["Behavior"])
+                    {
+                        Prompt = (string)r["Prompt"],
+                        Options = (List<string>)r["Options"],
+                        Required = r.TryGetValue("Required", out object value) ? (bool)value : false,
+                    }).ToList(),
                 Name = (string)dictionary["Name"],
                 OtherDetails = (string)dictionary["OtherDetails"],
                 Location = (string)dictionary["Location"],

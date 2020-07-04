@@ -143,8 +143,7 @@ namespace Fursvp.Api
         {
             services.AddSingleton<IRepository<Event>>(s =>
             {
-                //// var baseEventRepository = new InMemoryEventRepository(new FormPromptFactory());
-                var baseEventRepository = new FirestoreRepository<Event>(new EventMapper(new FormPromptFactory()));
+                var baseEventRepository = new FirestoreRepository<Event>(new EventMapper());
                 var dateTimeProvider = s.GetRequiredService<IProvideDateTime>();
                 var validateEmail = s.GetRequiredService<IValidateEmail>();
                 var validateMember = new ValidateMember(validateEmail);
