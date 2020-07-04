@@ -62,8 +62,7 @@ namespace Fursvp.Domain.Authorization.WriteAuthorization
                     }
                 }
             }
-
-            if (newState != null)
+            else if (newState != null)
             {
                 Assert.That(!newState.IsAuthor, nameof(newState.IsAuthor) + " cannot be altered by an attendee.");
                 Assert.That(!newState.IsOrganizer, nameof(newState.IsOrganizer) + " cannot be altered by an attendee.");
