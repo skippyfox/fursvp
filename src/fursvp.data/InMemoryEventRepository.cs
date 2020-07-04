@@ -98,11 +98,19 @@ namespace Fursvp.Data
                     IsAuthor = member.IsAuthor,
                     Responses = member.Responses.Select(r => new FormResponses
                     {
-                        Prompt = r.Prompt,
+                        PromptId = r.PromptId,
                         Responses = r.Responses.ToList(),
                     }).ToList(),
+                    RsvpedAt = member.RsvpedAt,
                 }).ToList(),
-                Form = @event.Form,
+                Form = @event.Form.Select(p => new FormPrompt(p.Behavior)
+                {
+                    Id = p.Id,
+                    Options = p.Options.ToList(),
+                    Prompt = p.Prompt,
+                    Required = p.Required,
+                    SortOrder = p.SortOrder,
+                }).ToList(),
                 Name = @event.Name,
                 OtherDetails = @event.OtherDetails,
                 Location = @event.Location,

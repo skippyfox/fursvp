@@ -26,12 +26,12 @@ namespace Fursvp.Domain
         public int Version { get; set; }
 
         /// <summary>
-        /// Gets or sets the date and time at which the Event is scheduled to start.
+        /// Gets or sets the local date and time at which the Event is scheduled to start.
         /// </summary>
         public DateTime StartsAt { get; set; }
 
         /// <summary>
-        /// Gets or sets he date and time at which the Event is scheduled to end.
+        /// Gets or sets the local date and time at which the Event is scheduled to end.
         /// </summary>
         public DateTime EndsAt { get; set; }
 
@@ -71,7 +71,7 @@ namespace Fursvp.Domain
         public bool RsvpOpen { get; set; }
 
         /// <summary>
-        /// Gets or sets the date and time at which RSVPs for the Event are scheduled to close.
+        /// Gets or sets the local date and time at which RSVPs for the Event are scheduled to close.
         /// </summary>
         public DateTime? RsvpClosesAt { get; set; }
 

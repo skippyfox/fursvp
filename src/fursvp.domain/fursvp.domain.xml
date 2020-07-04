@@ -128,10 +128,11 @@
             Checks for authorization by a given event attendee to create or perform a change to a Member that is frozen based on its Event's settings.
             </summary>
         </member>
-        <member name="M:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeFrozenMemberAsAttendee.#ctor">
+        <member name="M:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeFrozenMemberAsAttendee.#ctor(Fursvp.Domain.Authorization.IUserAccessor)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeFrozenMemberAsAttendee"/> class.
             </summary>
+            <param name="userAccessor">An instance of <see cref="T:Fursvp.Domain.Authorization.IUserAccessor"/> used to get the authenticated user's information.</param>
         </member>
         <member name="M:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeFrozenMemberAsAttendee.WriteAuthorize(Fursvp.Domain.Member,Fursvp.Domain.Member)">
             <summary>
@@ -149,7 +150,7 @@
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeMemberAsAttendee"/> class.
             </summary>
-            <param name="userAccessor">An instance of <see cref="T:Fursvp.Domain.Authorization.IUserAccessor"/> used to get the authenticated user's information..</param>
+            <param name="userAccessor">An instance of <see cref="T:Fursvp.Domain.Authorization.IUserAccessor"/> used to get the authenticated user's information.</param>
         </member>
         <member name="M:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeMemberAsAttendee.WriteAuthorize(Fursvp.Domain.Member,Fursvp.Domain.Member)">
             <summary>
@@ -210,12 +211,12 @@
         </member>
         <member name="P:Fursvp.Domain.Event.StartsAt">
             <summary>
-            Gets or sets the date and time at which the Event is scheduled to start.
+            Gets or sets the local date and time at which the Event is scheduled to start.
             </summary>
         </member>
         <member name="P:Fursvp.Domain.Event.EndsAt">
             <summary>
-            Gets or sets he date and time at which the Event is scheduled to end.
+            Gets or sets the local date and time at which the Event is scheduled to end.
             </summary>
         </member>
         <member name="P:Fursvp.Domain.Event.TimeZoneId">
@@ -255,7 +256,7 @@
         </member>
         <member name="P:Fursvp.Domain.Event.RsvpClosesAt">
             <summary>
-            Gets or sets the date and time at which RSVPs for the Event are scheduled to close.
+            Gets or sets the local date and time at which RSVPs for the Event are scheduled to close.
             </summary>
         </member>
         <member name="P:Fursvp.Domain.Event.IsPublished">
@@ -307,6 +308,11 @@
             </summary>
             <param name="behavior">The descriminator that indicates which implementation of FormPrompt to persist.</param>
         </member>
+        <member name="P:Fursvp.Domain.Forms.FormPrompt.Id">
+            <summary>
+            Gets or sets the globally unique identifier for the prompt.
+            </summary>
+        </member>
         <member name="P:Fursvp.Domain.Forms.FormPrompt.Behavior">
             <summary>
             Gets the discriminator for implementations of FormPrompt.
@@ -327,12 +333,17 @@
             Gets or sets the collection of text choices.
             </summary>
         </member>
+        <member name="P:Fursvp.Domain.Forms.FormPrompt.SortOrder">
+            <summary>
+            Gets or sets the sort order of the prompt.
+            </summary>
+        </member>
         <member name="T:Fursvp.Domain.Forms.FormResponses">
             <summary>
             Represents a question and a list of responses to that question.
             </summary>
         </member>
-        <member name="P:Fursvp.Domain.Forms.FormResponses.Prompt">
+        <member name="P:Fursvp.Domain.Forms.FormResponses.PromptId">
             <summary>
             Gets or sets the text prompt or question.
             </summary>
@@ -438,6 +449,11 @@
         <member name="P:Fursvp.Domain.Member.Responses">
             <summary>
             Gets or sets the collection of form responses for an event attendee.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Domain.Member.RsvpedAt">
+            <summary>
+            Gets or sets the Utc time that the member was RSVPed to the event.
             </summary>
         </member>
         <member name="T:Fursvp.Domain.UtcDateTimeProvider">

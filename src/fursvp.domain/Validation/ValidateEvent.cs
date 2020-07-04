@@ -61,6 +61,27 @@ namespace Fursvp.Domain.Validation
             }
 
             this.Assert.That(newState.Form != null, "Form cannot be null.");
+
+            // TODO: Get these magic strings out of here
+            var promptBehaviors = new[] { "Text", "Checkboxes", "Dropdown" };
+
+            foreach (var prompt in newState.Form)
+            {
+                this.Assert.That(!promptBehaviors.Contains(prompt.Behavior), "A prompt behavior must be one of: " + string.Join(", ", promptBehaviors));
+                switch (prompt.Behavior)
+                {
+                    case "Text":
+                        this.Assert.That(!prompt.Options.Any(), "A text prompt cannot have any options.");
+                        break;
+                    case "Checkboxes":
+                        this.Assert.That(prompt.Options.Count >= 1, "A checkboxes prompt must have at least one option.");
+                        break;
+                    case "Dropdown":
+                        this.Assert.That(prompt.Options.Count >= 2, "A dropdown prompt must have at least two options.");
+                        break;
+                }
+            }
+
             if (!newState.RsvpOpen)
             {
                 this.Assert.That(!newState.RsvpClosesAt.HasValue, "RsvpClosesAt cannot be set if Rsvp is closed.");

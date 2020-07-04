@@ -49,6 +49,7 @@ namespace Fursvp.Domain.Validation
             this.Assert.That(!string.IsNullOrWhiteSpace(newState.Name), "Name is required.");
             this.Assert.That(newState.IsAuthor || newState.IsOrganizer || newState.IsAttending, "Member must be the Author, an Organizer, or Attending.");
             this.Assert.That(newState.Responses != null, "Responses cannot be null.");
+            this.Assert.That(oldState == null || newState == null || oldState.RsvpedAt == default(DateTime) || oldState.RsvpedAt == newState.RsvpedAt, "RsvpedAt cannot be changed once set.");
         }
     }
 }

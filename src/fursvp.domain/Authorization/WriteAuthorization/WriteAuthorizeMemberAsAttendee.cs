@@ -1,4 +1,4 @@
-﻿// <copyright file="AuthorizeMemberAsAttendee.cs" company="skippyfox">
+﻿// <copyright file="WriteAuthorizeMemberAsAttendee.cs" company="skippyfox">
 // Copyright (c) skippyfox. All rights reserved.
 // Licensed under the MIT license. See the license.md file in the project root for full license information.
 // </copyright>
@@ -19,11 +19,11 @@ namespace Fursvp.Domain.Authorization.WriteAuthorization
         /// <summary>
         /// Initializes a new instance of the <see cref="WriteAuthorizeMemberAsAttendee"/> class.
         /// </summary>
-        /// <param name="userAccessor">An instance of <see cref="IUserAccessor"/> used to get the authenticated user's information..</param>
+        /// <param name="userAccessor">An instance of <see cref="IUserAccessor"/> used to get the authenticated user's information.</param>
         public WriteAuthorizeMemberAsAttendee(IUserAccessor userAccessor)
         {
-            Assert = new Assertions<NotAuthorizedException<Event>>();
-            UserAccessor = userAccessor ?? throw new ArgumentNullException(nameof(userAccessor));
+            this.Assert = new Assertions<NotAuthorizedException<Event>>();
+            this.UserAccessor = userAccessor ?? throw new ArgumentNullException(nameof(userAccessor));
         }
 
         private Assertions<NotAuthorizedException<Event>> Assert { get; }
@@ -37,35 +37,32 @@ namespace Fursvp.Domain.Authorization.WriteAuthorization
         /// <param name="newState">The new state of the Member.</param>
         public void WriteAuthorize(Member oldState, Member newState)
         {
-            if (oldState != null)
+            if (oldState != null && oldState.EmailAddress != this.UserAccessor.User?.EmailAddress)
             {
-                if (oldState.EmailAddress != UserAccessor.User?.EmailAddress)
+                this.Assert.That(newState != null, "Only an organizer can remove another member's info.");
+                this.Assert.That(oldState.EmailAddress == newState.EmailAddress, "Only an organizer can modify another member's info.");
+                this.Assert.That(oldState.Name == newState.Name, "Only an organizer can modify another member's info.");
+                this.Assert.That(oldState.IsAttending == newState.IsAttending, "Only an organizer can modify another member's info.");
+                this.Assert.That(oldState.IsOrganizer == newState.IsOrganizer, "Only an organizer can modify another member's info.");
+                this.Assert.That(oldState.IsAuthor == newState.IsAuthor, "Only an organizer can modify another member's info.");
+
+                // Assert that the old form responses and new form responses are equivalent.
+                foreach (var formPrompt in oldState.Responses.FullJoin(newState.Responses, r => r.PromptId, r => r.PromptId, (old, @new) => new { old, @new }))
                 {
-                    Assert.That(newState != null, "Only an organizer can remove another member's info.");
-                    Assert.That(oldState.EmailAddress == newState.EmailAddress, "Only an organizer can modify another member's info.");
-                    Assert.That(oldState.Name == newState.Name, "Only an organizer can modify another member's info.");
-                    Assert.That(oldState.IsAttending == newState.IsAttending, "Only an organizer can modify another member's info.");
-                    Assert.That(oldState.IsOrganizer == newState.IsOrganizer, "Only an organizer can modify another member's info.");
-                    Assert.That(oldState.IsAuthor == newState.IsAuthor, "Only an organizer can modify another member's info.");
+                    this.Assert.That(formPrompt.old != null && formPrompt.@new != null, "Only an organizer can modify another member's form responses.");
 
-                    // Assert that the old form responses and new form responses are equivalent.
-                    foreach (var formPrompt in oldState.Responses.FullJoin(newState.Responses, r => r.Prompt, r => r.Prompt, (old, @new) => new { old, @new }))
+                    var oldResponses = formPrompt.old?.Responses ?? Enumerable.Empty<string>();
+                    var newResponses = formPrompt.@new?.Responses ?? Enumerable.Empty<string>();
+                    foreach (var option in oldResponses.FullJoin(newResponses, s => s, s => s, (old, @new) => new { old, @new }))
                     {
-                        Assert.That(formPrompt.old != null && formPrompt.@new != null, "Only an organizer can modify another member's form responses.");
-
-                        var oldResponses = formPrompt.old?.Responses ?? Enumerable.Empty<string>();
-                        var newResponses = formPrompt.@new?.Responses ?? Enumerable.Empty<string>();
-                        foreach (var option in oldResponses.FullJoin(newResponses, s => s, s => s, (old, @new) => new { old, @new }))
-                        {
-                            Assert.That(option.old != null && option.@new != null, "Only an organizer can modify another member's form responses.");
-                        }
+                        this.Assert.That(option.old != null && option.@new != null, "Only an organizer can modify another member's form responses.");
                     }
                 }
             }
             else if (newState != null)
             {
-                Assert.That(!newState.IsAuthor, nameof(newState.IsAuthor) + " cannot be altered by an attendee.");
-                Assert.That(!newState.IsOrganizer, nameof(newState.IsOrganizer) + " cannot be altered by an attendee.");
+                this.Assert.That(!newState.IsAuthor, nameof(newState.IsAuthor) + " cannot be altered by an attendee.");
+                this.Assert.That(!newState.IsOrganizer, nameof(newState.IsOrganizer) + " cannot be altered by an attendee.");
             }
         }
     }

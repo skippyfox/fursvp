@@ -5,6 +5,7 @@
 
 namespace Fursvp.Domain.Forms
 {
+    using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
 
@@ -21,6 +22,11 @@ namespace Fursvp.Domain.Forms
         {
             this.Behavior = behavior;
         }
+
+        /// <summary>
+        /// Gets or sets the globally unique identifier for the prompt.
+        /// </summary>
+        public Guid Id { get; set; }
 
         /// <summary>
         /// Gets the discriminator for implementations of FormPrompt.
@@ -41,5 +47,10 @@ namespace Fursvp.Domain.Forms
         /// Gets or sets the collection of text choices.
         /// </summary>
         public ICollection<string> Options { get; set; } = new Collection<string>();
+
+        /// <summary>
+        /// Gets or sets the sort order of the prompt.
+        /// </summary>
+        public int SortOrder { get; set; }
     }
 }

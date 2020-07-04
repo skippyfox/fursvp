@@ -41,6 +41,7 @@ namespace Fursvp.Domain
                 IsOrganizer = true,
                 IsAttending = true,
                 Name = name,
+                RsvpedAt = this.DateTimeProvider.Now,
             };
 
             var @event = new Event()
@@ -60,6 +61,7 @@ namespace Fursvp.Domain
         public void AddMember(Event @event, Member member)
         {
             member.Id = Guid.NewGuid();
+            member.RsvpedAt = this.DateTimeProvider.Now;
             @event.Members.Add(member);
         }
 

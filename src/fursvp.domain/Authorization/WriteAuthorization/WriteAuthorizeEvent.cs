@@ -32,13 +32,13 @@ namespace Fursvp.Domain.Authorization.WriteAuthorization
             IEventService eventService,
             IUserAccessor userAccessor)
         {
-            Assert = new Assertions<NotAuthorizedException<Event>>();
-            AuthorizeMemberAsAuthor = authorizeMemberAsAuthor;
-            AuthorizeMemberAsOrganizer = authorizeMemberAsOrganizer;
-            AuthorizeMemberAsAttendee = authorizeMemberAsAttendee;
-            AuthorizeFrozenMemberAsAttendee = authorizeFrozenMemberAsAttendee;
-            EventService = eventService;
-            UserAccessor = userAccessor;
+            this.Assert = new Assertions<NotAuthorizedException<Event>>();
+            this.AuthorizeMemberAsAuthor = authorizeMemberAsAuthor;
+            this.AuthorizeMemberAsOrganizer = authorizeMemberAsOrganizer;
+            this.AuthorizeMemberAsAttendee = authorizeMemberAsAttendee;
+            this.AuthorizeFrozenMemberAsAttendee = authorizeFrozenMemberAsAttendee;
+            this.EventService = eventService;
+            this.UserAccessor = userAccessor;
         }
 
         private Assertions<NotAuthorizedException<Event>> Assert { get; }
@@ -62,7 +62,7 @@ namespace Fursvp.Domain.Authorization.WriteAuthorization
         /// <param name="newState">The new state of the Event.</param>
         public void WriteAuthorize(Event oldState, Event newState)
         {
-            var actingMember = (oldState ?? newState)?.Members?.FirstOrDefault(m => m.EmailAddress == UserAccessor.User?.EmailAddress);
+            var actingMember = (oldState ?? newState)?.Members?.FirstOrDefault(m => m.EmailAddress == this.UserAccessor.User?.EmailAddress);
 
             if (newState == null)
             {
@@ -91,7 +91,7 @@ namespace Fursvp.Domain.Authorization.WriteAuthorization
                 }
                 else
                 {
-                    if (EventService.RsvpOpen(newState))
+                    if (this.EventService.RsvpOpen(newState))
                     {
                         AuthorizeMembers(this.AuthorizeMemberAsAttendee);
                     }
@@ -111,9 +111,13 @@ namespace Fursvp.Domain.Authorization.WriteAuthorization
                     Assert.That(oldState.IsPublished == newState.IsPublished, nameof(oldState.IsPublished) + " can only be altered by an event's Author or Organizer.");
 
                     // Assert that the old form and new form are equivalent.
-                    foreach (var formPrompt in oldState.Form.FullJoin(newState.Form, f => f.Prompt, f => f.Prompt, (old, @new) => new { old, @new }))
+                    foreach (var formPrompt in oldState.Form.FullJoin(newState.Form, f => f.Id, f => f.Id, (old, @new) => new { old, @new }))
                     {
                         Assert.That(formPrompt.old != null && formPrompt.@new != null, "Form can only be altered by an event's Author or Organizer.");
+                        Assert.That(formPrompt.old.Prompt != formPrompt.@new.Prompt, "Form can only be altered by an event's Author or Organizer.");
+                        Assert.That(formPrompt.old.Required != formPrompt.@new.Required, "Form can only be altered by an event's Author or Organizer.");
+                        Assert.That(formPrompt.old.Behavior != formPrompt.@new.Behavior, "Form can only be altered by an event's Author or Organizer.");
+                        Assert.That(formPrompt.old.SortOrder != formPrompt.@new.SortOrder, "Form can only be altered by an event's Author or Organizer.");
 
                         var oldOptions = formPrompt.old?.Options ?? Enumerable.Empty<string>();
                         var newOptions = formPrompt.@new?.Options ?? Enumerable.Empty<string>();

@@ -157,7 +157,7 @@ namespace Fursvp.Api
                     new WriteAuthorizeMemberAsAuthor(),
                     new WriteAuthorizeMemberAsOrganizer(userAccessor),
                     new WriteAuthorizeMemberAsAttendee(userAccessor),
-                    new WriteAuthorizeFrozenMemberAsAttendee(),
+                    new WriteAuthorizeFrozenMemberAsAttendee(userAccessor),
                     eventService,
                     userAccessor);
 

@@ -49,5 +49,10 @@ namespace Fursvp.Domain
         /// Gets or sets the collection of form responses for an event attendee.
         /// </summary>
         public ICollection<FormResponses> Responses { get; set; } = new Collection<FormResponses>();
+
+        /// <summary>
+        /// Gets or sets the Utc time that the member was RSVPed to the event.
+        /// </summary>
+        public DateTime RsvpedAt { get; set; }
     }
 }

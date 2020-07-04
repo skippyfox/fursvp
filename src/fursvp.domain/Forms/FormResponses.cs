@@ -5,6 +5,7 @@
 
 namespace Fursvp.Domain.Forms
 {
+    using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
 
@@ -16,7 +17,7 @@ namespace Fursvp.Domain.Forms
         /// <summary>
         /// Gets or sets the text prompt or question.
         /// </summary>
-        public string Prompt { get; set; }
+        public Guid PromptId { get; set; }
 
         /// <summary>
         /// Gets or sets the collection of text responses to the question.
