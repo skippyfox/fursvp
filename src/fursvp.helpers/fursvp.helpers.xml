@@ -22,6 +22,19 @@
             <param name="evaluation">The result that is expected to have evaluated to true.</param>
             <param name="reason">The Exception message used when the result is not true and an Exception is thrown.</param>
         </member>
+        <member name="T:Fursvp.Helpers.DateTimeExtensions">
+            <summary>
+            Extension methods for DateTime objects.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Helpers.DateTimeExtensions.ToUtc(System.DateTime,System.String)">
+            <summary>
+            Converts a DateTime from local time zone to utc time.
+            </summary>
+            <param name="dateTime">The local datetime.</param>
+            <param name="sourceTimeZoneId">The local time zone from which to convert to utc time.</param>
+            <returns>The converted datetime in utc.</returns>
+        </member>
         <member name="T:Fursvp.Helpers.FursvpRandom">
             <summary>
             Helper methods for random behavior.

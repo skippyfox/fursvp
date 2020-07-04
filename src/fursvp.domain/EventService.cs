@@ -7,6 +7,7 @@ namespace Fursvp.Domain
 {
     using System;
     using System.Collections.Generic;
+    using Fursvp.Helpers;
 
     /// <summary>
     /// Provides business logic for creation and updates of an instance of <see cref="Event"/>.
@@ -69,7 +70,12 @@ namespace Fursvp.Domain
         /// <returns>True if attendees can currently RSVP, otherwise False.</returns>
         public bool RsvpOpen(Event @event)
         {
-            return @event.RsvpOpen && this.DateTimeProvider.Now < @event.RsvpClosesAt;
+            if (@event?.RsvpOpen != true)
+            {
+                return false;
+            }
+
+            return this.DateTimeProvider.Now < @event.RsvpClosesAt?.ToUtc(@event.TimeZoneId);
         }
     }
 }

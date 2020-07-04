@@ -35,9 +35,6 @@ namespace Fursvp.Api.Controllers
         [HttpGet]
         public IActionResult GetTimeZones()
         {
-            //// TZNames.GetDisplayNames("en-US", true);
-
-            // TODO: Use GetDisplayNames and TimeZoneConverter (if necessary) and join with system ids below
             var results = TimeZoneInfo.GetSystemTimeZones().Select(x => new
             {
                 x.Id,
