@@ -1,10 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿// <copyright file="ReadAuthorizeEvent.cs" company="skippyfox">
+// Copyright (c) skippyfox. All rights reserved.
+// Licensed under the MIT license. See the license.md file in the project root for full license information.
+// </copyright>
 
 namespace Fursvp.Domain.Authorization.ReadAuthorization
 {
+    using System.Linq;
+
     public class ReadAuthorizeEvent : IReadAuthorize<Event>
     {
         private readonly IUserAccessor userAccessor;

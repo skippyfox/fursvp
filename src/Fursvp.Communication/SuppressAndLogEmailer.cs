@@ -1,10 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿// <copyright file="SuppressAndLogEmailer.cs" company="skippyfox">
+// Copyright (c) skippyfox. All rights reserved.
+// Licensed under the MIT license. See the license.md file in the project root for full license information.
+// </copyright>
 
 namespace Fursvp.Communication
 {
+    using System;
+    using System.Threading.Tasks;
+
     public class SuppressAndLogEmailer : IEmailer
     {
         public void Send(Email email)

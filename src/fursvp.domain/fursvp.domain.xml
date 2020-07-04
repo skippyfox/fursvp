@@ -380,6 +380,16 @@
             Initializes a new instance of the <see cref="T:Fursvp.Domain.Forms.MultipleChoicePrompt"/> class.
             </summary>
         </member>
+        <member name="T:Fursvp.Domain.Forms.TextPrompt">
+            <summary>
+            Represents a question with an open ended text response.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Domain.Forms.TextPrompt.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.Forms.TextPrompt"/> class.
+            </summary>
+        </member>
         <member name="T:Fursvp.Domain.IEntity`1">
             <summary>
             A persistable domain entity or root aggregate that can be identified by a Global Unique Identifier and an integer Version.

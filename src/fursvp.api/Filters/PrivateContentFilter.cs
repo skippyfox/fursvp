@@ -1,15 +1,16 @@
-﻿namespace Fursvp.Api.Filters
+﻿// <copyright file="PrivateContentFilter.cs" company="skippyfox">
+// Copyright (c) skippyfox. All rights reserved.
+// Licensed under the MIT license. See the license.md file in the project root for full license information.
+// </copyright>
+
+namespace Fursvp.Api.Filters
 {
-    using Fursvp.Domain;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using Fursvp.Domain.Authorization.ReadAuthorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Filters;
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
-    using System.Threading.Tasks;
 
     public class PrivateContentFilter : IActionFilter
     {

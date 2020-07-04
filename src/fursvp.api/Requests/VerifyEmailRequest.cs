@@ -1,4 +1,9 @@
-﻿namespace Fursvp.Api.Requests
+﻿// <copyright file="VerifyEmailRequest.cs" company="skippyfox">
+// Copyright (c) skippyfox. All rights reserved.
+// Licensed under the MIT license. See the license.md file in the project root for full license information.
+// </copyright>
+
+namespace Fursvp.Api.Requests
 {
     using System.ComponentModel.DataAnnotations;
 
