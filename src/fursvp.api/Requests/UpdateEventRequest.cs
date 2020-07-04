@@ -39,7 +39,7 @@ namespace Fursvp.Api.Requests
         /// <summary>
         /// Gets or sets the date and time at which RSVPs for the Event are scheduled to close.
         /// </summary>
-        public DateTime RsvpClosesAt { get; set; }
+        public DateTime? RsvpClosesAt { get; set; }
 
         /// <summary>
         /// Gets or sets the date and time at which the Event is scheduled to start.
