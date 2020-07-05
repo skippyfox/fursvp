@@ -5,10 +5,19 @@
 
 namespace Fursvp.Communication
 {
+    /// <summary>
+    /// A collection of configuration options for use with the <see cref="SendGridEmailer"/>.
+    /// </summary>
     public class SendGridOptions
     {
+        /// <summary>
+        /// The value "SendGrid".
+        /// </summary>
         public const string SendGrid = "SendGrid";
 
+        /// <summary>
+        /// Gets or sets the SendGrid API key.
+        /// </summary>
         public string ApiKey { get; set; }
     }
 }

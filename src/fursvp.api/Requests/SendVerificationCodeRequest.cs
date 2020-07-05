@@ -7,6 +7,9 @@ namespace Fursvp.Api.Requests
 {
     using System.ComponentModel.DataAnnotations;
 
+    /// <summary>
+    /// The request model representing the email address to which to send a verification code.
+    /// </summary>
     public class SendVerificationCodeRequest
     {
         /// <summary>

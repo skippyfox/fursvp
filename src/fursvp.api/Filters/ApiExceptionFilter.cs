@@ -9,10 +9,10 @@ namespace Fursvp.Api.Filters
     using System.ComponentModel.DataAnnotations;
     using Fursvp.Communication;
     using Fursvp.Domain.Authorization;
+    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Filters;
-    using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
 

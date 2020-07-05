@@ -5,18 +5,34 @@
 
 namespace Fursvp.Communication
 {
+    /// <summary>
+    /// Represents a single copy of an email.
+    /// </summary>
     public class Email
     {
+        /// <summary>
+        /// Gets or sets the sender's name and address.
+        /// </summary>
         public EmailAddress From { get; set; }
-        public EmailAddress To { get; set; }
-        public string Subject { get; set; }
-        public string PlainTextContent { get; set; }
-        public string HtmlContent { get; set; }
-    }
 
-    public class EmailAddress
-    {
-        public string Name { get; set; }
-        public string Address { get; set; }
+        /// <summary>
+        /// Gets or sets the recipient's name and address.
+        /// </summary>
+        public EmailAddress To { get; set; }
+
+        /// <summary>
+        /// Gets or sets the email subject line.
+        /// </summary>
+        public string Subject { get; set; }
+
+        /// <summary>
+        /// Gets or sets the plain text content of the email.
+        /// </summary>
+        public string PlainTextContent { get; set; }
+
+        /// <summary>
+        /// Gets or sets the HTML-formatted content of the email.
+        /// </summary>
+        public string HtmlContent { get; set; }
     }
 }

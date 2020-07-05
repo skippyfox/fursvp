@@ -63,6 +63,7 @@ namespace Fursvp.Api.Controllers
         /// <summary>
         /// Throws an exception.
         /// </summary>
+        /// <returns>Always throws an exception.</returns>
         [ServiceFilter(typeof(DebugModeOnlyFilter))]
         [HttpPost]
         [Route("debugerror")]
@@ -171,7 +172,9 @@ If you didn't request this, simply ignore this message.",
             var verificationAttemptsCacheKey = VerificationAttemptsCacheKey(emailAddress);
             this.MemoryCache.TryGetValue(verificationAttemptsCacheKey, out int failedAttempts);
             failedAttempts++;
-            if (failedAttempts >= 5) // TODO - make this a config variable
+
+            // TODO - make this a config variable
+            if (failedAttempts >= 5)
             {
                 // We've hit the max allowed verification code attempts.
                 this.ExpireVerificationCode(emailAddress);

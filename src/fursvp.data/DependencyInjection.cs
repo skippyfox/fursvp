@@ -20,7 +20,7 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class DependencyInjection
     {
         /// <summary>
-        /// Registers repository services for use with FireStore repository
+        /// Registers repository services for use with FireStore repository.
         /// </summary>
         /// <param name="services">The service collection.</param>
         public static void AddFursvpDataWithFirestore(this IServiceCollection services)

@@ -77,6 +77,55 @@
             </summary>
             <param name="object">The object being read and filtered for privacy.</param>
         </member>
+        <member name="T:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeEvent">
+            <summary>
+            Authorizes and filters access to objects of type <see cref="T:Fursvp.Domain.Member" />.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeEvent.#ctor(Fursvp.Domain.Authorization.IUserAccessor,Fursvp.Domain.Authorization.ReadAuthorization.IReadAuthorize{Fursvp.Domain.Member})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeEvent"/> class.
+            </summary>
+            <param name="userAccessor">An instance of IUserAccessor to identify user access.</param>
+            <param name="readAuthorizeMember">An instance of IReadAuthorize to perform deeper authorization against members being viewed within this event.</param>
+        </member>
+        <member name="M:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeEvent.CanRead(Fursvp.Domain.Event)">
+            <summary>
+            Indicates whether the current user is allowed to view any information related to this event.
+            </summary>
+            <param name="event">The event information being viewed.</param>
+            <returns>A value indicating whether the user is allowed to view any information related to this event.</returns>
+        </member>
+        <member name="M:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeEvent.FilterUnauthorizedContent(Fursvp.Domain.Event)">
+            <summary>
+            Finds any unauthorized content within the Event object and redacts it if the user is not authorized to view it.
+            </summary>
+            <param name="event">The event information being viewed.</param>
+        </member>
+        <member name="T:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeMember">
+            <summary>
+            Authorizes and filters access to objects of type <see cref="T:Fursvp.Domain.Member" />.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeMember.#ctor(Fursvp.Domain.Authorization.IUserAccessor)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeMember"/> class.
+            </summary>
+            <param name="userAccessor">An instance of IUserAccessor to identify user access.</param>
+        </member>
+        <member name="M:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeMember.CanRead(Fursvp.Domain.Member)">
+            <summary>
+            Indicates whether the current user is allowed to view any information related to this member.
+            </summary>
+            <param name="member">The member information being viewed.</param>
+            <returns>A value indicating whether the user is allowed to view any information related to this member.</returns>
+        </member>
+        <member name="M:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeMember.FilterUnauthorizedContent(Fursvp.Domain.Member)">
+            <summary>
+            Finds any unauthorized content within the Member object and redacts it if the user is not authorized to view it.
+            </summary>
+            <param name="member">The member information being viewed.</param>
+        </member>
         <member name="T:Fursvp.Domain.Authorization.User">
             <summary>
             Provides information about a user.

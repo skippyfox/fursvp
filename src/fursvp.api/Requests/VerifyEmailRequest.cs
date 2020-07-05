@@ -7,6 +7,9 @@ namespace Fursvp.Api.Requests
 {
     using System.ComponentModel.DataAnnotations;
 
+    /// <summary>
+    /// The request model representing the email and verification code for email verification.
+    /// </summary>
     public class VerifyEmailRequest
     {
         /// <summary>

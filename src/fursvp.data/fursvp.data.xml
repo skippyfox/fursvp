@@ -11,7 +11,7 @@
         </member>
         <member name="M:Microsoft.Extensions.DependencyInjection.DependencyInjection.AddFursvpDataWithFirestore(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
             <summary>
-            Registers repository services for use with FireStore repository
+            Registers repository services for use with FireStore repository.
             </summary>
             <param name="services">The service collection.</param>
         </member>

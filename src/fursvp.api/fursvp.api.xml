@@ -44,6 +44,7 @@
             <summary>
             Throws an exception.
             </summary>
+            <returns>Always throws an exception.</returns>
         </member>
         <member name="M:Fursvp.Api.Controllers.AuthController.VerifyEmail(Fursvp.Api.Requests.VerifyEmailRequest)">
             <summary>
@@ -196,6 +197,47 @@
             </summary>
             <param name="context">The ActionExecutingContext.</param>
         </member>
+        <member name="T:Fursvp.Api.Filters.PrivateContentFilter">
+            <summary>
+            An action filter that invokes read authorization on content that is subject to it, to hide private content.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Api.Filters.PrivateContentFilter.#ctor(System.IServiceProvider)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Api.Filters.PrivateContentFilter"/> class.
+            </summary>
+            <param name="serviceProvider">The service provider.</param>
+        </member>
+        <member name="M:Fursvp.Api.Filters.PrivateContentFilter.Filter``1(``0,Fursvp.Domain.Authorization.ReadAuthorization.IReadAuthorize{``0},Microsoft.AspNetCore.Mvc.Filters.ActionExecutedContext)">
+            <summary>
+            Ensures that the user is authorized to read a single element and filters out any unauthorized content within the element.
+            </summary>
+            <typeparam name="T">The type of the content to be searched.</typeparam>
+            <param name="object">The content being searched.</param>
+            <param name="readAuthorizeObject">Executes read authorization methods against this type of object.</param>
+            <param name="context">The Microsoft.AspNetCore.Mvc.Filters.ActionExecutedContext.</param>
+        </member>
+        <member name="M:Fursvp.Api.Filters.PrivateContentFilter.FilterMany``1(System.Collections.Generic.IEnumerable{``0},Fursvp.Domain.Authorization.ReadAuthorization.IReadAuthorize{``0},Microsoft.AspNetCore.Mvc.ObjectResult)">
+            <summary>
+            Filters out any unauthorized content within the collection of elements.
+            </summary>
+            <typeparam name="T">The type of content to be searched.</typeparam>
+            <param name="objects">The content collection being searched.</param>
+            <param name="readAuthorizeObject">Executes read authorization methods against this type of object.</param>
+            <param name="contextResult">The context result object that contains the content collection value to be filtered.</param>
+        </member>
+        <member name="M:Fursvp.Api.Filters.PrivateContentFilter.OnActionExecuted(Microsoft.AspNetCore.Mvc.Filters.ActionExecutedContext)">
+            <summary>
+            Searches the response for content that implements IReadAuthorize, and invokes IReadAuthorize methods to hide private content.
+            </summary>
+            <param name="context">The Microsoft.AspNetCore.Mvc.Filters.ActionExecutedContext.</param>
+        </member>
+        <member name="M:Fursvp.Api.Filters.PrivateContentFilter.OnActionExecuting(Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext)">
+            <summary>
+            Called before the action executes, after model binding is complete.
+            </summary>
+            <param name="context">The Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext.</param>
+        </member>
         <member name="T:Fursvp.Api.Program">
             <summary>
             The entry point for Fursvp.
@@ -227,6 +269,11 @@
         <member name="P:Fursvp.Api.Requests.NewMemberRequest.Name">
             <summary>
             Gets or sets the display name for the new Member.
+            </summary>
+        </member>
+        <member name="T:Fursvp.Api.Requests.SendVerificationCodeRequest">
+            <summary>
+            The request model representing the email address to which to send a verification code.
             </summary>
         </member>
         <member name="P:Fursvp.Api.Requests.SendVerificationCodeRequest.EmailAddress">
@@ -292,6 +339,11 @@
         <member name="P:Fursvp.Api.Requests.UpdateMemberRequest.IsOrganizer">
             <summary>
             Gets or sets a value indicating whether an event member is an organizer.
+            </summary>
+        </member>
+        <member name="T:Fursvp.Api.Requests.VerifyEmailRequest">
+            <summary>
+            The request model representing the email and verification code for email verification.
             </summary>
         </member>
         <member name="P:Fursvp.Api.Requests.VerifyEmailRequest.EmailAddress">

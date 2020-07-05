@@ -12,8 +12,15 @@ namespace Fursvp.Api.Filters
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Filters;
 
+    /// <summary>
+    /// An action filter that invokes read authorization on content that is subject to it, to hide private content.
+    /// </summary>
     public class PrivateContentFilter : IActionFilter
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PrivateContentFilter"/> class.
+        /// </summary>
+        /// <param name="serviceProvider">The service provider.</param>
         public PrivateContentFilter(IServiceProvider serviceProvider)
         {
             this.ServiceProvider = serviceProvider;
@@ -21,6 +28,47 @@ namespace Fursvp.Api.Filters
 
         private IServiceProvider ServiceProvider { get; }
 
+        /// <summary>
+        /// Ensures that the user is authorized to read a single element and filters out any unauthorized content within the element.
+        /// </summary>
+        /// <typeparam name="T">The type of the content to be searched.</typeparam>
+        /// <param name="object">The content being searched.</param>
+        /// <param name="readAuthorizeObject">Executes read authorization methods against this type of object.</param>
+        /// <param name="context">The Microsoft.AspNetCore.Mvc.Filters.ActionExecutedContext.</param>
+        public static void Filter<T>(T @object, IReadAuthorize<T> readAuthorizeObject, ActionExecutedContext context)
+        {
+            if (!readAuthorizeObject.CanRead(@object))
+            {
+                context.Result = new UnauthorizedResult();
+                return;
+            }
+
+            readAuthorizeObject.FilterUnauthorizedContent(@object);
+        }
+
+        /// <summary>
+        /// Filters out any unauthorized content within the collection of elements.
+        /// </summary>
+        /// <typeparam name="T">The type of content to be searched.</typeparam>
+        /// <param name="objects">The content collection being searched.</param>
+        /// <param name="readAuthorizeObject">Executes read authorization methods against this type of object.</param>
+        /// <param name="contextResult">The context result object that contains the content collection value to be filtered.</param>
+        public static void FilterMany<T>(IEnumerable<T> objects, IReadAuthorize<T> readAuthorizeObject, ObjectResult contextResult)
+        {
+            var filteredObjects = objects.Where(readAuthorizeObject.CanRead).ToList();
+
+            foreach (var @object in filteredObjects)
+            {
+                readAuthorizeObject.FilterUnauthorizedContent(@object);
+            }
+
+            contextResult.Value = filteredObjects;
+        }
+
+        /// <summary>
+        /// Searches the response for content that implements IReadAuthorize, and invokes IReadAuthorize methods to hide private content.
+        /// </summary>
+        /// <param name="context">The Microsoft.AspNetCore.Mvc.Filters.ActionExecutedContext.</param>
         public void OnActionExecuted(ActionExecutedContext context)
         {
             if (!(context.Result is ObjectResult objectResult))
@@ -61,16 +109,12 @@ namespace Fursvp.Api.Filters
             }
         }
 
-        private object GetReadAuthorizeService(Type objectType)
-        {
-            Type readAuthorizeType = typeof(IReadAuthorize<>).MakeGenericType(objectType);
-            var readAuthorize = this.ServiceProvider.GetService(readAuthorizeType);
-            return readAuthorize;
-        }
-
+        /// <summary>
+        /// Called before the action executes, after model binding is complete.
+        /// </summary>
+        /// <param name="context">The Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext.</param>
         public void OnActionExecuting(ActionExecutingContext context)
         {
-
         }
 
         private static Type IEnumerableGenericArgument(Type candidate)
@@ -83,27 +127,11 @@ namespace Fursvp.Api.Filters
                 ?.Single();
         }
 
-        public static void Filter<T>(T @object, IReadAuthorize<T> readAuthorizeObject, ActionExecutedContext context)
+        private object GetReadAuthorizeService(Type objectType)
         {
-            if (!readAuthorizeObject.CanRead(@object))
-            {
-                context.Result = new UnauthorizedResult();
-                return;
-            }
-
-            readAuthorizeObject.FilterUnauthorizedContent(@object);
-        }
-
-        public static void FilterMany<T>(IEnumerable<T> objects, IReadAuthorize<T> readAuthorizeObject, ObjectResult contextResult)
-        {
-            var filteredObjects = objects.Where(readAuthorizeObject.CanRead).ToList();
-
-            foreach (var @object in filteredObjects)
-            {
-                readAuthorizeObject.FilterUnauthorizedContent(@object);
-            }
-
-            contextResult.Value = filteredObjects;
+            Type readAuthorizeType = typeof(IReadAuthorize<>).MakeGenericType(objectType);
+            var readAuthorize = this.ServiceProvider.GetService(readAuthorizeType);
+            return readAuthorize;
         }
     }
 }

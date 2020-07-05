@@ -7,8 +7,16 @@ namespace Fursvp.Domain.Authorization.ReadAuthorization
 {
     using System.Linq;
 
+    /// <summary>
+    /// Authorizes and filters access to objects of type <see cref="Member" />.
+    /// </summary>
     public class ReadAuthorizeEvent : IReadAuthorize<Event>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ReadAuthorizeEvent"/> class.
+        /// </summary>
+        /// <param name="userAccessor">An instance of IUserAccessor to identify user access.</param>
+        /// <param name="readAuthorizeMember">An instance of IReadAuthorize to perform deeper authorization against members being viewed within this event.</param>
         public ReadAuthorizeEvent(IUserAccessor userAccessor, IReadAuthorize<Member> readAuthorizeMember)
         {
             this.UserAccessor = userAccessor;
@@ -19,6 +27,11 @@ namespace Fursvp.Domain.Authorization.ReadAuthorization
 
         private IReadAuthorize<Member> ReadAuthorizeMember { get; }
 
+        /// <summary>
+        /// Indicates whether the current user is allowed to view any information related to this event.
+        /// </summary>
+        /// <param name="event">The event information being viewed.</param>
+        /// <returns>A value indicating whether the user is allowed to view any information related to this event.</returns>
         public bool CanRead(Event @event)
         {
             if (@event == null || @event.IsPublished == true)
@@ -43,6 +56,10 @@ namespace Fursvp.Domain.Authorization.ReadAuthorization
             return false;
         }
 
+        /// <summary>
+        /// Finds any unauthorized content within the Event object and redacts it if the user is not authorized to view it.
+        /// </summary>
+        /// <param name="event">The event information being viewed.</param>
         public void FilterUnauthorizedContent(Event @event)
         {
             if (@event?.Members == null)

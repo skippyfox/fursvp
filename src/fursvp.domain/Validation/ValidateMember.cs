@@ -67,7 +67,8 @@ namespace Fursvp.Domain.Validation
                     this.Assert.That(response.Responses.Count > 0, "Form response is required.");
                 }
 
-                if (formPrompt.Behavior == "Text" || formPrompt.Behavior == "Dropdown") // TODO - Get these magic strings out of here
+                // TODO - Get these magic strings out of here
+                if (formPrompt.Behavior == "Text" || formPrompt.Behavior == "Dropdown")
                 {
                     this.Assert.That(response.Responses.Count <= 1, "Form prompt does not permit multiple answers.");
                 }

@@ -8,8 +8,15 @@ namespace Fursvp.Communication
     using System;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Suppresses and logs emails instead of emailing them.
+    /// </summary>
     public class SuppressAndLogEmailer : IEmailer
     {
+        /// <summary>
+        /// Suppresses an email and logs it instead.
+        /// </summary>
+        /// <param name="email">The email to suppress and log.</param>
         public void Send(Email email)
         {
             Console.WriteLine($@"[{nameof(SuppressAndLogEmailer)} suppressed message] {email.Subject}
@@ -19,6 +26,11 @@ To:     {email.To.Address} ({email.To.Name})
 ");
         }
 
+        /// <summary>
+        /// Suppresses an email and logs it instead, then returns a completed task.
+        /// </summary>
+        /// <param name="email">The email to suppress and log.</param>
+        /// <returns>An object representing the a completed task operation.</returns>
         public Task SendAsync(Email email)
         {
             this.Send(email);

@@ -7,9 +7,22 @@ namespace Fursvp.Communication
 {
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Sends emails.
+    /// </summary>
     public interface IEmailer
     {
+        /// <summary>
+        /// Sends an email synchronously.
+        /// </summary>
+        /// <param name="email">The email to send.</param>
         void Send(Email email);
+
+        /// <summary>
+        /// Sends an email asynchronously.
+        /// </summary>
+        /// <param name="email">The email to send.</param>
+        /// <returns>An object representing the asynchronous task operation.</returns>
         Task SendAsync(Email email);
     }
 }
