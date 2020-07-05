@@ -17,7 +17,7 @@ namespace Microsoft.Extensions.DependencyInjection
     /// <summary>
     /// Provides static DependencyInjection extension methods for installation with .net core service collection.
     /// </summary>
-    public static class DependencyInjection
+    public static class DependencyInjectionInstaller
     {
         /// <summary>
         /// Registers repository services for use with FireStore repository.

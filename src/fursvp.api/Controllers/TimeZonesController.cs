@@ -20,13 +20,9 @@ namespace Fursvp.Api.Controllers
         /// <summary>
         /// Initializes a new instance of the <see cref="TimeZonesController"/> class.
         /// </summary>
-        /// <param name="logger">The application event logger.</param>
-        public TimeZonesController(ILogger<EventController> logger)
+        public TimeZonesController()
         {
-            this.Logger = logger;
         }
-
-        private ILogger<EventController> Logger { get; }
 
         /// <summary>
         /// Gets a list of all Time Zones by their unique Id and DisplayName.

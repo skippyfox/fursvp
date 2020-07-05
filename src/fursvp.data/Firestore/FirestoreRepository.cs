@@ -26,9 +26,9 @@ namespace Fursvp.Data.Firestore
         /// <param name="mapper">An instance of <see cref="IDictionaryMapper{T}"/> to map between the domain entity and the Firestore document.</param>
         public FirestoreRepository(IDictionaryMapper<T> mapper)
         {
-            this.Db = FirestoreDb.Create(ProjectId);
-            this.Collection = this.Db.Collection(typeof(T).Name);
-            this.Mapper = mapper;
+            Db = FirestoreDb.Create(ProjectId);
+            Collection = Db.Collection(typeof(T).Name);
+            Mapper = mapper;
         }
 
         private FirestoreDb Db { get; }
@@ -45,8 +45,8 @@ namespace Fursvp.Data.Firestore
         {
             // TODO: Can we instantiate some IQueryable<T> that can query the DB with filter on enumerator get?
             // https://cloud.google.com/firestore/docs/query-data/queries
-            QuerySnapshot snapshot = await this.Collection.GetSnapshotAsync();
-            return snapshot.Documents.Select(d => this.Mapper.FromDictionary(d.ToDictionary())).AsQueryable();
+            QuerySnapshot snapshot = await Collection.GetSnapshotAsync().ConfigureAwait(false);
+            return snapshot.Documents.Select(d => Mapper.FromDictionary(d.ToDictionary())).AsQueryable();
         }
 
         /// <summary>
@@ -56,10 +56,10 @@ namespace Fursvp.Data.Firestore
         /// <returns>An asynchronous <see cref="Task{T}"/> containing the entity if found, otherwise null.</returns>
         public async Task<T> GetById(Guid guid)
         {
-            var snapshot = await this.Document(guid).GetSnapshotAsync();
+            var snapshot = await Document(guid).GetSnapshotAsync().ConfigureAwait(false);
             if (snapshot.Exists)
             {
-                return this.Mapper.FromDictionary(snapshot.ToDictionary());
+                return Mapper.FromDictionary(snapshot.ToDictionary());
             }
 
             return default;
@@ -73,16 +73,15 @@ namespace Fursvp.Data.Firestore
         /// <returns>The newer version of the entity if it exists. Otherwise, default(T).</returns>
         public async Task<T> GetNewerVersionIfExists(Guid guid, int version)
         {
-            var snapshot = (await this.Collection
+            var snapshotCollection = await Collection
                 .WhereEqualTo(new FieldPath("Id"), guid.ToString())
                 .WhereGreaterThan(new FieldPath("Version"), version)
                 .Limit(1)
-                .GetSnapshotAsync())
-                .FirstOrDefault();
+                .GetSnapshotAsync().ConfigureAwait(false);
 
-            if (snapshot?.Exists == true)
+            if (snapshotCollection.Count > 0 && snapshotCollection[0]?.Exists == true)
             {
-                return this.Mapper.FromDictionary(snapshot.ToDictionary());
+                return Mapper.FromDictionary(snapshotCollection[0].ToDictionary());
             }
 
             return default;
@@ -93,24 +92,24 @@ namespace Fursvp.Data.Firestore
         /// </summary>
         /// <param name="entity">The entity to persist to the repository.</param>
         /// <returns>An asynchronous <see cref="Task{T}"/>.</returns>
-        public Task Insert(T entity) => this.Document(entity).CreateAsync(this.Mapper.ToDictionary(entity));
+        public Task Insert(T entity) => Document(entity).CreateAsync(Mapper.ToDictionary(entity));
 
         /// <summary>
         /// Overwrites an existing document representing the entity to Firestore.
         /// </summary>
         /// <param name="entity">The entity to persist to the repository.</param>
         /// <returns>An asynchronous <see cref="Task{T}"/>.</returns>
-        public Task Update(T entity) => this.Document(entity).SetAsync(this.Mapper.ToDictionary(entity), SetOptions.Overwrite);
+        public Task Update(T entity) => Document(entity).SetAsync(Mapper.ToDictionary(entity), SetOptions.Overwrite);
 
         /// <summary>
         /// Permanently removes an existing document representing the entity from Firestore.
         /// </summary>
         /// <param name="guid">The globally unique identifier for the entity.</param>
         /// <returns>An asynchronous <see cref="Task{T}"/>.</returns>
-        public Task Delete(Guid guid) => this.Document(guid).DeleteAsync();
+        public Task Delete(Guid guid) => Document(guid).DeleteAsync();
 
-        private DocumentReference Document(Guid id) => this.Collection.Document(id.ToString());
+        private DocumentReference Document(Guid id) => Collection.Document(id.ToString());
 
-        private DocumentReference Document(T entity) => this.Document(entity.Id);
+        private DocumentReference Document(T entity) => Document(entity.Id);
     }
 }

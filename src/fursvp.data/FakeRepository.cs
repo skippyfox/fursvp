@@ -25,7 +25,7 @@ namespace Fursvp.Data
         /// <param name="mapper">The instance of <see cref="IMapper" /> for making deep copies.</param>
         public FakeRepository(IMapper mapper)
         {
-            this.Mapper = mapper;
+            Mapper = mapper;
         }
 
         private IMapper Mapper { get; }
@@ -39,7 +39,7 @@ namespace Fursvp.Data
         /// <returns>An asynchronous <see cref="Task{TEntity}"/>.</returns>
         public Task Delete(Guid guid)
         {
-            this.Entities.RemoveAll(e => e.Id == guid);
+            Entities.RemoveAll(e => e.Id == guid);
             return Task.CompletedTask;
         }
 
@@ -49,7 +49,7 @@ namespace Fursvp.Data
         /// <returns>An <see cref="IQueryable{TEntity}"/> against which further filtering can be applied on the result set.</returns>
         public Task<IQueryable<TEntity>> GetAll()
         {
-            return Task.FromResult(this.Entities.Select(this.DeepCopy).AsQueryable());
+            return Task.FromResult(Entities.Select(DeepCopy).AsQueryable());
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace Fursvp.Data
         /// <returns>An asynchronous <see cref="Task{TEntity}"/> containing the entity if found, otherwise null.</returns>
         public Task<TEntity> GetById(Guid guid)
         {
-            return Task.FromResult(this.DeepCopy(this.Entities.FirstOrDefault(e => e.Id == guid)));
+            return Task.FromResult(DeepCopy(Entities.FirstOrDefault(e => e.Id == guid)));
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Fursvp.Data
         /// <returns>An asynchronous <see cref="Task{TEntity}"/>.</returns>
         public Task Insert(TEntity entity)
         {
-            this.Entities.Add(entity);
+            Entities.Add(entity);
             return Task.CompletedTask;
         }
 
@@ -80,8 +80,8 @@ namespace Fursvp.Data
         /// <returns>An asynchronous <see cref="Task{TEntity}"/>.</returns>
         public Task Update(TEntity entity)
         {
-            this.Entities.RemoveAll(e => e.Id == entity.Id);
-            this.Insert(entity);
+            Entities.RemoveAll(e => e.Id == entity.Id);
+            Insert(entity);
             return Task.CompletedTask;
         }
 
@@ -93,7 +93,7 @@ namespace Fursvp.Data
         /// <returns>The newer version of the entity if it exists. Otherwise, null.</returns>
         public async Task<TEntity> GetNewerVersionIfExists(Guid guid, int version)
         {
-            var @entityInMemory = await this.GetById(guid);
+            var @entityInMemory = await GetById(guid).ConfigureAwait(false);
             if (@entityInMemory?.Version > version)
             {
                 return @entityInMemory;
@@ -102,6 +102,6 @@ namespace Fursvp.Data
             return default(TEntity);
         }
 
-        private TEntity DeepCopy(TEntity entity) => this.Mapper.Map<TEntity, TEntity>(entity);
+        private TEntity DeepCopy(TEntity entity) => Mapper.Map<TEntity, TEntity>(entity);
     }
 }

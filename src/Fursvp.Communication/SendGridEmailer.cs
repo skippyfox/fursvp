@@ -5,7 +5,9 @@
 
 namespace Fursvp.Communication
 {
+    using System;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using SendGrid;
     using SendGrid.Helpers.Mail;
@@ -19,18 +21,26 @@ namespace Fursvp.Communication
         /// Initializes a new instance of the <see cref="SendGridEmailer"/> class.
         /// </summary>
         /// <param name="options">The SendGrid configuration options.</param>
-        public SendGridEmailer(IOptions<SendGridOptions> options)
+        public SendGridEmailer(IOptions<SendGridOptions> options, ILogger<SendGridEmailer> logger)
         {
-            this.Options = options.Value;
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            Options = options.Value;
+            Logger = logger;
         }
 
         private SendGridOptions Options { get; }
+
+        private ILogger<SendGridEmailer> Logger { get; }
 
         /// <summary>
         /// Sends an email synchronously via the SendGrid API.
         /// </summary>
         /// <param name="email">The email to send.</param>
-        public void Send(Email email) => this.SendAsync(email).GetAwaiter().GetResult();
+        public void Send(Email email) => SendAsync(email).GetAwaiter().GetResult();
 
         /// <summary>
         /// Sends an email asynchronously via the SendGrid API.
@@ -39,12 +49,25 @@ namespace Fursvp.Communication
         /// <returns>An object representing the asynchronous task operation.</returns>
         public async Task SendAsync(Email email)
         {
-            var client = new SendGridClient(this.Options.ApiKey);
-            var sendGridMessage = this.ConvertFrom(email);
-            var response = await client.SendEmailAsync(sendGridMessage).ConfigureAwait(false);
+            if (email == null)
+            {
+                throw new ArgumentNullException(nameof(email));
+            }
+
+            try
+            {
+                var client = new SendGridClient(Options.ApiKey);
+                var sendGridMessage = ConvertFrom(email);
+                _ = await client.SendEmailAsync(sendGridMessage).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Encountered exception while attempting to send email via SendGrid.", email);
+                throw;
+            }
         }
 
-        private SendGridMessage ConvertFrom(Email email)
+        private static SendGridMessage ConvertFrom(Email email)
         {
             var from = new SendGrid.Helpers.Mail.EmailAddress(email.From.Address, email.From.Name);
             var to = new SendGrid.Helpers.Mail.EmailAddress(email.To.Address, email.To.Name);

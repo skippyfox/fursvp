@@ -13,9 +13,9 @@ namespace Fursvp.Domain
         /// <summary>
         /// Adds a <see cref="Member"/> to an <see cref="Event"/>.
         /// </summary>
-        /// <param name="event">The <see cref="Event"/> to add a new <see cref="Member"/> to.</param>
+        /// <param name="eventInfo">The <see cref="Event"/> to add a new <see cref="Member"/> to.</param>
         /// <param name="member">The <see cref="Member"/> to be added to an existing <see cref="Event"/>.</param>
-        void AddMember(Event @event, Member member);
+        void AddMember(Event eventInfo, Member member);
 
         /// <summary>
         /// Creates a new <see cref="Event"/>.
@@ -28,8 +28,8 @@ namespace Fursvp.Domain
         /// <summary>
         /// Determines whether attendees can RSVP to an <see cref="Event"/>.
         /// </summary>
-        /// <param name="event">The <see cref="Event"/>.</param>
+        /// <param name="eventInstance">The <see cref="Event"/>.</param>
         /// <returns>True if attendees can currently RSVP, otherwise False.</returns>
-        bool RsvpOpen(Event @event);
+        bool RsvpOpen(Event eventInstance);
     }
 }

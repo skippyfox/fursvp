@@ -21,8 +21,8 @@ namespace Fursvp.Helpers
         public Assertions()
         {
             var type = typeof(TException);
-            this.Ctor = type.GetConstructor(new[] { typeof(string) });
-            if (this.Ctor == null)
+            Ctor = type.GetConstructor(new[] { typeof(string) });
+            if (Ctor == null)
             {
                 throw new ArgumentException($"{type.Name} does not have a (string) constructor.");
             }
@@ -39,7 +39,7 @@ namespace Fursvp.Helpers
         {
             if (!evaluation)
             {
-                throw (TException)this.Ctor.Invoke(new[] { reason });
+                throw (TException)Ctor.Invoke(new[] { reason });
             }
         }
     }

@@ -21,7 +21,7 @@ namespace Fursvp.Api
         /// <param name="httpContextAccessor">The HttpContextAccessor.</param>
         public ClaimsPrincipalUserAccessor(IHttpContextAccessor httpContextAccessor)
         {
-            this.HttpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+            HttpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
         }
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace Fursvp.Api
         {
             get
             {
-                var claimsPrincipal = this.HttpContextAccessor.HttpContext.User;
+                var claimsPrincipal = HttpContextAccessor.HttpContext.User;
                 if (claimsPrincipal?.Identity?.IsAuthenticated != true)
                 {
                     return null;

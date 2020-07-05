@@ -4,18 +4,18 @@
         <name>Fursvp.Data</name>
     </assembly>
     <members>
-        <member name="T:Microsoft.Extensions.DependencyInjection.DependencyInjection">
+        <member name="T:Microsoft.Extensions.DependencyInjection.DependencyInjectionInstaller">
             <summary>
             Provides static DependencyInjection extension methods for installation with .net core service collection.
             </summary>
         </member>
-        <member name="M:Microsoft.Extensions.DependencyInjection.DependencyInjection.AddFursvpDataWithFirestore(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+        <member name="M:Microsoft.Extensions.DependencyInjection.DependencyInjectionInstaller.AddFursvpDataWithFirestore(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
             <summary>
             Registers repository services for use with FireStore repository.
             </summary>
             <param name="services">The service collection.</param>
         </member>
-        <member name="M:Microsoft.Extensions.DependencyInjection.DependencyInjection.AddFursvpDataWithFakeRepository(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+        <member name="M:Microsoft.Extensions.DependencyInjection.DependencyInjectionInstaller.AddFursvpDataWithFakeRepository(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
             <summary>
             Registers repository services for use with fake repository for development.
             </summary>
@@ -163,7 +163,7 @@
             <summary>
             Converts an Entity of type T to <see cref="T:System.Collections.Generic.Dictionary`2"/>.
             </summary>
-            <param name="object">An instance of the entity to convert to Dictionary.</param>
+            <param name="content">An instance of the entity to convert to Dictionary.</param>
             <returns>The dictionary converted from the entity.</returns>
         </member>
         <member name="M:Fursvp.Data.Firestore.IDictionaryMapper`1.FromDictionary(System.Collections.Generic.Dictionary{System.String,System.Object})">
@@ -195,14 +195,14 @@
             <summary>
             Gets a single instance of T matching the given Id.
             </summary>
-            <param name="guid">The globally unique identifier for the entity.</param>
+            <param name="entityId">The globally unique identifier for the entity.</param>
             <returns>An asynchronous <see cref="T:System.Threading.Tasks.Task`1"/> containing the entity if found, otherwise null.</returns>
         </member>
         <member name="M:Fursvp.Data.IRepositoryRead`1.GetNewerVersionIfExists(System.Guid,System.Int32)">
             <summary>
             Searches for a newer version of an entity in the database if it exists and returns it if found.
             </summary>
-            <param name="guid">The globally unique identifier for the entity.</param>
+            <param name="entityId">The globally unique identifier for the entity.</param>
             <param name="version">The presumed most recent version of the entity document.</param>
             <returns>The newer version of the entity if it exists. Otherwise, default(T).</returns>
         </member>
@@ -230,7 +230,7 @@
             <summary>
             Permanently removes an existing document representing the entity from the repository.
             </summary>
-            <param name="guid">The globally unique identifier for the entity.</param>
+            <param name="entityId">The globally unique identifier for the entity.</param>
             <returns>An asynchronous <see cref="T:System.Threading.Tasks.Task`1"/>.</returns>
         </member>
         <member name="T:Fursvp.Data.MappingProfile">
@@ -385,7 +385,7 @@
             <param name="message">The message that describes the error.</param>
             <param name="type">The type of which the compared versions do not match.</param>
         </member>
-        <member name="P:Fursvp.Data.VersionConflictException.Type">
+        <member name="P:Fursvp.Data.VersionConflictException.SourceType">
             <summary>
             Gets the context of the exception.
             </summary>

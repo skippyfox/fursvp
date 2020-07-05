@@ -33,8 +33,8 @@ namespace Fursvp.Api
         /// <param name="environment">The <see cref="IWebHostEnvironment"/> instance containing environment specific settings.</param>
         public Startup(IConfiguration configuration, IWebHostEnvironment environment)
         {
-            this.Configuration = configuration;
-            this.Environment = environment;
+            Configuration = configuration;
+            Environment = environment;
         }
 
         private IConfiguration Configuration { get; }
@@ -53,14 +53,14 @@ namespace Fursvp.Api
             services.AddDomainServices();
             services.AddFursvpDataWithFirestore();
 
-            if (this.Environment.IsDevelopment())
+            if (Environment.IsDevelopment())
             {
                 services.AddSingleton<IEmailer, SuppressAndLogEmailer>();
             }
             else
             {
                 services.AddSingleton<IEmailer, SendGridEmailer>();
-                services.Configure<SendGridOptions>(this.Configuration.GetSection(SendGridOptions.SendGrid));
+                services.Configure<SendGridOptions>(Configuration.GetSection(SendGridOptions.SendGrid));
             }
 
             services.AddLogging(lc =>
@@ -88,7 +88,7 @@ namespace Fursvp.Api
             })
             .AddJwtBearer(x =>
             {
-                var key = Encoding.ASCII.GetBytes(this.Configuration["AuthorizationIssuerSigningKey"]);
+                var key = Encoding.ASCII.GetBytes(Configuration["AuthorizationIssuerSigningKey"]);
                 x.SaveToken = true;
                 x.TokenValidationParameters = new TokenValidationParameters
                 {

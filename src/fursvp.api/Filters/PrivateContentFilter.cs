@@ -23,7 +23,7 @@ namespace Fursvp.Api.Filters
         /// <param name="serviceProvider">The service provider.</param>
         public PrivateContentFilter(IServiceProvider serviceProvider)
         {
-            this.ServiceProvider = serviceProvider;
+            ServiceProvider = serviceProvider;
         }
 
         private IServiceProvider ServiceProvider { get; }
@@ -32,18 +32,28 @@ namespace Fursvp.Api.Filters
         /// Ensures that the user is authorized to read a single element and filters out any unauthorized content within the element.
         /// </summary>
         /// <typeparam name="T">The type of the content to be searched.</typeparam>
-        /// <param name="object">The content being searched.</param>
+        /// <param name="content">The content being searched.</param>
         /// <param name="readAuthorizeObject">Executes read authorization methods against this type of object.</param>
         /// <param name="context">The Microsoft.AspNetCore.Mvc.Filters.ActionExecutedContext.</param>
-        public static void Filter<T>(T @object, IReadAuthorize<T> readAuthorizeObject, ActionExecutedContext context)
+        public static void Filter<T>(T content, IReadAuthorize<T> readAuthorizeObject, ActionExecutedContext context)
         {
-            if (!readAuthorizeObject.CanRead(@object))
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (readAuthorizeObject == null)
+            {
+                throw new ArgumentNullException(nameof(readAuthorizeObject));
+            }
+
+            if (!readAuthorizeObject.CanRead(content))
             {
                 context.Result = new UnauthorizedResult();
                 return;
             }
 
-            readAuthorizeObject.FilterUnauthorizedContent(@object);
+            readAuthorizeObject.FilterUnauthorizedContent(content);
         }
 
         /// <summary>
@@ -55,6 +65,16 @@ namespace Fursvp.Api.Filters
         /// <param name="contextResult">The context result object that contains the content collection value to be filtered.</param>
         public static void FilterMany<T>(IEnumerable<T> objects, IReadAuthorize<T> readAuthorizeObject, ObjectResult contextResult)
         {
+            if (contextResult == null)
+            {
+                throw new ArgumentNullException(nameof(contextResult));
+            }
+
+            if (readAuthorizeObject == null)
+            {
+                throw new ArgumentNullException(nameof(readAuthorizeObject));
+            }
+
             var filteredObjects = objects.Where(readAuthorizeObject.CanRead).ToList();
 
             foreach (var @object in filteredObjects)
@@ -71,7 +91,7 @@ namespace Fursvp.Api.Filters
         /// <param name="context">The Microsoft.AspNetCore.Mvc.Filters.ActionExecutedContext.</param>
         public void OnActionExecuted(ActionExecutedContext context)
         {
-            if (!(context.Result is ObjectResult objectResult))
+            if (!(context?.Result is ObjectResult objectResult))
             {
                 return;
             }
@@ -80,7 +100,7 @@ namespace Fursvp.Api.Filters
             var objectType = objectResult.Value.GetType();
             if (objectType != null)
             {
-                object readAuthorize = this.GetReadAuthorizeService(objectType);
+                object readAuthorize = GetReadAuthorizeService(objectType);
 
                 if (readAuthorize != null)
                 {
@@ -96,7 +116,7 @@ namespace Fursvp.Api.Filters
             objectType = IEnumerableGenericArgument(objectType);
             if (objectType != null)
             {
-                object readAuthorize = this.GetReadAuthorizeService(objectType);
+                object readAuthorize = GetReadAuthorizeService(objectType);
 
                 if (readAuthorize != null)
                 {
@@ -130,7 +150,7 @@ namespace Fursvp.Api.Filters
         private object GetReadAuthorizeService(Type objectType)
         {
             Type readAuthorizeType = typeof(IReadAuthorize<>).MakeGenericType(objectType);
-            var readAuthorize = this.ServiceProvider.GetService(readAuthorizeType);
+            var readAuthorize = ServiceProvider.GetService(readAuthorizeType);
             return readAuthorize;
         }
     }

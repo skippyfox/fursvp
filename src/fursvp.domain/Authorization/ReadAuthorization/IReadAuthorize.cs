@@ -14,14 +14,14 @@ namespace Fursvp.Domain.Authorization.ReadAuthorization
         /// <summary>
         /// Performs an authorization check for a read.
         /// </summary>
-        /// <param name="object">The object being read.</param>
+        /// <param name="content">The content being read.</param>
         /// <returns>True if the user is authorized to view the object.</returns>
-        bool CanRead(T @object);
+        bool CanRead(T content);
 
         /// <summary>
         /// Changes any part of the object contents to hide whatever the user is not authorized to view.
         /// </summary>
-        /// <param name="object">The object being read and filtered for privacy.</param>
-        void FilterUnauthorizedContent(T @object);
+        /// <param name="content">The content being read and filtered for privacy.</param>
+        void FilterUnauthorizedContent(T content);
     }
 }

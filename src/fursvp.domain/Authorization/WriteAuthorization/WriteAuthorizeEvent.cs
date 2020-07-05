@@ -22,9 +22,9 @@ namespace Fursvp.Domain.Authorization.WriteAuthorization
         /// <param name="userAccessor">An instance of <see cref="IUserAccessor"/> used to get the authenticated user's information..</param>
         public WriteAuthorizeEvent(IWriteAuthorizeMember writeAuthorizeMember, IUserAccessor userAccessor)
         {
-            this.Assert = new Assertions<NotAuthorizedException<Event>>();
-            this.UserAccessor = userAccessor;
-            this.WriteAuthorizeMember = writeAuthorizeMember;
+            Assert = new Assertions<NotAuthorizedException<Event>>();
+            UserAccessor = userAccessor;
+            WriteAuthorizeMember = writeAuthorizeMember;
         }
 
         private Assertions<NotAuthorizedException<Event>> Assert { get; }
@@ -40,19 +40,19 @@ namespace Fursvp.Domain.Authorization.WriteAuthorization
         /// <param name="newState">The new state of the Event.</param>
         public void WriteAuthorize(Event oldState, Event newState)
         {
-            var actingMember = (oldState ?? newState)?.Members?.FirstOrDefault(m => m.EmailAddress == this.UserAccessor.User?.EmailAddress);
+            var actingMember = (oldState ?? newState)?.Members?.FirstOrDefault(m => m.EmailAddress == UserAccessor.User?.EmailAddress);
 
             if (newState == null)
             {
                 // Deletion
-                this.Assert.That(actingMember?.IsAuthor == true, "An event can be deleted only by its author.");
+                Assert.That(actingMember?.IsAuthor == true, "An event can be deleted only by its author.");
             }
 
             if (oldState != null && newState != null)
             {
                 foreach (var memberState in oldState.Members.FullJoin(newState.Members, m => m.Id, m => m.Id, (old, @new) => new { old, @new }))
                 {
-                    this.WriteAuthorizeMember.WriteAuthorize(memberState.old, oldState, memberState.@new, newState, actingMember);
+                    WriteAuthorizeMember.WriteAuthorize(memberState.old, oldState, memberState.@new, newState, actingMember);
                 }
 
                 if (actingMember?.IsAuthor == true || actingMember?.IsOrganizer == true)
@@ -60,30 +60,30 @@ namespace Fursvp.Domain.Authorization.WriteAuthorization
                     return;
                 }
 
-                this.Assert.That(oldState.StartsAt == newState.StartsAt, nameof(oldState.StartsAt) + " can only be altered by an event's Author or Organizer.");
-                this.Assert.That(oldState.EndsAt == newState.EndsAt, nameof(oldState.EndsAt) + " can only be altered by an event's Author or Organizer.");
-                this.Assert.That(oldState.TimeZoneId == newState.TimeZoneId, nameof(oldState.StartsAt) + " can only be altered by an event's Author or Organizer.");
-                this.Assert.That(oldState.Name == newState.Name, nameof(oldState.Name) + " can only be altered by an event's Author or Organizer.");
-                this.Assert.That(oldState.OtherDetails == newState.OtherDetails, nameof(oldState.OtherDetails) + " can only be altered by an event's Author or Organizer.");
-                this.Assert.That(oldState.Location == newState.Location, nameof(oldState.Location) + " can only be altered by an event's Author or Organizer.");
-                this.Assert.That(oldState.RsvpOpen == newState.RsvpOpen, nameof(oldState.RsvpOpen) + " can only be altered by an event's Author or Organizer.");
-                this.Assert.That(oldState.RsvpClosesAt == newState.RsvpClosesAt, nameof(oldState.RsvpClosesAt) + " can only be altered by an event's Author or Organizer.");
-                this.Assert.That(oldState.IsPublished == newState.IsPublished, nameof(oldState.IsPublished) + " can only be altered by an event's Author or Organizer.");
+                Assert.That(oldState.StartsAt == newState.StartsAt, nameof(oldState.StartsAt) + " can only be altered by an event's Author or Organizer.");
+                Assert.That(oldState.EndsAt == newState.EndsAt, nameof(oldState.EndsAt) + " can only be altered by an event's Author or Organizer.");
+                Assert.That(oldState.TimeZoneId == newState.TimeZoneId, nameof(oldState.StartsAt) + " can only be altered by an event's Author or Organizer.");
+                Assert.That(oldState.Name == newState.Name, nameof(oldState.Name) + " can only be altered by an event's Author or Organizer.");
+                Assert.That(oldState.OtherDetails == newState.OtherDetails, nameof(oldState.OtherDetails) + " can only be altered by an event's Author or Organizer.");
+                Assert.That(oldState.Location == newState.Location, nameof(oldState.Location) + " can only be altered by an event's Author or Organizer.");
+                Assert.That(oldState.RsvpOpen == newState.RsvpOpen, nameof(oldState.RsvpOpen) + " can only be altered by an event's Author or Organizer.");
+                Assert.That(oldState.RsvpClosesAt == newState.RsvpClosesAt, nameof(oldState.RsvpClosesAt) + " can only be altered by an event's Author or Organizer.");
+                Assert.That(oldState.IsPublished == newState.IsPublished, nameof(oldState.IsPublished) + " can only be altered by an event's Author or Organizer.");
 
                 // Assert that the old form and new form are equivalent.
                 foreach (var formPrompt in oldState.Form.FullJoin(newState.Form, f => f.Id, f => f.Id, (old, @new) => new { old, @new }))
                 {
-                    this.Assert.That(formPrompt.old != null && formPrompt.@new != null, "Form can only be altered by an event's Author or Organizer.");
-                    this.Assert.That(formPrompt.old.Prompt != formPrompt.@new.Prompt, "Form can only be altered by an event's Author or Organizer.");
-                    this.Assert.That(formPrompt.old.Required != formPrompt.@new.Required, "Form can only be altered by an event's Author or Organizer.");
-                    this.Assert.That(formPrompt.old.Behavior != formPrompt.@new.Behavior, "Form can only be altered by an event's Author or Organizer.");
-                    this.Assert.That(formPrompt.old.SortOrder != formPrompt.@new.SortOrder, "Form can only be altered by an event's Author or Organizer.");
+                    Assert.That(formPrompt.old != null && formPrompt.@new != null, "Form can only be altered by an event's Author or Organizer.");
+                    Assert.That(formPrompt.old.Prompt != formPrompt.@new.Prompt, "Form can only be altered by an event's Author or Organizer.");
+                    Assert.That(formPrompt.old.Required != formPrompt.@new.Required, "Form can only be altered by an event's Author or Organizer.");
+                    Assert.That(formPrompt.old.Behavior != formPrompt.@new.Behavior, "Form can only be altered by an event's Author or Organizer.");
+                    Assert.That(formPrompt.old.SortOrder != formPrompt.@new.SortOrder, "Form can only be altered by an event's Author or Organizer.");
 
                     var oldOptions = formPrompt.old?.Options ?? Enumerable.Empty<string>();
                     var newOptions = formPrompt.@new?.Options ?? Enumerable.Empty<string>();
                     foreach (var option in oldOptions.FullJoin(newOptions, s => s, s => s, (old, @new) => new { old, @new }))
                     {
-                        this.Assert.That(option.old != null && option.@new != null, "Form can only be altered by an event's Author or Organizer.");
+                        Assert.That(option.old != null && option.@new != null, "Form can only be altered by an event's Author or Organizer.");
                     }
                 }
             }

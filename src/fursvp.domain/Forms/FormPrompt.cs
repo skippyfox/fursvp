@@ -20,7 +20,7 @@ namespace Fursvp.Domain.Forms
         /// <param name="behavior">The descriminator that indicates which implementation of FormPrompt to persist.</param>
         public FormPrompt(string behavior)
         {
-            this.Behavior = behavior;
+            Behavior = behavior;
         }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace Fursvp.Domain.Forms
         /// <summary>
         /// Gets or sets the collection of text choices.
         /// </summary>
-        public ICollection<string> Options { get; set; } = new Collection<string>();
+        public ICollection<string> Options { get; } = new Collection<string>();
 
         /// <summary>
         /// Gets or sets the sort order of the prompt.

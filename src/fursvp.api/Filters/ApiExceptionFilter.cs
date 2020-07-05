@@ -6,9 +6,11 @@
 namespace Fursvp.Api.Filters
 {
     using System;
-    using System.ComponentModel.DataAnnotations;
+    using System.Threading.Tasks;
+    using System.Web;
     using Fursvp.Communication;
     using Fursvp.Domain.Authorization;
+    using Fursvp.Domain.Validation;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
@@ -30,10 +32,10 @@ namespace Fursvp.Api.Filters
         /// <param name="webHostEnvironment">The web hosting environment.</param>
         public ApiExceptionFilter(ILogger<ApiExceptionFilter> logger, IEmailer emailer, IUserAccessor userAccessor, IWebHostEnvironment webHostEnvironment)
         {
-            this.Logger = logger;
-            this.Emailer = emailer;
-            this.UserAccessor = userAccessor;
-            this.WebHostEnvironment = webHostEnvironment;
+            Logger = logger;
+            Emailer = emailer;
+            UserAccessor = userAccessor;
+            WebHostEnvironment = webHostEnvironment;
         }
 
         private ILogger<ApiExceptionFilter> Logger { get; }
@@ -50,68 +52,98 @@ namespace Fursvp.Api.Filters
         /// <param name="context">The Exception context.</param>
         public override void OnException(ExceptionContext context)
         {
-            if (context.Exception is NotAuthorizedException authEx)
+            if (context == null)
             {
-                this.OnException(context, StatusCodes.Status401Unauthorized, authEx.GetType().Name, authEx.Message, authEx.Type.Name);
+                string message = "Exception filter was triggered with null context argument.";
+                Logger?.LogError(message);
+                EmailException(message);
+            }
+            else if (context.Exception is NotAuthorizedException authEx)
+            {
+                OnException(context, StatusCodes.Status401Unauthorized, authEx.GetType().Name, authEx.Message, authEx.SourceType.Name);
 
-                this.Logger?.LogInformation(authEx, authEx.Message);
+                Logger?.LogInformation(authEx, authEx.Message);
             }
             else if (context.Exception is ValidationException validationEx)
             {
-                this.OnException(context, StatusCodes.Status400BadRequest, validationEx.GetType().Name, validationEx.Message);
+                OnException(context, StatusCodes.Status403Forbidden, validationEx.GetType().Name, validationEx.Message);
 
-                this.Logger?.LogInformation(validationEx, validationEx.Message);
+                Logger?.LogInformation(validationEx, validationEx.Message);
             }
             else
             {
                 var ex = context.Exception;
-                string message = this.WebHostEnvironment.IsDevelopment()
+                string message = WebHostEnvironment.IsDevelopment()
                     ? ex.Message
                     : "An internal server error occurred. Sorry about that. The error has been logged.";
 
-                this.OnException(context, StatusCodes.Status500InternalServerError, ex.GetType().Name, message);
-                this.Logger?.LogError(ex, ex.Message);
+                OnException(context, StatusCodes.Status500InternalServerError, ex.GetType().Name, message);
+                Logger?.LogError(ex, ex.Message);
+                EmailException(context, ex);
+            }
 
-                // TODO - put all of these values in config:
-                try
+            base.OnException(context);
+        }
+
+        private void EmailException(ExceptionContext context, Exception ex)
+        {
+            // TODO - put all of these values in config:
+            _ = Task.Run(() =>
+            {
+                Emailer?.Send(new Email
                 {
-                    this.Emailer?.Send(new Email
-                    {
-                        From = new EmailAddress { Address = "noreply@fursvp.com", Name = "Fursvp.com" },
-                        To = new EmailAddress { Address = "where.is.skippy@gmail.com" },
-                        Subject = "Error on FURsvp.com",
-                        PlainTextContent = @$"FURsvp error.
+                    From = new EmailAddress { Address = "noreply@fursvp.com", Name = "Fursvp.com" },
+                    To = new EmailAddress { Address = "where.is.skippy@gmail.com" },
+                    Subject = "Error on FURsvp.com",
+                    PlainTextContent = @$"FURsvp error.
 
 Time: {DateTime.Now}
 Method: {context?.HttpContext?.Request?.Method}
 QueryString: {context?.HttpContext?.Request?.QueryString}
 Path: {context?.HttpContext?.Request?.Path}
 Client IP: {context?.HttpContext?.Connection?.RemoteIpAddress}
-User: {this.UserAccessor?.User?.EmailAddress}
+User: {UserAccessor?.User?.EmailAddress}
 Trace Identifier: {context?.HttpContext?.TraceIdentifier}
 
 {ex.ToString()}
 
 Inner Exception: {(ex.InnerException == null ? "null" : ex.InnerException.ToString())}",
-                        HtmlContent = @$"<p>FURsvp error.</p>
+                    HtmlContent = @$"<p>FURsvp error.</p>
 <p>Time: {DateTime.Now}
 <br />Method: {context?.HttpContext?.Request?.Method}
 <br />QueryString: {context?.HttpContext?.Request?.QueryString}
 <br />Path: {context?.HttpContext?.Request?.Path}
 <br />Client IP: {context?.HttpContext?.Connection?.RemoteIpAddress}
-<br />User: {this.UserAccessor?.User?.EmailAddress}
+<br />User: {UserAccessor?.User?.EmailAddress}
 <br />Trace Identifier: {context?.HttpContext?.TraceIdentifier}</p>
-<p>{ex.ToString().Replace("\n", "<br />")}</p>
-<p>Inner Exception: {(ex.InnerException == null ? "null" : ex.InnerException.ToString().Replace("\n", "<br />"))}</p>",
-                    });
-                }
-                catch
-                {
-                    // TODO ?
-                }
-            }
+<p>{HttpUtility.HtmlEncode(ex)}</p>
+<p>Inner Exception: {(ex.InnerException == null ? "null" : ex.InnerException.ToString().Replace("\n", "<br />", StringComparison.InvariantCulture))}</p>",
+                });
+            });
+        }
 
-            base.OnException(context);
+        private void EmailException(string message)
+        {
+            // TODO - put all of these values in config:
+            _ = Task.Run(() =>
+            {
+                Emailer?.Send(new Email
+                {
+                    From = new EmailAddress { Address = "noreply@fursvp.com", Name = "Fursvp.com" },
+                    To = new EmailAddress { Address = "where.is.skippy@gmail.com" },
+                    Subject = "Error on FURsvp.com",
+                    PlainTextContent = @$"FURsvp error.
+
+Time: {DateTime.Now}
+User: {UserAccessor?.User?.EmailAddress}
+
+{message}",
+                    HtmlContent = @$"<p>FURsvp error.</p>
+<p>Time: {DateTime.Now}
+<br />User: {UserAccessor?.User?.EmailAddress}
+<p>{HttpUtility.HtmlEncode(message)}</p>",
+                });
+            });
         }
 
         private void OnException(ExceptionContext context, int statusCode, string exception, string errorMessage, string entity = null)

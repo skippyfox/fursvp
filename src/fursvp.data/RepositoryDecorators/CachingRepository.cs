@@ -30,9 +30,9 @@ namespace Fursvp.Data.RepositoryDecorators
         /// <param name="mapper">The instance of <see cref="IMemoryCache"/> for caching.</param>
         public CachingRepository(IRepository<T> decorated, IMemoryCache memoryCache, IMapper mapper)
         {
-            this.Decorated = decorated;
-            this.MemoryCache = memoryCache;
-            this.Mapper = mapper;
+            Decorated = decorated;
+            MemoryCache = memoryCache;
+            Mapper = mapper;
         }
 
         private IRepository<T> Decorated { get; }
@@ -41,7 +41,7 @@ namespace Fursvp.Data.RepositoryDecorators
 
         private IMapper Mapper { get; }
 
-        private string IndexCacheKey => $"{typeof(CachingRepository<T>).Name}<{typeof(T).Name}>.Index";
+        private static string IndexCacheKey => $"{typeof(CachingRepository<T>).Name}<{typeof(T).Name}>.Index";
 
         /// <summary>
         /// Permanently removes an existing document representing <see ref="T" /> from the repository by exposing the decorated method, and from the cache.
@@ -50,8 +50,8 @@ namespace Fursvp.Data.RepositoryDecorators
         /// <returns>An asynchronous <see cref="Task{T}"/>.</returns>
         public async Task Delete(Guid guid)
         {
-            await this.Decorated.Delete(guid);
-            this.MemoryCache.Remove(guid);
+            await Decorated.Delete(guid).ConfigureAwait(false);
+            MemoryCache.Remove(guid);
         }
 
         /// <summary>
@@ -61,23 +61,23 @@ namespace Fursvp.Data.RepositoryDecorators
         /// <returns>An <see cref="IQueryable{T}"/> against which further filtering can be applied on the result set.</returns>
         public async Task<IQueryable<T>> GetAll()
         {
-            if (this.MemoryCache.TryGetValue(this.IndexCacheKey, out List<Guid> guids))
+            if (MemoryCache.TryGetValue(IndexCacheKey, out List<Guid> guids))
             {
                 return guids.Select(g =>
                 {
-                    var entity = this.MemoryCache.Get<T>(g);
-                    return this.Mapper.Map<T, T>(entity);
+                    var entity = MemoryCache.Get<T>(g);
+                    return Mapper.Map<T, T>(entity);
                 }).AsQueryable();
             }
 
-            var allEntities = (await this.Decorated.GetAll()).ToList();
+            var allEntities = (await Decorated.GetAll().ConfigureAwait(false)).ToList();
             DateTime expiration = DateTime.Now.AddMinutes(5); // TODO - put magic number into config
 
-            this.MemoryCache.Set(this.IndexCacheKey, allEntities.Select(e => e.Id).ToList(), expiration);
+            MemoryCache.Set(IndexCacheKey, allEntities.Select(e => e.Id).ToList(), expiration);
 
             foreach (var e in allEntities)
             {
-                this.CacheCopyOfEntity(e, expiration);
+                CacheCopyOfEntity(e, expiration);
             }
 
             return allEntities.AsQueryable();
@@ -91,13 +91,13 @@ namespace Fursvp.Data.RepositoryDecorators
         /// <returns>An asynchronous <see cref="Task{T}"/> containing the entity if found, otherwise null.</returns>
         public async Task<T> GetById(Guid guid)
         {
-            var entity = await this.MemoryCache.GetOrCreateAsync(guid, async entry =>
+            var entity = await MemoryCache.GetOrCreateAsync(guid, async entry =>
             {
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5); // TODO - put magic number into config
-                return await this.Decorated.GetById(guid);
-            });
+                return await Decorated.GetById(guid).ConfigureAwait(false);
+            }).ConfigureAwait(false);
 
-            return this.Mapper.Map<T, T>(entity);
+            return Mapper.Map<T, T>(entity);
         }
 
         /// <summary>
@@ -109,14 +109,14 @@ namespace Fursvp.Data.RepositoryDecorators
         /// <returns>The newer version of the entity if it exists. Otherwise, default(T).</returns>
         public async Task<T> GetNewerVersionIfExists(Guid guid, int version)
         {
-            var entity = await this.Decorated.GetNewerVersionIfExists(guid, version);
+            var entity = await Decorated.GetNewerVersionIfExists(guid, version).ConfigureAwait(false);
 
             if (entity != null)
             {
-                this.CacheCopyOfEntity(entity);
+                CacheCopyOfEntity(entity);
             }
 
-            return this.Mapper.Map<T, T>(entity);
+            return Mapper.Map<T, T>(entity);
         }
 
         /// <summary>
@@ -126,8 +126,8 @@ namespace Fursvp.Data.RepositoryDecorators
         /// <returns>An asynchronous <see cref="Task{T}"/>.</returns>
         public async Task Insert(T entity)
         {
-            await this.Decorated.Insert(entity);
-            this.CacheCopyOfEntity(entity);
+            await Decorated.Insert(entity).ConfigureAwait(false);
+            CacheCopyOfEntity(entity);
         }
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace Fursvp.Data.RepositoryDecorators
         public async Task Update(T entity)
         {
             // TODO - it would be nice if this could be made into an atomic operation against Firestore.
-            var entityInDb = await this.GetNewerVersionIfExists(entity.Id, entity.Version);
+            var entityInDb = await GetNewerVersionIfExists(entity.Id, entity.Version).ConfigureAwait(false);
 
             if (entityInDb != null && entityInDb.Version != entity.Version)
             {
@@ -147,20 +147,20 @@ namespace Fursvp.Data.RepositoryDecorators
 
             entity.Version++;
 
-            await this.Decorated.Update(entity);
-            this.CacheCopyOfEntity(entity);
+            await Decorated.Update(entity).ConfigureAwait(false);
+            CacheCopyOfEntity(entity);
         }
 
         private void CacheCopyOfEntity(T entity)
         {
-            var copy = this.Mapper.Map<T, T>(entity);
-            this.MemoryCache.Set(entity.Id, copy, TimeSpan.FromMinutes(5)); // TODO - put magic number into config
+            var copy = Mapper.Map<T, T>(entity);
+            MemoryCache.Set(entity.Id, copy, TimeSpan.FromMinutes(5)); // TODO - put magic number into config
         }
 
         private void CacheCopyOfEntity(T entity, DateTime expiration)
         {
-            var copy = this.Mapper.Map<T, T>(entity);
-            this.MemoryCache.Set(entity.Id, copy, expiration);
+            var copy = Mapper.Map<T, T>(entity);
+            MemoryCache.Set(entity.Id, copy, expiration);
         }
     }
 }

@@ -7,9 +7,11 @@ namespace Fursvp.Data
 {
     using System;
 
+
     /// <summary>
     /// An exception that is thrown when persistence logic encounters a Version conflict.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1032:Implement standard exception constructors", Justification = "These exception types have nonstandard constructors because the type parameter is required.")]
     public class VersionConflictException : Exception
     {
         /// <summary>
@@ -20,19 +22,21 @@ namespace Fursvp.Data
         public VersionConflictException(string message, Type type)
             : base(message)
         {
-            this.Type = type;
+            SourceType = type;
         }
 
         /// <summary>
         /// Gets the context of the exception.
         /// </summary>
-        public Type Type { get; }
+        public Type SourceType { get; }
     }
+
 
     /// <summary>
     /// An exception that is thrown when persistence logic encounters a Version conflict.
     /// </summary>
     /// <typeparam name="T">The context of the exception.</typeparam>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1032:Implement standard exception constructors", Justification = "These exception types have nonstandard constructors because the type parameter is required.")]
     public class VersionConflictException<T> : VersionConflictException
     {
         /// <summary>

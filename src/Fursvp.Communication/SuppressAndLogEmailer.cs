@@ -19,6 +19,11 @@ namespace Fursvp.Communication
         /// <param name="email">The email to suppress and log.</param>
         public void Send(Email email)
         {
+            if (email == null)
+            {
+                throw new ArgumentNullException(nameof(email));
+            }
+
             Console.WriteLine($@"[{nameof(SuppressAndLogEmailer)} suppressed message] {email.Subject}
 From:   {email.From.Address} ({email.From.Name})
 To:     {email.To.Address} ({email.To.Name})
@@ -33,7 +38,7 @@ To:     {email.To.Address} ({email.To.Name})
         /// <returns>An object representing the a completed task operation.</returns>
         public Task SendAsync(Email email)
         {
-            this.Send(email);
+            Send(email);
             return Task.CompletedTask;
         }
     }

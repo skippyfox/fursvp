@@ -6,6 +6,7 @@
 namespace Fursvp.Domain.Authorization.WriteAuthorization
 {
     using System;
+    using System.Diagnostics.Contracts;
     using System.Linq;
     using Fursvp.Domain;
     using Fursvp.Domain.Authorization;
@@ -22,8 +23,8 @@ namespace Fursvp.Domain.Authorization.WriteAuthorization
         /// <param name="eventService">An instance of <see cref="IEventService"/>.</param>
         public WriteAuthorizeMember(IEventService eventService)
         {
-            this.Assert = new Assertions<NotAuthorizedException<Event>>();
-            this.EventService = eventService;
+            Assert = new Assertions<NotAuthorizedException<Event>>();
+            EventService = eventService;
         }
 
         private Assertions<NotAuthorizedException<Event>> Assert { get; }
@@ -49,15 +50,15 @@ namespace Fursvp.Domain.Authorization.WriteAuthorization
             // I am not the author. I am not allowed to change anyone's status as organizer or author, not even my own.
             if (newMemberState != null)
             {
-                this.Assert.That(!newMemberState.IsAuthor, nameof(newMemberState.IsAuthor) + " cannot be set.");
+                Assert.That(!newMemberState.IsAuthor, nameof(newMemberState.IsAuthor) + " cannot be set.");
                 bool targetMemberWasOrganizer = oldMemberState?.IsOrganizer == true;
-                this.Assert.That(targetMemberWasOrganizer == newMemberState.IsOrganizer, nameof(newMemberState.IsOrganizer) + " cannot be set.");
+                Assert.That(targetMemberWasOrganizer == newMemberState.IsOrganizer, nameof(newMemberState.IsOrganizer) + " cannot be set.");
             }
 
             // I'm not an author or organizer and I'm trying to add a new RSVP
             if (oldMemberState == null && actingMember?.IsOrganizer != true)
             {
-                this.Assert.That(this.EventService.RsvpOpen(newEventState), "New members cannot be added at this time.");
+                Assert.That(EventService.RsvpOpen(newEventState), "New members cannot be added at this time.");
             }
 
             // I am editing my own entry or creating a new entry. I can change anything except the above.
@@ -73,9 +74,10 @@ namespace Fursvp.Domain.Authorization.WriteAuthorization
             }
 
             // I am either an organizer changing or removing another organizer or the author, or I am a member changing or removing anyone else's entry. Changes aren't allowed.
-            this.Assert.That(newMemberState != null, "You do not have permission to remove this member's info.");
+            Assert.That(newMemberState != null, "You do not have permission to remove this member's info.");
+            Contract.Requires(newMemberState != null);
 
-            this.Assert.That(
+            Assert.That(
                 oldMemberState.EmailAddress == newMemberState.EmailAddress
                     && oldMemberState.Name == newMemberState.Name
                     && oldMemberState.IsAttending == newMemberState.IsAttending,
@@ -84,7 +86,7 @@ namespace Fursvp.Domain.Authorization.WriteAuthorization
             // Assert that the old form responses and new form responses are equivalent.
             var oldResponses = oldMemberState.Responses.SelectMany(r => r.Responses.Select(response => new { r.PromptId, response }));
             var newResponses = newMemberState.Responses.SelectMany(r => r.Responses.Select(response => new { r.PromptId, response }));
-            this.Assert.That(oldResponses.FullJoin(newResponses, s => s, s => s, (o, i) => o == null || i == null).Any(), "You do not have permission to change this member's form responses.");
+            Assert.That(oldResponses.FullJoin(newResponses, s => s, s => s, (o, i) => o == null || i == null).Any(), "You do not have permission to change this member's form responses.");
         }
     }
 }

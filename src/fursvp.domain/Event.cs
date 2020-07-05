@@ -10,9 +10,11 @@ namespace Fursvp.Domain
     using System.Collections.ObjectModel;
     using Fursvp.Domain.Forms;
 
+
     /// <summary>
     /// The Domain Event representing the settings and current state of an Event.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1716:Identifiers should not match keywords", Justification = "Can't think of a suitable alternative. If this changes, rename, or correctly map to, any database collection.")]
     public class Event : IEntity<Event>
     {
         /// <summary>
@@ -43,12 +45,12 @@ namespace Fursvp.Domain
         /// <summary>
         /// Gets or sets the collection of Members associated with this Event.
         /// </summary>
-        public ICollection<Member> Members { get; set; } = new Collection<Member>();
+        public ICollection<Member> Members { get; } = new Collection<Member>();
 
         /// <summary>
         /// Gets or sets form responses for an Event.
         /// </summary>
-        public ICollection<FormPrompt> Form { get; set; } = new Collection<FormPrompt>();
+        public ICollection<FormPrompt> Form { get; } = new Collection<FormPrompt>();
 
         /// <summary>
         /// Gets or sets the Event Name.

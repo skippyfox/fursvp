@@ -19,15 +19,15 @@ namespace Fursvp.Data
         /// </summary>
         public MappingProfile()
         {
-            this.CreateIdentityMapsForDeepCopying();
+            CreateIdentityMapsForDeepCopying();
         }
 
         private void CreateIdentityMapsForDeepCopying()
         {
-            this.CreateMap<Event, Event>();
-            this.CreateMap<Member, Member>();
-            this.CreateMap<FormPrompt, FormPrompt>();
-            this.CreateMap<FormResponses, FormResponses>();
+            CreateMap<Event, Event>();
+            CreateMap<Member, Member>();
+            CreateMap<FormPrompt, FormPrompt>();
+            CreateMap<FormResponses, FormResponses>();
         }
     }
 }

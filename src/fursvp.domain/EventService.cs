@@ -20,7 +20,7 @@ namespace Fursvp.Domain
         /// <param name="dateTimeProvider">An instance of <see cref="IProvideDateTime"/>.</param>
         public EventService(IProvideDateTime dateTimeProvider)
         {
-            this.DateTimeProvider = dateTimeProvider;
+            DateTimeProvider = dateTimeProvider;
         }
 
         private IProvideDateTime DateTimeProvider { get; }
@@ -41,14 +41,15 @@ namespace Fursvp.Domain
                 IsOrganizer = true,
                 IsAttending = true,
                 Name = name,
-                RsvpedAt = this.DateTimeProvider.Now,
+                RsvpedAt = DateTimeProvider.Now,
             };
 
             var @event = new Event()
             {
                 Id = Guid.NewGuid(),
-                Members = new List<Member> { author },
             };
+
+            @event.Members.Add(author);
 
             return @event;
         }
@@ -60,8 +61,18 @@ namespace Fursvp.Domain
         /// <param name="member">The <see cref="Member"/> to be added to an existing <see cref="Event"/>.</param>
         public void AddMember(Event @event, Member member)
         {
+            if (member == null)
+            {
+                throw new ArgumentNullException(nameof(member));
+            }
+
+            if (@event == null)
+            {
+                throw new ArgumentNullException(nameof(@event));
+            }
+
             member.Id = Guid.NewGuid();
-            member.RsvpedAt = this.DateTimeProvider.Now;
+            member.RsvpedAt = DateTimeProvider.Now;
             @event.Members.Add(member);
         }
 
@@ -77,7 +88,7 @@ namespace Fursvp.Domain
                 return false;
             }
 
-            return this.DateTimeProvider.Now < @event.RsvpClosesAt?.ToUtc(@event.TimeZoneId);
+            return DateTimeProvider.Now < @event.RsvpClosesAt?.ToUtc(@event.TimeZoneId);
         }
     }
 }

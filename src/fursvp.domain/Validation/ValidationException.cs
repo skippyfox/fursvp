@@ -7,9 +7,11 @@ namespace Fursvp.Domain.Validation
 {
     using System;
 
+
     /// <summary>
     /// Thrown when the attempted transition between two states of the same type is not valid. For use with Domain validation, not endpoint request validation.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1032:Implement standard exception constructors", Justification = "These exception types have nonstandard constructors because the type parameter is required.")]
     public class ValidationException : Exception
     {
         /// <summary>
@@ -20,7 +22,7 @@ namespace Fursvp.Domain.Validation
         public ValidationException(string message, Type type)
             : base(message)
         {
-            this.Type = type;
+            SourceType = type;
         }
 
         /// <summary>
@@ -32,19 +34,21 @@ namespace Fursvp.Domain.Validation
         public ValidationException(string message, Type type, Exception innerException)
             : base(message, innerException)
         {
-            this.Type = type;
+            SourceType = type;
         }
 
         /// <summary>
         /// Gets the type of which the compared states are invalid.
         /// </summary>
-        public Type Type { get; }
+        public Type SourceType { get; }
     }
+
 
     /// <summary>
     /// Thrown when the attempted transition between two states (instances of type T) is not valid. For use with Domain validation, not endpoint request validation.
     /// </summary>
     /// <typeparam name="T">The type of which the compared states are invalid.</typeparam>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1032:Implement standard exception constructors", Justification = "These exception types have nonstandard constructors because the type parameter is required.")]
     public class ValidationException<T> : ValidationException
     {
         /// <summary>

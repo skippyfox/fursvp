@@ -16,9 +16,9 @@ namespace Fursvp.Data.Firestore
         /// <summary>
         /// Converts an Entity of type T to <see cref="Dictionary{String, Object}"/>.
         /// </summary>
-        /// <param name="object">An instance of the entity to convert to Dictionary.</param>
+        /// <param name="content">An instance of the entity to convert to Dictionary.</param>
         /// <returns>The dictionary converted from the entity.</returns>
-        Dictionary<string, object> ToDictionary(T @object);
+        Dictionary<string, object> ToDictionary(T content);
 
         /// <summary>
         /// Converts an Entity of <see cref="Dictionary{String, Object}"/> to type T.

@@ -12,11 +12,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fursvp.Helpers", "fursvp.helpers\Fursvp.Helpers.csproj", "{149D633F-E363-4EF9-B07E-6F75CFA16C76}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4FF3ED8B-0DB2-4B3B-9108-F4772F14FD44}"
-	ProjectSection(SolutionItems) = preProject
-		stylecop.json = stylecop.json
-	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fursvp.Communication", "Fursvp.Communication\Fursvp.Communication.csproj", "{1A8D6680-B831-40C5-B710-347E29898804}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fursvp.Communication", "Fursvp.Communication\Fursvp.Communication.csproj", "{1A8D6680-B831-40C5-B710-347E29898804}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -26,16 +26,16 @@ namespace Fursvp.Data
         /// <summary>
         /// Gets a single instance of T matching the given Id.
         /// </summary>
-        /// <param name="guid">The globally unique identifier for the entity.</param>
+        /// <param name="entityId">The globally unique identifier for the entity.</param>
         /// <returns>An asynchronous <see cref="Task{T}"/> containing the entity if found, otherwise null.</returns>
-        Task<T> GetById(Guid guid);
+        Task<T> GetById(Guid entityId);
 
         /// <summary>
         /// Searches for a newer version of an entity in the database if it exists and returns it if found.
         /// </summary>
-        /// <param name="guid">The globally unique identifier for the entity.</param>
+        /// <param name="entityId">The globally unique identifier for the entity.</param>
         /// <param name="version">The presumed most recent version of the entity document.</param>
         /// <returns>The newer version of the entity if it exists. Otherwise, default(T).</returns>
-        Task<T> GetNewerVersionIfExists(Guid guid, int version);
+        Task<T> GetNewerVersionIfExists(Guid entityId, int version);
     }
 }

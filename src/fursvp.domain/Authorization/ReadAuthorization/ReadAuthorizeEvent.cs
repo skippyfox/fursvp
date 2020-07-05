@@ -19,8 +19,8 @@ namespace Fursvp.Domain.Authorization.ReadAuthorization
         /// <param name="readAuthorizeMember">An instance of IReadAuthorize to perform deeper authorization against members being viewed within this event.</param>
         public ReadAuthorizeEvent(IUserAccessor userAccessor, IReadAuthorize<Member> readAuthorizeMember)
         {
-            this.UserAccessor = userAccessor;
-            this.ReadAuthorizeMember = readAuthorizeMember;
+            UserAccessor = userAccessor;
+            ReadAuthorizeMember = readAuthorizeMember;
         }
 
         private IUserAccessor UserAccessor { get; }
@@ -41,7 +41,7 @@ namespace Fursvp.Domain.Authorization.ReadAuthorization
 
             const bool organizersCanViewUnpublishedEvent = false;
 
-            var actingMember = @event.Members.FirstOrDefault(m => m.EmailAddress == this.UserAccessor.User?.EmailAddress);
+            var actingMember = @event.Members.FirstOrDefault(m => m.EmailAddress == UserAccessor.User?.EmailAddress);
 
             if (actingMember?.IsAuthor == true)
             {
@@ -67,11 +67,14 @@ namespace Fursvp.Domain.Authorization.ReadAuthorization
                 return;
             }
 
-            @event.Members = @event.Members.Where(this.ReadAuthorizeMember.CanRead).ToList();
+            foreach (var member in @event.Members.Where(m => !ReadAuthorizeMember.CanRead(m)).ToList()) 
+            {
+                @event.Members.Remove(member);
+            }
 
             foreach (var member in @event.Members)
             {
-                this.ReadAuthorizeMember.FilterUnauthorizedContent(member);
+                ReadAuthorizeMember.FilterUnauthorizedContent(member);
             }
         }
     }

@@ -34,9 +34,9 @@ namespace Fursvp.Api.Controllers
         /// <param name="emailer">The instance of <see cref="IEmailer"/> used to suppress or send emails.</param>
         public AuthController(IConfiguration configuration, IMemoryCache memoryCache, IEmailer emailer)
         {
-            this.Configuration = configuration;
-            this.MemoryCache = memoryCache;
-            this.Emailer = emailer;
+            Configuration = configuration;
+            MemoryCache = memoryCache;
+            Emailer = emailer;
         }
 
         private IConfiguration Configuration { get; }
@@ -56,8 +56,8 @@ namespace Fursvp.Api.Controllers
         public IActionResult DebugAuth([FromBody]string emailAddress)
         {
             // authentication successful so generate jwt token
-            var token = this.CreateVerificationToken(emailAddress);
-            return this.Ok(token);
+            var token = CreateVerificationToken(emailAddress);
+            return Ok(token);
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Fursvp.Api.Controllers
         [Route("debugerror")]
         public IActionResult DebugError()
         {
-            throw new Exception("Debug exception");
+            throw new Exception();
         }
 
         /// <summary>
@@ -81,22 +81,27 @@ namespace Fursvp.Api.Controllers
         [Route("verifyemail")]
         public IActionResult VerifyEmail([FromBody]VerifyEmailRequest verifyEmailRequest)
         {
+            if (verifyEmailRequest == null)
+            {
+                return BadRequest();
+            }
+
             var verificationCodeCacheKey = VerificationCodeCacheKey(verifyEmailRequest.EmailAddress);
 
-            if (this.MemoryCache.TryGetValue(verificationCodeCacheKey, out string verificationCode))
+            if (MemoryCache.TryGetValue(verificationCodeCacheKey, out string verificationCode))
             {
                 if (verificationCode == verifyEmailRequest.VerificationCode)
                 {
                     // authentication successful.
-                    this.ExpireVerificationCode(verifyEmailRequest.EmailAddress);
-                    var token = this.CreateVerificationToken(verifyEmailRequest.EmailAddress);
-                    return this.Ok(token);
+                    ExpireVerificationCode(verifyEmailRequest.EmailAddress);
+                    var token = CreateVerificationToken(verifyEmailRequest.EmailAddress);
+                    return Ok(token);
                 }
 
-                this.IncrementFailedVerificationAttemptsOrExpire(verifyEmailRequest.EmailAddress);
+                IncrementFailedVerificationAttemptsOrExpire(verifyEmailRequest.EmailAddress);
             }
 
-            return this.Unauthorized();
+            return Unauthorized();
         }
 
         /// <summary>
@@ -108,17 +113,22 @@ namespace Fursvp.Api.Controllers
         [Route("sendverificationcode")]
         public async Task<IActionResult> SendVerificationCode([FromBody]SendVerificationCodeRequest sendVerificationCodeRequest)
         {
+            if (sendVerificationCodeRequest == null)
+            {
+                return BadRequest();
+            }
+
             var verificationCodeCacheKey = VerificationCodeCacheKey(sendVerificationCodeRequest.EmailAddress);
 
             string verificationCode = FursvpRandom.CopyableButHardToGuessCode();
 
-            this.MemoryCache.Set(verificationCodeCacheKey, verificationCode, TimeSpan.FromMinutes(60)); // TODO - make this a config variable
+            MemoryCache.Set(verificationCodeCacheKey, verificationCode, TimeSpan.FromMinutes(60)); // TODO - make this a config variable
 
             var email = CreateVerificationEmail(sendVerificationCodeRequest.EmailAddress, verificationCode);
 
-            await this.Emailer.SendAsync(email);
+            await Emailer.SendAsync(email).ConfigureAwait(false);
 
-            return this.Ok();
+            return Ok();
         }
 
         private static string VerificationCodeCacheKey(string emailAddress) => $"VerificationCodeFor:{emailAddress}";
@@ -145,14 +155,14 @@ If you didn't request this, simply ignore this message.",
 
         private void ExpireVerificationCode(string emailAddress)
         {
-            this.MemoryCache.Remove(VerificationCodeCacheKey(emailAddress));
-            this.MemoryCache.Remove(VerificationAttemptsCacheKey(emailAddress));
+            MemoryCache.Remove(VerificationCodeCacheKey(emailAddress));
+            MemoryCache.Remove(VerificationAttemptsCacheKey(emailAddress));
         }
 
         private string CreateVerificationToken(string emailAddress)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(this.Configuration["AuthorizationIssuerSigningKey"]);
+            var key = Encoding.ASCII.GetBytes(Configuration["AuthorizationIssuerSigningKey"]);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
@@ -170,18 +180,18 @@ If you didn't request this, simply ignore this message.",
         private void IncrementFailedVerificationAttemptsOrExpire(string emailAddress)
         {
             var verificationAttemptsCacheKey = VerificationAttemptsCacheKey(emailAddress);
-            this.MemoryCache.TryGetValue(verificationAttemptsCacheKey, out int failedAttempts);
+            MemoryCache.TryGetValue(verificationAttemptsCacheKey, out int failedAttempts);
             failedAttempts++;
 
             // TODO - make this a config variable
             if (failedAttempts >= 5)
             {
                 // We've hit the max allowed verification code attempts.
-                this.ExpireVerificationCode(emailAddress);
+                ExpireVerificationCode(emailAddress);
             }
             else
             {
-                this.MemoryCache.Set(verificationAttemptsCacheKey, failedAttempts, TimeSpan.FromMinutes(15)); // TODO - make this a config variable.
+                MemoryCache.Set(verificationAttemptsCacheKey, failedAttempts, TimeSpan.FromMinutes(15)); // TODO - make this a config variable.
             }
         }
     }

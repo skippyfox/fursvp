@@ -23,8 +23,8 @@ namespace Fursvp.Api.Filters
         /// <param name="env">The web hosting environment.</param>
         public DebugModeOnlyFilter(ILogger<ApiExceptionFilter> logger, IWebHostEnvironment env)
         {
-            this.Logger = logger;
-            this.WebHostEnvironment = env;
+            Logger = logger;
+            WebHostEnvironment = env;
         }
 
         private ILogger<ApiExceptionFilter> Logger { get; }
@@ -37,9 +37,9 @@ namespace Fursvp.Api.Filters
         /// <param name="context">The ActionExecutingContext.</param>
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            if (!this.WebHostEnvironment.IsDevelopment())
+            if (!WebHostEnvironment.IsDevelopment())
             {
-                this.Logger.LogWarning("Attempt to access a debug-only controller.", context);
+                Logger.LogWarning("Attempt to access a debug-only controller.", context);
                 throw new NotAuthorizedException<string>(string.Empty);
             }
 

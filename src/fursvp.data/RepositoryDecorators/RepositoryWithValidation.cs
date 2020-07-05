@@ -27,9 +27,9 @@ namespace Fursvp.Data.RepositoryDecorators
         /// <param name="validator">The instance of <see cref="IValidate{T}"/> to perform validation.</param>
         public RepositoryWithValidation(IRepositoryWrite<T> decorated, IRepositoryRead<T> repositoryRead, IValidate<T> validator)
         {
-            this.Decorated = decorated;
-            this.Validator = validator;
-            this.RepositoryRead = repositoryRead;
+            Decorated = decorated;
+            Validator = validator;
+            RepositoryRead = repositoryRead;
         }
 
         private IRepositoryWrite<T> Decorated { get; }
@@ -45,9 +45,9 @@ namespace Fursvp.Data.RepositoryDecorators
         /// <returns>An asynchronous <see cref="Task{T}"/>.</returns>
         public async Task Insert(T entity)
         {
-            this.Validator.ValidateState(default, entity);
+            Validator.ValidateState(default, entity);
 
-            await this.Decorated.Insert(entity);
+            await Decorated.Insert(entity).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -57,16 +57,16 @@ namespace Fursvp.Data.RepositoryDecorators
         /// <returns>An asynchronous <see cref="Task{T}"/>.</returns>
         public async Task Update(T updatedEntity)
         {
-            var oldEntity = await this.RepositoryRead.GetById(updatedEntity.Id);
+            var oldEntity = await RepositoryRead.GetById(updatedEntity.Id).ConfigureAwait(false);
 
             if (oldEntity == null)
             {
                 throw new ValidationException<T>("Must provide a valid id");
             }
 
-            this.Validator.ValidateState(oldEntity, updatedEntity);
+            Validator.ValidateState(oldEntity, updatedEntity);
 
-            await this.Decorated.Update(updatedEntity);
+            await Decorated.Update(updatedEntity).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -76,11 +76,11 @@ namespace Fursvp.Data.RepositoryDecorators
         /// <returns>An asynchronous <see cref="Task{T}"/>.</returns>
         public async Task Delete(Guid guid)
         {
-            var entity = await this.RepositoryRead.GetById(guid);
+            var entity = await RepositoryRead.GetById(guid).ConfigureAwait(false);
 
-            this.Validator.ValidateState(entity, default);
+            Validator.ValidateState(entity, default);
 
-            await this.Decorated.Delete(guid);
+            await Decorated.Delete(guid).ConfigureAwait(false);
         }
     }
 }

@@ -11,6 +11,7 @@ namespace Fursvp.Api
     /// <summary>
     /// The entry point for Fursvp.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1052:Static holder types should be Static or NotInheritable", Justification = "Application entry point.")]
     public class Program
     {
         /// <summary>

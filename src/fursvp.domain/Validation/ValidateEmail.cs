@@ -21,7 +21,8 @@ namespace Fursvp.Domain.Validation
         {
             try
             {
-                new MailAddress(address);
+                // We're not using this MailAddress - we just need to try and create it and see if an exception is thrown.
+                _ = new MailAddress(address);
             }
             catch (ArgumentNullException)
             {

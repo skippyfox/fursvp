@@ -123,7 +123,7 @@
             </summary>
             <param name="eventId">The globally unique identifier for the Event.</param>
             <param name="newMember">The <see cref="T:Fursvp.Api.Requests.NewMemberRequest" /> containing member data to be added.</param>
-            <returns>201 Created on success, 404 Not Found if the Event Id is not found, or 400 Bad Request if the member's email address already exists in the event.</returns>
+            <returns>201 Created on success, 404 Not Found if the Event Id is not found, or 409 Conflict if the member's email address already exists in the event.</returns>
         </member>
         <member name="M:Fursvp.Api.Controllers.EventController.UpdateMember(System.Guid,System.Guid,Fursvp.Api.Requests.UpdateMemberRequest)">
             <summary>
@@ -147,11 +147,10 @@
             The Web Api Controller used to get Time Zone details.
             </summary>
         </member>
-        <member name="M:Fursvp.Api.Controllers.TimeZonesController.#ctor(Microsoft.Extensions.Logging.ILogger{Fursvp.Api.Controllers.EventController})">
+        <member name="M:Fursvp.Api.Controllers.TimeZonesController.#ctor">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Api.Controllers.TimeZonesController"/> class.
             </summary>
-            <param name="logger">The application event logger.</param>
         </member>
         <member name="M:Fursvp.Api.Controllers.TimeZonesController.GetTimeZones">
             <summary>
@@ -213,7 +212,7 @@
             Ensures that the user is authorized to read a single element and filters out any unauthorized content within the element.
             </summary>
             <typeparam name="T">The type of the content to be searched.</typeparam>
-            <param name="object">The content being searched.</param>
+            <param name="content">The content being searched.</param>
             <param name="readAuthorizeObject">Executes read authorization methods against this type of object.</param>
             <param name="context">The Microsoft.AspNetCore.Mvc.Filters.ActionExecutedContext.</param>
         </member>

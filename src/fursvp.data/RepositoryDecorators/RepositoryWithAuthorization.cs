@@ -28,9 +28,9 @@ namespace Fursvp.Data.RepositoryDecorators
         /// <param name="authorize">The instance of <see cref="IWriteAuthorize{T}"/> to perform authorization.</param>
         public RepositoryWithAuthorization(IRepositoryWrite<T> decorated, IRepositoryRead<T> repositoryRead, IWriteAuthorize<T> authorize)
         {
-            this.Decorated = decorated;
-            this.RepositoryRead = repositoryRead;
-            this.Authorize = authorize;
+            Decorated = decorated;
+            RepositoryRead = repositoryRead;
+            Authorize = authorize;
         }
 
         private IRepositoryWrite<T> Decorated { get; }
@@ -46,9 +46,9 @@ namespace Fursvp.Data.RepositoryDecorators
         /// <returns>An asynchronous <see cref="Task{T}"/>.</returns>
         public async Task Insert(T entity)
         {
-            this.Authorize.WriteAuthorize(default, entity);
+            Authorize.WriteAuthorize(default, entity);
 
-            await this.Decorated.Insert(entity);
+            await Decorated.Insert(entity).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -58,16 +58,16 @@ namespace Fursvp.Data.RepositoryDecorators
         /// <returns>An asynchronous <see cref="Task{T}"/>.</returns>
         public async Task Update(T updatedEntity)
         {
-            var oldEntity = await this.RepositoryRead.GetById(updatedEntity.Id);
+            var oldEntity = await RepositoryRead.GetById(updatedEntity.Id).ConfigureAwait(false);
 
             if (oldEntity == null)
             {
                 throw new ValidationException<T>("Must provide a valid id");
             }
 
-            this.Authorize.WriteAuthorize(oldEntity, updatedEntity);
+            Authorize.WriteAuthorize(oldEntity, updatedEntity);
 
-            await this.Decorated.Update(updatedEntity);
+            await Decorated.Update(updatedEntity).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -77,11 +77,11 @@ namespace Fursvp.Data.RepositoryDecorators
         /// <returns>An asynchronous <see cref="Task{T}"/>.</returns>
         public async Task Delete(Guid guid)
         {
-            var entity = await this.RepositoryRead.GetById(guid);
+            var entity = await RepositoryRead.GetById(guid).ConfigureAwait(false);
 
-            this.Authorize.WriteAuthorize(entity, default);
+            Authorize.WriteAuthorize(entity, default);
 
-            await this.Decorated.Delete(guid);
+            await Decorated.Delete(guid).ConfigureAwait(false);
         }
     }
 }

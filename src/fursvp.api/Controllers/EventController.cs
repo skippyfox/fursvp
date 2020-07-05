@@ -34,11 +34,11 @@ namespace Fursvp.Api.Controllers
         /// <param name="emailer">The emailer what sends the emails.</param>
         public EventController(ILogger<EventController> logger, IEventService eventService, IRepositoryWrite<Event> eventRepositoryWrite, IRepositoryRead<Event> eventRepositoryRead, IEmailer emailer)
         {
-            this.Logger = logger;
-            this.EventRepositoryWrite = eventRepositoryWrite;
-            this.EventRepositoryRead = eventRepositoryRead;
-            this.EventService = eventService;
-            this.Emailer = emailer;
+            Logger = logger;
+            EventRepositoryWrite = eventRepositoryWrite;
+            EventRepositoryRead = eventRepositoryRead;
+            EventService = eventService;
+            Emailer = emailer;
         }
 
         private ILogger<EventController> Logger { get; }
@@ -58,7 +58,7 @@ namespace Fursvp.Api.Controllers
         [HttpGet]
         public async Task<List<Event>> GetEvents()
         {
-            return (await this.EventRepositoryRead.GetAll()).ToList();
+            return (await EventRepositoryRead.GetAll().ConfigureAwait(false)).ToList();
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace Fursvp.Api.Controllers
         [Route("{id}")]
         public Task<Event> GetEvent(Guid id)
         {
-            return this.EventRepositoryRead.GetById(id);
+            return EventRepositoryRead.GetById(id);
         }
 
         /// <summary>
@@ -81,9 +81,14 @@ namespace Fursvp.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateEvent([FromBody] NewMemberRequest author)
         {
-            var @event = this.EventService.CreateNewEvent(author.EmailAddress, author.Name);
-            await this.EventRepositoryWrite.Insert(@event);
-            return this.CreatedAtAction(nameof(this.GetEvent), new { id = @event.Id }, @event);
+            if (author == null)
+            {
+                throw new ArgumentNullException(nameof(author));
+            }
+
+            var @event = EventService.CreateNewEvent(author.EmailAddress, author.Name);
+            await EventRepositoryWrite.Insert(@event).ConfigureAwait(false);
+            return CreatedAtAction(nameof(GetEvent), new { id = @event.Id }, @event);
         }
 
         /// <summary>
@@ -96,10 +101,15 @@ namespace Fursvp.Api.Controllers
         [Route("{eventId}")]
         public async Task<IActionResult> UpdateEvent(Guid eventId, [FromBody] UpdateEventRequest request)
         {
-            var @event = await this.EventRepositoryRead.GetById(eventId);
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            var @event = await EventRepositoryRead.GetById(eventId).ConfigureAwait(false);
             if (@event == null)
             {
-                return this.NotFound("Event not found with id " + eventId);
+                return NotFound("Event not found with id " + eventId);
             }
 
             @event.Location = request.Location;
@@ -111,8 +121,8 @@ namespace Fursvp.Api.Controllers
             @event.EndsAt = request.EndsAt;
             @event.TimeZoneId = request.TimeZoneId;
 
-            await this.EventRepositoryWrite.Update(@event);
-            return this.Ok(@event);
+            await EventRepositoryWrite.Update(@event).ConfigureAwait(false);
+            return Ok(@event);
         }
 
         /// <summary>
@@ -124,16 +134,16 @@ namespace Fursvp.Api.Controllers
         [Route("{eventId}/publish")]
         public async Task<IActionResult> PublishEvent(Guid eventId)
         {
-            var @event = await this.EventRepositoryRead.GetById(eventId);
+            var @event = await EventRepositoryRead.GetById(eventId).ConfigureAwait(false);
             if (@event == null)
             {
-                return this.NotFound("Event not found with id " + eventId);
+                return NotFound("Event not found with id " + eventId);
             }
 
             @event.IsPublished = true;
 
-            await this.EventRepositoryWrite.Update(@event);
-            return this.Ok(@event);
+            await EventRepositoryWrite.Update(@event).ConfigureAwait(false);
+            return Ok(@event);
         }
 
         /// <summary>
@@ -145,16 +155,16 @@ namespace Fursvp.Api.Controllers
         [Route("{eventId}/publish")]
         public async Task<IActionResult> UnpublishEvent(Guid eventId)
         {
-            var @event = await this.EventRepositoryRead.GetById(eventId);
+            var @event = await EventRepositoryRead.GetById(eventId).ConfigureAwait(false);
             if (@event == null)
             {
-                return this.NotFound("Event not found with id " + eventId);
+                return NotFound("Event not found with id " + eventId);
             }
 
             @event.IsPublished = true;
 
-            await this.EventRepositoryWrite.Update(@event);
-            return this.Ok(@event);
+            await EventRepositoryWrite.Update(@event).ConfigureAwait(false);
+            return Ok(@event);
         }
 
         /// <summary>
@@ -162,20 +172,25 @@ namespace Fursvp.Api.Controllers
         /// </summary>
         /// <param name="eventId">The globally unique identifier for the Event.</param>
         /// <param name="newMember">The <see cref="NewMemberRequest" /> containing member data to be added.</param>
-        /// <returns>201 Created on success, 404 Not Found if the Event Id is not found, or 400 Bad Request if the member's email address already exists in the event.</returns>
+        /// <returns>201 Created on success, 404 Not Found if the Event Id is not found, or 409 Conflict if the member's email address already exists in the event.</returns>
         [HttpPost]
         [Route("{eventId}/member")]
         public async Task<IActionResult> AddMember(Guid eventId, [FromBody] NewMemberRequest newMember)
         {
-            var @event = await this.EventRepositoryRead.GetById(eventId);
-            if (@event == null)
+            if (newMember == null)
             {
-                return this.NotFound("Event not found with id " + eventId);
+                throw new ArgumentNullException(nameof(newMember));
             }
 
-            if (@event.Members.Any(m => m.EmailAddress.ToLower() == newMember.EmailAddress.ToLower()))
+            var @event = await EventRepositoryRead.GetById(eventId).ConfigureAwait(false);
+            if (@event == null)
             {
-                return this.BadRequest("Email address already exists in member list.");
+                return NotFound("Event not found with id " + eventId);
+            }
+
+            if (@event.Members.Any(m => m.EmailAddress.ToUpperInvariant() == newMember.EmailAddress.ToUpperInvariant()))
+            {
+                return Conflict("Email address already exists in member list.");
             }
 
             var member = new Member
@@ -185,27 +200,23 @@ namespace Fursvp.Api.Controllers
                 Name = newMember.Name,
             };
 
-            this.EventService.AddMember(@event, member);
-            await this.EventRepositoryWrite.Update(@event);
+            EventService.AddMember(@event, member);
+            await EventRepositoryWrite.Update(@event).ConfigureAwait(false);
 
-            try
-            {
+            _ = Task.Run(() =>
+              {
                 // TODO: Get hardcoded strings into config
-                this.Emailer?.Send(new Email
-                {
-                    From = new EmailAddress { Address = "noreply@fursvp.com", Name = "Fursvp.com" },
-                    To = new EmailAddress { Address = newMember.EmailAddress, Name = newMember.Name },
-                    Subject = $"{@event.Name}: Your event registration",
-                    PlainTextContent = @$"{newMember.Name}: We've got you on the list! View the event details or review and change your response at Fursvp.com.",
-                    HtmlContent = @$"{HttpUtility.HtmlEncode(newMember.Name)}: We've got you on the list! View the event details or review and change your response at <a href=""https://www.fursvp.com"">FURsvp.com</a>.",
-                });
-            }
-            catch
-            {
-                // TODO ?
-            }
+                Emailer?.Send(new Email
+                  {
+                      From = new EmailAddress { Address = "noreply@fursvp.com", Name = "Fursvp.com" },
+                      To = new EmailAddress { Address = newMember.EmailAddress, Name = newMember.Name },
+                      Subject = $"{@event.Name}: Your event registration",
+                      PlainTextContent = @$"{newMember.Name}: We've got you on the list! View the event details or review and change your response at Fursvp.com.",
+                      HtmlContent = @$"{HttpUtility.HtmlEncode(newMember.Name)}: We've got you on the list! View the event details or review and change your response at <a href=""https://www.fursvp.com"">FURsvp.com</a>.",
+                  });
+              });
 
-            return this.CreatedAtAction(nameof(this.GetEvent), new { id = @event.Id }, @event);
+            return CreatedAtAction(nameof(GetEvent), new { id = @event.Id }, @event);
         }
 
         /// <summary>
@@ -219,28 +230,33 @@ namespace Fursvp.Api.Controllers
         [Route("{eventId}/member/{memberId}")]
         public async Task<IActionResult> UpdateMember(Guid eventId, Guid memberId, [FromBody] UpdateMemberRequest updateMember)
         {
-            var @event = await this.EventRepositoryRead.GetById(eventId);
+            if (updateMember == null)
+            {
+                throw new ArgumentNullException(nameof(updateMember)); 
+            }
+
+            var @event = await EventRepositoryRead.GetById(eventId).ConfigureAwait(false);
             if (@event == null)
             {
-                return this.NotFound("Event not found with id " + eventId);
+                return NotFound("Event not found with id " + eventId);
             }
 
             if (!updateMember.IsAttending && !updateMember.IsOrganizer)
             {
-                return this.BadRequest("Member must be at least one of these: Attendee, Organizer");
+                return BadRequest("Member must be at least one of these: Attendee, Organizer");
             }
 
             var member = @event.Members.SingleOrDefault(x => x.Id == memberId);
             if (member == null)
             {
-                return this.NotFound("Member not found with id " + memberId);
+                return NotFound("Member not found with id " + memberId);
             }
 
             member.IsAttending = updateMember.IsAttending;
             member.IsOrganizer = updateMember.IsOrganizer;
 
-            await this.EventRepositoryWrite.Update(@event);
-            return this.Ok(@event);
+            await EventRepositoryWrite.Update(@event).ConfigureAwait(false);
+            return Ok(@event);
         }
 
         /// <summary>
@@ -253,22 +269,22 @@ namespace Fursvp.Api.Controllers
         [Route("{eventId}/member/{memberId}")]
         public async Task<IActionResult> RemoveMember(Guid eventId, Guid memberId)
         {
-            var @event = await this.EventRepositoryRead.GetById(eventId);
+            var @event = await EventRepositoryRead.GetById(eventId).ConfigureAwait(false);
             if (@event == null)
             {
-                return this.NotFound("Event not found with id " + eventId);
+                return NotFound("Event not found with id " + eventId);
             }
 
             var member = @event.Members.SingleOrDefault(x => x.Id == memberId);
             if (member == null)
             {
-                return this.NotFound("Member not found with id " + memberId);
+                return NotFound("Member not found with id " + memberId);
             }
 
             @event.Members.Remove(member);
 
-            await this.EventRepositoryWrite.Update(@event);
-            return this.NoContent();
+            await EventRepositoryWrite.Update(@event).ConfigureAwait(false);
+            return NoContent();
         }
     }
 }

@@ -6,12 +6,13 @@
 namespace Fursvp.Helpers
 {
     using System;
+    using System.Globalization;
     using System.Linq;
 
     /// <summary>
     /// Helper methods for random behavior.
     /// </summary>
-    public class FursvpRandom
+    public static class FursvpRandom
     {
         /// <summary>
         /// No lucky guesses random code.
@@ -23,7 +24,7 @@ namespace Fursvp.Helpers
             string code;
             do
             {
-                code = new Random().Next(100236, 998752).ToString();
+                code = new Random().Next(100236, 998752).ToString(CultureInfo.InvariantCulture);
             }
             while (!IsSturdy(code));
 

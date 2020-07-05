@@ -7,9 +7,11 @@ namespace Fursvp.Domain.Authorization
 {
     using System;
 
+
     /// <summary>
     /// An Exception that represents an unauthorized attempt at an action.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1032:Implement standard exception constructors", Justification = "These exception types have nonstandard constructors because the type parameter is required.")]
     public class NotAuthorizedException : Exception
     {
         /// <summary>
@@ -20,7 +22,7 @@ namespace Fursvp.Domain.Authorization
         public NotAuthorizedException(string message, Type type)
             : base(message)
         {
-            this.Type = type;
+            SourceType = type;
         }
 
         /// <summary>
@@ -32,19 +34,21 @@ namespace Fursvp.Domain.Authorization
         public NotAuthorizedException(string message, Type type, Exception innerException)
             : base(message, innerException)
         {
-            this.Type = type;
+            SourceType = type;
         }
 
         /// <summary>
         /// Gets the type for which the change is not authorized.
         /// </summary>
-        public Type Type { get; }
+        public Type SourceType { get; }
     }
+
 
     /// <summary>
     /// An Exception that represents an unauthorized attempt at an action.
     /// </summary>
     /// <typeparam name="T">The type against which the action is not authorized.</typeparam>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1032:Implement standard exception constructors", Justification = "These exception types have nonstandard constructors because the type parameter is required.")]
     public class NotAuthorizedException<T> : NotAuthorizedException
     {
         /// <summary>

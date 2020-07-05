@@ -34,8 +34,8 @@ namespace Fursvp.Data
         /// <summary>
         /// Permanently removes an existing document representing the entity from the repository.
         /// </summary>
-        /// <param name="guid">The globally unique identifier for the entity.</param>
+        /// <param name="entityId">The globally unique identifier for the entity.</param>
         /// <returns>An asynchronous <see cref="Task{T}"/>.</returns>
-        Task Delete(Guid guid);
+        Task Delete(Guid entityId);
     }
 }

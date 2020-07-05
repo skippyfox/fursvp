@@ -6,6 +6,7 @@
 namespace Fursvp.Domain.Validation
 {
     using System;
+    using System.Diagnostics.Contracts;
     using System.Linq;
     using Fursvp.Helpers;
 
@@ -20,8 +21,8 @@ namespace Fursvp.Domain.Validation
         /// <param name="validateEmail">An instance of <see cref="IValidateEmail"/> to provide email validation.</param>
         public ValidateMember(IValidateEmail validateEmail)
         {
-            this.ValidateEmail = validateEmail;
-            this.Assert = new Assertions<ValidationException<Member>>();
+            ValidateEmail = validateEmail;
+            Assert = new Assertions<ValidationException<Member>>();
         }
 
         private IValidateEmail ValidateEmail { get; }
@@ -44,33 +45,41 @@ namespace Fursvp.Domain.Validation
 
             if (newMemberState == null)
             {
-                this.Assert.That(!oldMemberState.IsAuthor, "The author of an event cannot be removed.");
+                Contract.Requires(oldMemberState != null);
+
+                Assert.That(!oldMemberState.IsAuthor, "The author of an event cannot be removed.");
 
                 return; // Delete member
             }
 
-            this.Assert.That(!string.IsNullOrWhiteSpace(newMemberState.EmailAddress), "Email address is required.");
-            this.ValidateEmail.Validate(newMemberState.EmailAddress);
-            this.Assert.That(!string.IsNullOrWhiteSpace(newMemberState.Name), "Name is required.");
-            this.Assert.That(newMemberState.IsAuthor || newMemberState.IsOrganizer || newMemberState.IsAttending, "Member must be the Author, an Organizer, or Attending.");
-            this.Assert.That(newMemberState.Responses != null, "Responses cannot be null.");
-            this.Assert.That(oldMemberState == null || newMemberState == null || oldMemberState.RsvpedAt == default(DateTime) || oldMemberState.RsvpedAt == newMemberState.RsvpedAt, "RsvpedAt cannot be changed once set.");
+            if (newEventState == null)
+            {
+                // This cannot be null if newMemberState is not null
+                throw new ArgumentNullException(nameof(newEventState));
+            }
+
+            Assert.That(!string.IsNullOrWhiteSpace(newMemberState.EmailAddress), "Email address is required.");
+            ValidateEmail.Validate(newMemberState.EmailAddress);
+            Assert.That(!string.IsNullOrWhiteSpace(newMemberState.Name), "Name is required.");
+            Assert.That(newMemberState.IsAuthor || newMemberState.IsOrganizer || newMemberState.IsAttending, "Member must be the Author, an Organizer, or Attending.");
+            Assert.That(newMemberState.Responses != null, "Responses cannot be null.");
+            Assert.That(oldMemberState == null || newMemberState == null || oldMemberState.RsvpedAt == default(DateTime) || oldMemberState.RsvpedAt == newMemberState.RsvpedAt, "RsvpedAt cannot be changed once set.");
 
             foreach (var response in newMemberState.Responses)
             {
                 var formPrompt = newEventState.Form.FirstOrDefault(f => f.Id == response.PromptId);
-                this.Assert.That(formPrompt != null, "Response prompt must have a matching prompt in the event form.");
-                this.Assert.That(!response.Responses.Any(string.IsNullOrWhiteSpace), "Response text cannot be null or whitespace.");
+                Assert.That(formPrompt != null, "Response prompt must have a matching prompt in the event form.");
+                Assert.That(!response.Responses.Any(string.IsNullOrWhiteSpace), "Response text cannot be null or whitespace.");
 
                 if (formPrompt.Required)
                 {
-                    this.Assert.That(response.Responses.Count > 0, "Form response is required.");
+                    Assert.That(response.Responses.Count > 0, "Form response is required.");
                 }
 
                 // TODO - Get these magic strings out of here
                 if (formPrompt.Behavior == "Text" || formPrompt.Behavior == "Dropdown")
                 {
-                    this.Assert.That(response.Responses.Count <= 1, "Form prompt does not permit multiple answers.");
+                    Assert.That(response.Responses.Count <= 1, "Form prompt does not permit multiple answers.");
                 }
             }
         }
