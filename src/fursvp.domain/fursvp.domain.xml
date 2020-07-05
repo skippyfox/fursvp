@@ -100,20 +100,31 @@
             <param name="oldState">The initial object state.</param>
             <param name="newState">The new object state.</param>
         </member>
+        <member name="T:Fursvp.Domain.Authorization.WriteAuthorization.IWriteAuthorizeMember">
+            <summary>
+            Checks for authorization by a given actor to perform a change to a Member.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Domain.Authorization.WriteAuthorization.IWriteAuthorizeMember.WriteAuthorize(Fursvp.Domain.Member,Fursvp.Domain.Event,Fursvp.Domain.Member,Fursvp.Domain.Event,Fursvp.Domain.Member)">
+            <summary>
+            Performs the authorization check for a Member state change and throws an exception if the check fails.
+            </summary>
+            <param name="oldMemberState">The initial member state.</param>
+            <param name="oldEventState">The initial event state.</param>
+            <param name="newMemberState">The new member state.</param>
+            <param name="newEventState">The new event state.</param>
+            <param name="actingMember">The member performing the action.</param>
+        </member>
         <member name="T:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeEvent">
             <summary>
             Checks for authorization by a given actor to create or perform a change to an Event.
             </summary>
         </member>
-        <member name="M:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeEvent.#ctor(Fursvp.Domain.Authorization.WriteAuthorization.IWriteAuthorize{Fursvp.Domain.Member},Fursvp.Domain.Authorization.WriteAuthorization.IWriteAuthorize{Fursvp.Domain.Member},Fursvp.Domain.Authorization.WriteAuthorization.IWriteAuthorize{Fursvp.Domain.Member},Fursvp.Domain.Authorization.WriteAuthorization.IWriteAuthorize{Fursvp.Domain.Member},Fursvp.Domain.IEventService,Fursvp.Domain.Authorization.IUserAccessor)">
+        <member name="M:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeEvent.#ctor(Fursvp.Domain.Authorization.WriteAuthorization.IWriteAuthorizeMember,Fursvp.Domain.Authorization.IUserAccessor)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeEvent"/> class.
             </summary>
-            <param name="authorizeMemberAsAuthor">The <see cref="T:Fursvp.Domain.Authorization.WriteAuthorization.IWriteAuthorize`1"/> used to authorize Member state changes when the authenticated user is the Event's author.</param>
-            <param name="authorizeMemberAsOrganizer">The <see cref="T:Fursvp.Domain.Authorization.WriteAuthorization.IWriteAuthorize`1"/> used to authorize Member state changes when the authenticated user is an organizer of the Event.</param>
-            <param name="authorizeMemberAsAttendee">The <see cref="T:Fursvp.Domain.Authorization.WriteAuthorization.IWriteAuthorize`1"/> used to authorize Member state changes when the authenticated user is an attendee and RSVPs are open.</param>
-            <param name="authorizeFrozenMemberAsAttendee">The <see cref="T:Fursvp.Domain.Authorization.WriteAuthorization.IWriteAuthorize`1"/> used to authorize Member state changes when the authenticated user is an attendee and RVSPs are not open.</param>
-            <param name="eventService">An instance of <see cref="T:Fursvp.Domain.IEventService"/> used to evaluate an Event's state.</param>
+            <param name="writeAuthorizeMember">The <see cref="T:Fursvp.Domain.Authorization.WriteAuthorization.IWriteAuthorizeMember"/> used to authorize Member state changes.</param>
             <param name="userAccessor">An instance of <see cref="T:Fursvp.Domain.Authorization.IUserAccessor"/> used to get the authenticated user's information..</param>
         </member>
         <member name="M:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeEvent.WriteAuthorize(Fursvp.Domain.Event,Fursvp.Domain.Event)">
@@ -123,76 +134,26 @@
             <param name="oldState">The initial state of the Event.</param>
             <param name="newState">The new state of the Event.</param>
         </member>
-        <member name="T:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeFrozenMemberAsAttendee">
-            <summary>
-            Checks for authorization by a given event attendee to create or perform a change to a Member that is frozen based on its Event's settings.
-            </summary>
-        </member>
-        <member name="M:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeFrozenMemberAsAttendee.#ctor(Fursvp.Domain.Authorization.IUserAccessor)">
-            <summary>
-            Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeFrozenMemberAsAttendee"/> class.
-            </summary>
-            <param name="userAccessor">An instance of <see cref="T:Fursvp.Domain.Authorization.IUserAccessor"/> used to get the authenticated user's information.</param>
-        </member>
-        <member name="M:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeFrozenMemberAsAttendee.WriteAuthorize(Fursvp.Domain.Member,Fursvp.Domain.Member)">
-            <summary>
-            Performs the authorization check for a state change and throws an exception if the check fails.
-            </summary>
-            <param name="oldState">The initial state of the Member.</param>
-            <param name="newState">The new state of the Member.</param>
-        </member>
-        <member name="T:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeMemberAsAttendee">
+        <member name="T:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeMember">
             <summary>
             Checks for authorization by a given event attendee to create or perform a change to a Member.
             </summary>
         </member>
-        <member name="M:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeMemberAsAttendee.#ctor(Fursvp.Domain.Authorization.IUserAccessor)">
+        <member name="M:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeMember.#ctor(Fursvp.Domain.IEventService)">
             <summary>
-            Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeMemberAsAttendee"/> class.
+            Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeMember"/> class.
             </summary>
-            <param name="userAccessor">An instance of <see cref="T:Fursvp.Domain.Authorization.IUserAccessor"/> used to get the authenticated user's information.</param>
+            <param name="eventService">An instance of <see cref="T:Fursvp.Domain.IEventService"/>.</param>
         </member>
-        <member name="M:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeMemberAsAttendee.WriteAuthorize(Fursvp.Domain.Member,Fursvp.Domain.Member)">
+        <member name="M:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeMember.WriteAuthorize(Fursvp.Domain.Member,Fursvp.Domain.Event,Fursvp.Domain.Member,Fursvp.Domain.Event,Fursvp.Domain.Member)">
             <summary>
             Performs the authorization check for a state change and throws an exception if the check fails.
             </summary>
-            <param name="oldState">The initial state of the Member.</param>
-            <param name="newState">The new state of the Member.</param>
-        </member>
-        <member name="T:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeMemberAsAuthor">
-            <summary>
-            Checks for authorization by a given event author to create or perform a change to a Member.
-            </summary>
-        </member>
-        <member name="M:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeMemberAsAuthor.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeMemberAsAuthor"/> class.
-            </summary>
-        </member>
-        <member name="M:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeMemberAsAuthor.WriteAuthorize(Fursvp.Domain.Member,Fursvp.Domain.Member)">
-            <summary>
-            Performs the authorization check for a state change and throws an exception if the check fails.
-            </summary>
-            <param name="oldState">The initial state of the Member.</param>
-            <param name="newState">The new state of the Member.</param>
-        </member>
-        <member name="T:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeMemberAsOrganizer">
-            <summary>
-            Checks for authorization by a given event organizer to create or perform a change to a Member.
-            </summary>
-        </member>
-        <member name="M:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeMemberAsOrganizer.#ctor(Fursvp.Domain.Authorization.IUserAccessor)">
-            <summary>
-            Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeMemberAsOrganizer"/> class.
-            </summary>
-            <param name="userAccessor">An instance of <see cref="T:Fursvp.Domain.Authorization.IUserAccessor"/> used to get the authenticated user's information..</param>
-        </member>
-        <member name="M:Fursvp.Domain.Authorization.WriteAuthorization.WriteAuthorizeMemberAsOrganizer.WriteAuthorize(Fursvp.Domain.Member,Fursvp.Domain.Member)">
-            <summary>
-            Performs the authorization check for a state change and throws an exception if the check fails.
-            </summary>
-            <param name="oldState">The initial state of the Member.</param>
-            <param name="newState">The new state of the Member.</param>
+            <param name="oldMemberState">The initial member state.</param>
+            <param name="oldEventState">The initial event state.</param>
+            <param name="newMemberState">The new member state.</param>
+            <param name="newEventState">The new event state.</param>
+            <param name="actingMember">The member performing the action.</param>
         </member>
         <member name="T:Fursvp.Domain.Event">
             <summary>
@@ -495,6 +456,20 @@
             </summary>
             <param name="address">The email address.</param>
         </member>
+        <member name="T:Fursvp.Domain.Validation.IValidateMember">
+            <summary>
+            Compares and validates the transition between two states (instances of <see cref="T:Fursvp.Domain.Member"/>). For use with Domain Member validation, not endpoint request validation.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Domain.Validation.IValidateMember.ValidateState(Fursvp.Domain.Member,Fursvp.Domain.Event,Fursvp.Domain.Member,Fursvp.Domain.Event)">
+            <summary>
+            Compares two instances of <see cref="T:Fursvp.Domain.Member"/> and throws an exception if the transition from oldState to newState is not valid.
+            </summary>
+            <param name="oldMemberState">The old member state.</param>
+            <param name="oldEventState">The old event state.</param>
+            <param name="newMemberState">The new member state.</param>
+            <param name="newEventState">The new event state.</param>
+        </member>
         <member name="T:Fursvp.Domain.Validation.IValidateTimeZone">
             <summary>
             Provides logic to ensure that a TimeZoneId string can be resolved to an instance of TimeZoneInfo.
@@ -522,11 +497,10 @@
             Compares and validates the transition between two states (instances of <see cref="T:Fursvp.Domain.Event"/>). For use with Domain Event validation, not endpoint request validation.
             </summary>
         </member>
-        <member name="M:Fursvp.Domain.Validation.ValidateEvent.#ctor(Fursvp.Domain.IProvideDateTime,Fursvp.Domain.Validation.IValidate{Fursvp.Domain.Member},Fursvp.Domain.Validation.IValidateTimeZone)">
+        <member name="M:Fursvp.Domain.Validation.ValidateEvent.#ctor(Fursvp.Domain.Validation.IValidateMember,Fursvp.Domain.Validation.IValidateTimeZone)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Domain.Validation.ValidateEvent"/> class.
             </summary>
-            <param name="dateTimeProvider">An instance of <see cref="T:Fursvp.Domain.IProvideDateTime"/>.</param>
             <param name="validateMember">An instance of <see cref="T:Fursvp.Domain.Validation.IValidate`1"/> to provide Member state validation.</param>
             <param name="validateTimeZone">An instance of <see cref="T:Fursvp.Domain.Validation.IValidateTimeZone"/> to provide time zone validation.</param>
         </member>
@@ -548,12 +522,14 @@
             </summary>
             <param name="validateEmail">An instance of <see cref="T:Fursvp.Domain.Validation.IValidateEmail"/> to provide email validation.</param>
         </member>
-        <member name="M:Fursvp.Domain.Validation.ValidateMember.ValidateState(Fursvp.Domain.Member,Fursvp.Domain.Member)">
+        <member name="M:Fursvp.Domain.Validation.ValidateMember.ValidateState(Fursvp.Domain.Member,Fursvp.Domain.Event,Fursvp.Domain.Member,Fursvp.Domain.Event)">
             <summary>
             Compares two instances of <see cref="T:Fursvp.Domain.Member"/> and throws an exception if the transition from oldState to newState is not valid.
             </summary>
-            <param name="oldState">The old state.</param>
-            <param name="newState">The new state.</param>
+            <param name="oldMemberState">The old member state.</param>
+            <param name="oldEventState">The old event state.</param>
+            <param name="newMemberState">The new member state.</param>
+            <param name="newEventState">The new event state.</param>
         </member>
         <member name="T:Fursvp.Domain.Validation.ValidateTimeZone">
             <summary>

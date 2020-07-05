@@ -15,7 +15,6 @@ namespace Fursvp.Api
     using Fursvp.Domain.Authorization;
     using Fursvp.Domain.Authorization.ReadAuthorization;
     using Fursvp.Domain.Authorization.WriteAuthorization;
-    using Fursvp.Domain.Forms;
     using Fursvp.Domain.Validation;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Builder;
@@ -59,6 +58,7 @@ namespace Fursvp.Api
             services.AddCors();
             services.AddControllers();
             services.AddSingleton<IEventService, EventService>();
+            services.AddSingleton<IValidateTimeZone, ValidateTimeZone>();
             this.ConfigureRepositoryServices(services);
             services.AddSingleton<IValidateEmail, ValidateEmail>();
 
@@ -146,31 +146,26 @@ namespace Fursvp.Api
 
         private void ConfigureRepositoryServices(IServiceCollection services)
         {
+            services.AddSingleton<IWriteAuthorizeMember, WriteAuthorizeMember>();
+            services.AddSingleton<IWriteAuthorize<Event>, WriteAuthorizeEvent>();
+            services.AddSingleton<IValidate<Event>, ValidateEvent>();
+            services.AddSingleton<IValidateMember, ValidateMember>();
+            services.AddSingleton<IDictionaryMapper<Event>, EventMapper>();
+
             services.AddSingleton<IRepository<Event>>(s =>
             {
-                var baseEventRepository = new FirestoreRepository<Event>(new EventMapper());
-                var dateTimeProvider = s.GetRequiredService<IProvideDateTime>();
-                var validateEmail = s.GetRequiredService<IValidateEmail>();
-                var validateMember = new ValidateMember(validateEmail);
-                var validateTimeZone = new ValidateTimeZone();
-                var validateEvent = new ValidateEvent(dateTimeProvider, validateMember, validateTimeZone);
+                var eventMapper = s.GetRequiredService<IDictionaryMapper<Event>>();
+                var baseEventRepository = new FirestoreRepository<Event>(eventMapper);
 
-                var userAccessor = s.GetRequiredService<IUserAccessor>();
+                var memoryCache = s.GetRequiredService<IMemoryCache>();
+                var mapper = s.GetRequiredService<IMapper>();
+                var versionControlRepository = new RepositoryWithVersionControl<Event>(baseEventRepository, memoryCache, mapper);
 
-                var eventService = s.GetRequiredService<IEventService>();
-                var authorizeEvent = new WriteAuthorizeEvent(
-                    new WriteAuthorizeMemberAsAuthor(),
-                    new WriteAuthorizeMemberAsOrganizer(userAccessor),
-                    new WriteAuthorizeMemberAsAttendee(userAccessor),
-                    new WriteAuthorizeFrozenMemberAsAttendee(userAccessor),
-                    eventService,
-                    userAccessor);
-
-                var versionControlRepository = new RepositoryWithVersionControl<Event>(baseEventRepository, s.GetRequiredService<IMemoryCache>(), s.GetRequiredService<IMapper>());
-
+                var validateEvent = s.GetRequiredService<IValidate<Event>>();
                 var validateEventRepository = new RepositoryWithValidation<Event>(versionControlRepository, validateEvent);
 
-                return new RepositoryWithAuthorization<Event>(validateEventRepository, authorizeEvent);
+                var writeAuthorizeEvent = s.GetRequiredService<IWriteAuthorize<Event>>();
+                return new RepositoryWithAuthorization<Event>(validateEventRepository, writeAuthorizeEvent);
             });
         }
     }

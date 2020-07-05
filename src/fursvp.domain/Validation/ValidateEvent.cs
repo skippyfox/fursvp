@@ -17,12 +17,10 @@ namespace Fursvp.Domain.Validation
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidateEvent"/> class.
         /// </summary>
-        /// <param name="dateTimeProvider">An instance of <see cref="IProvideDateTime"/>.</param>
         /// <param name="validateMember">An instance of <see cref="IValidate{Member}"/> to provide Member state validation.</param>
         /// <param name="validateTimeZone">An instance of <see cref="IValidateTimeZone"/> to provide time zone validation.</param>
-        public ValidateEvent(IProvideDateTime dateTimeProvider, IValidate<Member> validateMember, IValidateTimeZone validateTimeZone)
+        public ValidateEvent(IValidateMember validateMember, IValidateTimeZone validateTimeZone)
         {
-            this.DateTimeProvider = dateTimeProvider;
             this.ValidateMember = validateMember;
             this.ValidateTimeZone = validateTimeZone;
             this.Assert = new Assertions<ValidationException<Event>>();
@@ -30,9 +28,7 @@ namespace Fursvp.Domain.Validation
 
         private IValidateTimeZone ValidateTimeZone { get; }
 
-        private IProvideDateTime DateTimeProvider { get; }
-
-        private IValidate<Member> ValidateMember { get; }
+        private IValidateMember ValidateMember { get; }
 
         private Assertions<ValidationException<Event>> Assert { get; }
 
@@ -57,7 +53,7 @@ namespace Fursvp.Domain.Validation
             var newMembers = newState?.Members ?? Enumerable.Empty<Member>();
             foreach (var memberState in oldMembers.FullJoin(newMembers, m => m.Id, m => m.Id, (old, @new) => new { old, @new }))
             {
-                this.ValidateMember.ValidateState(memberState.old, memberState.@new);
+                this.ValidateMember.ValidateState(memberState.old, oldState, memberState.@new, newState);
             }
 
             this.Assert.That(newState.Form != null, "Form cannot be null.");
