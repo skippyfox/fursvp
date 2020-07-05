@@ -48,6 +48,17 @@ namespace Fursvp.Data
         public async Task<T> GetById(Guid guid) => await this.Decorated.GetById(guid);
 
         /// <summary>
+        /// Searches for a newer version of an entity in the database if it exists and returns it if found.
+        /// </summary>
+        /// <param name="guid">The globally unique identifier for the entity.</param>
+        /// <param name="version">The presumed most recent version of the entity document.</param>
+        /// <returns>The newer version of the entity if it exists. Otherwise, default(T).</returns>
+        public Task<T> GetNewerVersionIfExists(Guid guid, int version)
+        {
+            return this.Decorated.GetNewerVersionIfExists(guid, version);
+        }
+
+        /// <summary>
         /// Persists a new document representing the entity to the repository if the user is authorized.
         /// </summary>
         /// <param name="entity">The entity to persist to the repository.</param>

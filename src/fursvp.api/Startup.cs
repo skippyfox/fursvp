@@ -6,6 +6,7 @@
 namespace Fursvp.Api
 {
     using System.Text;
+    using AutoMapper;
     using Fursvp.Api.Filters;
     using Fursvp.Communication;
     using Fursvp.Data;
@@ -22,6 +23,7 @@ namespace Fursvp.Api
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Infrastructure;
     using Microsoft.AspNetCore.Mvc.Routing;
+    using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -108,6 +110,9 @@ namespace Fursvp.Api
                     ValidateAudience = false,
                 };
             });
+
+            var mappingConfig = new MapperConfiguration(cfg => cfg.AddProfile<MappingProfile>());
+            services.AddSingleton(mappingConfig.CreateMapper());
         }
 
         /// <summary>
@@ -161,7 +166,7 @@ namespace Fursvp.Api
                     eventService,
                     userAccessor);
 
-                var versionControlRepository = new RepositoryWithVersionControl<Event>(baseEventRepository);
+                var versionControlRepository = new RepositoryWithVersionControl<Event>(baseEventRepository, s.GetRequiredService<IMemoryCache>(), s.GetRequiredService<IMapper>());
 
                 var validateEventRepository = new RepositoryWithValidation<Event>(versionControlRepository, validateEvent);
 

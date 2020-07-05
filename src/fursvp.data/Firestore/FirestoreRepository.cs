@@ -18,7 +18,7 @@ namespace Fursvp.Data.Firestore
     public class FirestoreRepository<T> : IRepository<T>
         where T : IEntity<T>
     {
-        private const string ProjectId = "fursvp-dev";
+        private const string ProjectId = "fursvp-dev"; // TODO - put into config variable
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FirestoreRepository{T}"/> class.
@@ -58,6 +58,29 @@ namespace Fursvp.Data.Firestore
         {
             var snapshot = await this.Document(guid).GetSnapshotAsync();
             if (snapshot.Exists)
+            {
+                return this.Mapper.FromDictionary(snapshot.ToDictionary());
+            }
+
+            return default;
+        }
+
+        /// <summary>
+        /// Searches for a newer version of an entity in the database if it exists and returns it if found.
+        /// </summary>
+        /// <param name="guid">The globally unique identifier for the entity.</param>
+        /// <param name="version">The presumed most recent version of the entity document.</param>
+        /// <returns>The newer version of the entity if it exists. Otherwise, default(T).</returns>
+        public async Task<T> GetNewerVersionIfExists(Guid guid, int version)
+        {
+            var snapshot = (await this.Collection
+                .WhereEqualTo(new FieldPath("Id"), guid.ToString())
+                .WhereGreaterThan(new FieldPath("Version"), version)
+                .Limit(1)
+                .GetSnapshotAsync())
+                .FirstOrDefault();
+
+            if (snapshot?.Exists == true)
             {
                 return this.Mapper.FromDictionary(snapshot.ToDictionary());
             }

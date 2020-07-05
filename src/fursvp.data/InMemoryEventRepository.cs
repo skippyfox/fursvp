@@ -9,6 +9,7 @@ namespace Fursvp.Data
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fursvp.Domain;
     using Fursvp.Domain.Forms;
 
@@ -17,11 +18,15 @@ namespace Fursvp.Data
     /// </summary>
     public class InMemoryEventRepository : IRepository<Event>
     {
+        private readonly IMapper mapper;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryEventRepository"/> class for debugging and testing.
         /// </summary>
-        public InMemoryEventRepository()
+        /// <param name="mapper">The instance of <see cref="IMapper" /> for making deep copies.</param>
+        public InMemoryEventRepository(IMapper mapper)
         {
+            this.mapper = mapper;
         }
 
         private List<Event> Events { get; } = new List<Event>();
@@ -79,45 +84,23 @@ namespace Fursvp.Data
             return Task.CompletedTask;
         }
 
-        private Event DeepCopy(Event @event)
+        /// <summary>
+        /// Searches for a newer version of <see ref="Event" /> in memory if it exists and returns it if found.
+        /// </summary>
+        /// <param name="guid">The globally unique identifier for the entity.</param>
+        /// <param name="version">The presumed most recent version of the entity document.</param>
+        /// <returns>The newer version of the entity if it exists. Otherwise, null.</returns>
+        public async Task<Event> GetNewerVersionIfExists(Guid guid, int version)
         {
-            return new Event
+            var @eventInMemory = await this.GetById(guid);
+            if (@eventInMemory?.Version > version)
             {
-                Id = @event.Id,
-                Version = @event.Version,
-                StartsAt = @event.StartsAt,
-                EndsAt = @event.EndsAt,
-                TimeZoneId = @event.TimeZoneId,
-                Members = @event.Members.Select(member => new Member
-                {
-                    Id = member.Id,
-                    EmailAddress = member.EmailAddress,
-                    Name = member.Name,
-                    IsAttending = member.IsAttending,
-                    IsOrganizer = member.IsOrganizer,
-                    IsAuthor = member.IsAuthor,
-                    Responses = member.Responses.Select(r => new FormResponses
-                    {
-                        PromptId = r.PromptId,
-                        Responses = r.Responses.ToList(),
-                    }).ToList(),
-                    RsvpedAt = member.RsvpedAt,
-                }).ToList(),
-                Form = @event.Form.Select(p => new FormPrompt(p.Behavior)
-                {
-                    Id = p.Id,
-                    Options = p.Options.ToList(),
-                    Prompt = p.Prompt,
-                    Required = p.Required,
-                    SortOrder = p.SortOrder,
-                }).ToList(),
-                Name = @event.Name,
-                OtherDetails = @event.OtherDetails,
-                Location = @event.Location,
-                RsvpOpen = @event.RsvpOpen,
-                RsvpClosesAt = @event.RsvpClosesAt,
-                IsPublished = @event.IsPublished,
-            };
+                return @eventInMemory;
+            }
+
+            return null;
         }
+
+        private Event DeepCopy(Event @event) => @event != null ? this.mapper.Map<Event, Event>(@event) : null;
     }
 }

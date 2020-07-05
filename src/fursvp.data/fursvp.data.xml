@@ -53,6 +53,14 @@
             <param name="guid">The globally unique identifier for the entity.</param>
             <returns>An asynchronous <see cref="T:System.Threading.Tasks.Task`1"/> containing the entity if found, otherwise null.</returns>
         </member>
+        <member name="M:Fursvp.Data.Firestore.FirestoreRepository`1.GetNewerVersionIfExists(System.Guid,System.Int32)">
+            <summary>
+            Searches for a newer version of an entity in the database if it exists and returns it if found.
+            </summary>
+            <param name="guid">The globally unique identifier for the entity.</param>
+            <param name="version">The presumed most recent version of the entity document.</param>
+            <returns>The newer version of the entity if it exists. Otherwise, default(T).</returns>
+        </member>
         <member name="M:Fursvp.Data.Firestore.FirestoreRepository`1.Insert(`0)">
             <summary>
             Persists a new document representing the entity to Firestore.
@@ -99,10 +107,11 @@
             An in-memory repository store for <see cref="T:Fursvp.Domain.Event"/>.
             </summary>
         </member>
-        <member name="M:Fursvp.Data.InMemoryEventRepository.#ctor">
+        <member name="M:Fursvp.Data.InMemoryEventRepository.#ctor(AutoMapper.IMapper)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Data.InMemoryEventRepository"/> class for debugging and testing.
             </summary>
+            <param name="mapper">The instance of <see cref="T:AutoMapper.IMapper" /> for making deep copies.</param>
         </member>
         <member name="M:Fursvp.Data.InMemoryEventRepository.Delete(System.Guid)">
             <summary>
@@ -137,6 +146,14 @@
             </summary>
             <param name="entity">The entity to persist to memory.</param>
             <returns>An asynchronous <see cref="T:System.Threading.Tasks.Task`1"/>.</returns>
+        </member>
+        <member name="M:Fursvp.Data.InMemoryEventRepository.GetNewerVersionIfExists(System.Guid,System.Int32)">
+            <summary>
+            Searches for a newer version of <see ref="Event" /> in memory if it exists and returns it if found.
+            </summary>
+            <param name="guid">The globally unique identifier for the entity.</param>
+            <param name="version">The presumed most recent version of the entity document.</param>
+            <returns>The newer version of the entity if it exists. Otherwise, null.</returns>
         </member>
         <member name="T:Fursvp.Data.IRepository`1">
             <summary>
@@ -178,6 +195,14 @@
             <param name="guid">The globally unique identifier for the entity.</param>
             <returns>An asynchronous <see cref="T:System.Threading.Tasks.Task`1"/>.</returns>
         </member>
+        <member name="M:Fursvp.Data.IRepository`1.GetNewerVersionIfExists(System.Guid,System.Int32)">
+            <summary>
+            Searches for a newer version of an entity in the database if it exists and returns it if found.
+            </summary>
+            <param name="guid">The globally unique identifier for the entity.</param>
+            <param name="version">The presumed most recent version of the entity document.</param>
+            <returns>The newer version of the entity if it exists. Otherwise, default(T).</returns>
+        </member>
         <member name="T:Fursvp.Data.RepositoryWithAuthorization`1">
             <summary>
             Authorizes state changes by a user on new, updated or removed documents using a decorated instance <see cref="T:Fursvp.Data.IRepository`1"/>.
@@ -203,6 +228,14 @@
             </summary>
             <param name="guid">The globally unique identifier for the entity.</param>
             <returns>An asynchronous <see cref="T:System.Threading.Tasks.Task`1"/> containing the entity if found, otherwise null.</returns>
+        </member>
+        <member name="M:Fursvp.Data.RepositoryWithAuthorization`1.GetNewerVersionIfExists(System.Guid,System.Int32)">
+            <summary>
+            Searches for a newer version of an entity in the database if it exists and returns it if found.
+            </summary>
+            <param name="guid">The globally unique identifier for the entity.</param>
+            <param name="version">The presumed most recent version of the entity document.</param>
+            <returns>The newer version of the entity if it exists. Otherwise, default(T).</returns>
         </member>
         <member name="M:Fursvp.Data.RepositoryWithAuthorization`1.Insert(`0)">
             <summary>
@@ -251,6 +284,14 @@
             <param name="guid">The globally unique identifier for the entity.</param>
             <returns>An asynchronous <see cref="T:System.Threading.Tasks.Task`1"/> containing the entity if found, otherwise null.</returns>
         </member>
+        <member name="M:Fursvp.Data.RepositoryWithValidation`1.GetNewerVersionIfExists(System.Guid,System.Int32)">
+            <summary>
+            Searches for a newer version of an entity in the database if it exists and returns it if found.
+            </summary>
+            <param name="guid">The globally unique identifier for the entity.</param>
+            <param name="version">The presumed most recent version of the entity document.</param>
+            <returns>The newer version of the entity if it exists. Otherwise, default(T).</returns>
+        </member>
         <member name="M:Fursvp.Data.RepositoryWithValidation`1.Insert(`0)">
             <summary>
             Persists a new document representing the entity to the repository if the state is valid.
@@ -274,46 +315,59 @@
         </member>
         <member name="T:Fursvp.Data.RepositoryWithVersionControl`1">
             <summary>
-            Provides version control when persisting state changes on new, updated or removed documents using a decorated instance <see cref="T:Fursvp.Data.IRepository`1"/>.
+            Provides caching and version control when persisting state changes on new, updated or removed documents using a decorated instance <see cref="T:Fursvp.Data.IRepository`1"/>.
             </summary>
             <typeparam name="T">The <see cref="T:Fursvp.Domain.IEntity`1"/> type.</typeparam>
         </member>
-        <member name="M:Fursvp.Data.RepositoryWithVersionControl`1.#ctor(Fursvp.Data.IRepository{`0})">
+        <member name="M:Fursvp.Data.RepositoryWithVersionControl`1.#ctor(Fursvp.Data.IRepository{`0},Microsoft.Extensions.Caching.Memory.IMemoryCache,AutoMapper.IMapper)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Data.RepositoryWithVersionControl`1"/> class.
             </summary>
             <param name="decorated">The instance of <see cref="T:Fursvp.Data.IRepository`1"/> to decorate.</param>
+            <param name="memoryCache">The instance of <see cref="T:AutoMapper.IMapper"/> for deep copies.</param>
+            <param name="mapper">The instance of <see cref="T:Microsoft.Extensions.Caching.Memory.IMemoryCache"/> for caching.</param>
         </member>
         <member name="M:Fursvp.Data.RepositoryWithVersionControl`1.Delete(System.Guid)">
             <summary>
-            Permanently removes an existing document representing <see ref="T" /> from the repository by exposing the decorated method.
+            Permanently removes an existing document representing <see ref="T" /> from the repository by exposing the decorated method, and from the cache.
             </summary>
             <param name="guid">The globally unique identifier for the entity.</param>
             <returns>An asynchronous <see cref="T:System.Threading.Tasks.Task`1"/>.</returns>
         </member>
         <member name="M:Fursvp.Data.RepositoryWithVersionControl`1.GetAll">
             <summary>
-            Gets a result set containing all documents for the entity type by exposing the decorated method.
+            Gets a result set containing all documents for the entity type from the cache, or via the decorated method if not yet cached.
+            If not already cached, then an index is built and the index and all entities retrieved are cached.
             </summary>
             <returns>An <see cref="T:System.Linq.IQueryable`1"/> against which further filtering can be applied on the result set.</returns>
         </member>
         <member name="M:Fursvp.Data.RepositoryWithVersionControl`1.GetById(System.Guid)">
             <summary>
-            Gets a single instance of T matching the given Id by exposing the decorated method.
+            Gets a single instance of T matching the given Id from the cache, or via the decorated method if not already cached.
+            If not already cached, the entity retrieved is cached.
             </summary>
             <param name="guid">The globally unique identifier for the entity.</param>
             <returns>An asynchronous <see cref="T:System.Threading.Tasks.Task`1"/> containing the entity if found, otherwise null.</returns>
         </member>
+        <member name="M:Fursvp.Data.RepositoryWithVersionControl`1.GetNewerVersionIfExists(System.Guid,System.Int32)">
+            <summary>
+            Searches for a newer version of an entity in the database if it exists and returns it if found.
+            If found, the newer version is saved to the cache.
+            </summary>
+            <param name="guid">The globally unique identifier for the entity.</param>
+            <param name="version">The presumed most recent version of the entity document.</param>
+            <returns>The newer version of the entity if it exists. Otherwise, default(T).</returns>
+        </member>
         <member name="M:Fursvp.Data.RepositoryWithVersionControl`1.Insert(`0)">
             <summary>
-            Persists a new document representing the entity to the repository by exposing the decorated method.
+            Persists to the repository and to the cache a new document representing the entity by exposing the decorated method.
             </summary>
             <param name="entity">The entity to persist to the repository.</param>
             <returns>An asynchronous <see cref="T:System.Threading.Tasks.Task`1"/>.</returns>
         </member>
         <member name="M:Fursvp.Data.RepositoryWithVersionControl`1.Update(`0)">
             <summary>
-            Updates the entity's Version property and overwrites the existing document in the repository if the versions do not conflict.
+            Updates the entity's Version property and, if the versions do not conflict, overwrites the existing document in the repository and in the cache.
             </summary>
             <param name="entity">The entity to persist to the repository.</param>
             <returns>An asynchronous <see cref="T:System.Threading.Tasks.Task`1"/>.</returns>

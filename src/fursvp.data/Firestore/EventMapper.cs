@@ -51,7 +51,7 @@ namespace Fursvp.Data.Firestore
                     IsAttending = (bool)m["IsAttending"],
                     IsOrganizer = (bool)m["IsOrganizer"],
                     IsAuthor = (bool)m["IsAuthor"],
-                    RsvpedAt = m["RsvpedAt"] is Timestamp rsvpedAt ? rsvpedAt.ToDateTime() : DateTime.MinValue,
+                    RsvpedAt = m.TryGetValue("RsvpedAt", out var rsvpedAt) ? ((Timestamp)rsvpedAt).ToDateTime() : DateTime.MinValue,
                     Responses = ((List<object>)m["Responses"]).Cast<Dictionary<string, object>>().Select(r => new FormResponses
                     {
                         PromptId = Guid.Parse((string)r["PromptId"]),
@@ -90,8 +90,8 @@ namespace Fursvp.Data.Firestore
         {
             { nameof(@event.Id), @event.Id.ToString() },
             { nameof(@event.Version), @event.Version },
-            { nameof(@event.StartsAt), @event.StartsAt },
-            { nameof(@event.EndsAt), @event.EndsAt },
+            { nameof(@event.StartsAt), @event.StartsAt.ToUniversalTime() },
+            { nameof(@event.EndsAt), @event.EndsAt.ToUniversalTime() },
             { nameof(@event.TimeZoneId), @event.TimeZoneId },
             {
                 nameof(@event.Members), @event.Members.Select(m => new Dictionary<string, object>
@@ -102,7 +102,7 @@ namespace Fursvp.Data.Firestore
                     { nameof(m.IsAttending), m.IsAttending },
                     { nameof(m.IsOrganizer), m.IsOrganizer },
                     { nameof(m.IsAuthor), m.IsAuthor },
-                    { nameof(m.RsvpedAt), m.RsvpedAt },
+                    { nameof(m.RsvpedAt), m.RsvpedAt.ToUniversalTime() },
                     {
                         nameof(m.Responses), m.Responses.Select(r => new Dictionary<string, object>
                         {
@@ -127,7 +127,7 @@ namespace Fursvp.Data.Firestore
             { nameof(@event.OtherDetails), @event.OtherDetails },
             { nameof(@event.Location), @event.Location },
             { nameof(@event.RsvpOpen), @event.RsvpOpen },
-            { nameof(@event.RsvpClosesAt), @event.RsvpClosesAt },
+            { nameof(@event.RsvpClosesAt), @event.RsvpClosesAt?.ToUniversalTime() },
             { nameof(@event.IsPublished), @event.IsPublished },
         };
     }

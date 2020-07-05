@@ -186,6 +186,16 @@
             </summary>
             <param name="context">The ActionExecutingContext.</param>
         </member>
+        <member name="T:Fursvp.Api.MappingProfile">
+            <summary>
+            Mapping Profile for use with AutoMapper, including deep copies of objects.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Api.MappingProfile.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Api.MappingProfile"/> class.
+            </summary>
+        </member>
         <member name="T:Fursvp.Api.Program">
             <summary>
             The entry point for Fursvp.
