@@ -61,14 +61,14 @@ namespace Fursvp.Domain.Validation
             Assert.That(!string.IsNullOrWhiteSpace(newMemberState.EmailAddress), "Email address is required.");
             ValidateEmail.Validate(newMemberState.EmailAddress);
             Assert.That(!string.IsNullOrWhiteSpace(newMemberState.Name), "Name is required.");
-            Assert.That(newMemberState.IsAuthor || newMemberState.IsOrganizer || newMemberState.IsAttending, "Member must be the Author, an Organizer, or Attending.");
+            Assert.That(newMemberState.IsAuthor || newMemberState.IsOrganizer || newMemberState.IsAttending, "Member must be at least one of these: Attendee, Organizer.");
             Assert.That(newMemberState.Responses != null, "Responses cannot be null.");
             Assert.That(oldMemberState == null || newMemberState == null || oldMemberState.RsvpedAt == default(DateTime) || oldMemberState.RsvpedAt == newMemberState.RsvpedAt, "RsvpedAt cannot be changed once set.");
 
             foreach (var response in newMemberState.Responses)
             {
                 var formPrompt = newEventState.Form.FirstOrDefault(f => f.Id == response.PromptId);
-                Assert.That(formPrompt != null, "Response prompt must have a matching prompt in the event form.");
+                Assert.That(formPrompt != null, "Response prompt must belong to a prompt on the Event's rsvp form.");
                 Assert.That(!response.Responses.Any(string.IsNullOrWhiteSpace), "Response text cannot be null or whitespace.");
 
                 if (formPrompt.Required)

@@ -5,6 +5,8 @@
 
 namespace Fursvp.Api.Requests
 {
+    using Fursvp.Domain.Forms;
+    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
 
     /// <summary>
@@ -24,5 +26,11 @@ namespace Fursvp.Api.Requests
         /// </summary>
         [Required]
         public string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets the list of Form Responses for the event sign-up form.
+        /// </summary>
+        [Required]
+        public IEnumerable<FormResponses> FormResponses { get; set; }
     }
 }

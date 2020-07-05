@@ -76,17 +76,17 @@ namespace Fursvp.Api.Controllers
         /// <summary>
         /// Creates a new Event.
         /// </summary>
-        /// <param name="author">The <see cref="NewMemberRequest"/> for the author of the Event.</param>
+        /// <param name="newEvent">The <see cref="NewMemberRequest"/> for the author of the Event.</param>
         /// <returns>201 Created on success.</returns>
         [HttpPost]
-        public async Task<IActionResult> CreateEvent([FromBody] NewMemberRequest author)
+        public async Task<IActionResult> CreateEvent([FromBody] NewEventRequest newEvent)
         {
-            if (author == null)
+            if (newEvent == null)
             {
-                throw new ArgumentNullException(nameof(author));
+                throw new ArgumentNullException(nameof(newEvent));
             }
 
-            var @event = EventService.CreateNewEvent(author.EmailAddress, author.Name);
+            var @event = EventService.CreateNewEvent(newEvent.AuthorEmailAddress, newEvent.AuthorEmailAddress);
             await EventRepositoryWrite.Insert(@event).ConfigureAwait(false);
             return CreatedAtAction(nameof(GetEvent), new { id = @event.Id }, @event);
         }
@@ -188,17 +188,17 @@ namespace Fursvp.Api.Controllers
                 return NotFound("Event not found with id " + eventId);
             }
 
-            if (@event.Members.Any(m => m.EmailAddress.ToUpperInvariant() == newMember.EmailAddress.ToUpperInvariant()))
-            {
-                return Conflict("Email address already exists in member list.");
-            }
-
             var member = new Member
             {
                 IsAttending = true,
                 EmailAddress = newMember.EmailAddress,
                 Name = newMember.Name,
             };
+
+            foreach (var response in newMember.FormResponses) 
+            {
+                member.Responses.Add(response);
+            }
 
             EventService.AddMember(@event, member);
             await EventRepositoryWrite.Update(@event).ConfigureAwait(false);
@@ -241,11 +241,6 @@ namespace Fursvp.Api.Controllers
                 return NotFound("Event not found with id " + eventId);
             }
 
-            if (!updateMember.IsAttending && !updateMember.IsOrganizer)
-            {
-                return BadRequest("Member must be at least one of these: Attendee, Organizer");
-            }
-
             var member = @event.Members.SingleOrDefault(x => x.Id == memberId);
             if (member == null)
             {
@@ -254,6 +249,14 @@ namespace Fursvp.Api.Controllers
 
             member.IsAttending = updateMember.IsAttending;
             member.IsOrganizer = updateMember.IsOrganizer;
+            member.EmailAddress = updateMember.EmailAddress;
+            member.Name = updateMember.Name;
+
+            member.Responses.Clear();
+            foreach (var response in updateMember.FormResponses)
+            {
+                member.Responses.Add(response);
+            }
 
             await EventRepositoryWrite.Update(@event).ConfigureAwait(false);
             return Ok(@event);

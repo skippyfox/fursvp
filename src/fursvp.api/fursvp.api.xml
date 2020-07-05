@@ -88,11 +88,11 @@
             <param name="id">The globally unique identifier of the Event to update.</param>
             <returns>An object representing the Event matching the id.</returns>
         </member>
-        <member name="M:Fursvp.Api.Controllers.EventController.CreateEvent(Fursvp.Api.Requests.NewMemberRequest)">
+        <member name="M:Fursvp.Api.Controllers.EventController.CreateEvent(Fursvp.Api.Requests.NewEventRequest)">
             <summary>
             Creates a new Event.
             </summary>
-            <param name="author">The <see cref="T:Fursvp.Api.Requests.NewMemberRequest"/> for the author of the Event.</param>
+            <param name="newEvent">The <see cref="T:Fursvp.Api.Requests.NewMemberRequest"/> for the author of the Event.</param>
             <returns>201 Created on success.</returns>
         </member>
         <member name="M:Fursvp.Api.Controllers.EventController.UpdateEvent(System.Guid,Fursvp.Api.Requests.UpdateEventRequest)">
@@ -255,6 +255,21 @@
             <param name="args">The command line args for the builder.</param>
             <returns>The .net core web host builder.</returns>
         </member>
+        <member name="T:Fursvp.Api.Requests.NewEventRequest">
+            <summary>
+            The request model representing a new Member for an Event.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Requests.NewEventRequest.AuthorEmailAddress">
+            <summary>
+            Gets or sets the Email Address for the author.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Requests.NewEventRequest.AuthorName">
+            <summary>
+            Gets or sets the display name for the author.
+            </summary>
+        </member>
         <member name="T:Fursvp.Api.Requests.NewMemberRequest">
             <summary>
             The request model representing a new Member for an Event.
@@ -268,6 +283,11 @@
         <member name="P:Fursvp.Api.Requests.NewMemberRequest.Name">
             <summary>
             Gets or sets the display name for the new Member.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Requests.NewMemberRequest.FormResponses">
+            <summary>
+            Gets or sets the list of Form Responses for the event sign-up form.
             </summary>
         </member>
         <member name="T:Fursvp.Api.Requests.SendVerificationCodeRequest">
@@ -338,6 +358,21 @@
         <member name="P:Fursvp.Api.Requests.UpdateMemberRequest.IsOrganizer">
             <summary>
             Gets or sets a value indicating whether an event member is an organizer.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Requests.UpdateMemberRequest.EmailAddress">
+            <summary>
+            Gets or sets the Email Address for the member.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Requests.UpdateMemberRequest.Name">
+            <summary>
+            Gets or sets the display name for the member.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Requests.UpdateMemberRequest.FormResponses">
+            <summary>
+            Gets or sets the list of Form Responses for the event sign-up form.
             </summary>
         </member>
         <member name="T:Fursvp.Api.Requests.VerifyEmailRequest">

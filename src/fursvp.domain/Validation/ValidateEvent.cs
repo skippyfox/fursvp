@@ -50,7 +50,7 @@ namespace Fursvp.Domain.Validation
             Contract.Requires(newState != null);
 
             Assert.That(newState.Members?.Any() == true, "Members list cannot be empty or null.");
-            Assert.That(newState.Members.Select(x => x.EmailAddress.ToUpperInvariant()).Distinct().Count() == newState.Members.Count, "Each member in list must have a unique email address.");
+            Assert.That(newState.Members.Select(x => x.EmailAddress.ToUpperInvariant()).Distinct().Count() == newState.Members.Count, "Member email address must be unique.");
             Assert.That(newState.Members.Count(x => x.IsAuthor) == 1, "Members list must contain exactly one author of the event.");
 
             var oldMembers = oldState?.Members ?? Enumerable.Empty<Member>();
