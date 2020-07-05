@@ -59,6 +59,17 @@ namespace Fursvp.Api.Controllers
         }
 
         /// <summary>
+        /// Throws an exception.
+        /// </summary>
+        [ServiceFilter(typeof(DebugModeOnlyFilter))]
+        [HttpPost]
+        [Route("debugerror")]
+        public IActionResult DebugError()
+        {
+            throw new Exception("Debug exception");
+        }
+
+        /// <summary>
         /// Logs in a tester with the email address provided by verifying a cached verification code.
         /// </summary>
         /// <param name="verifyEmailRequest">The email address and verification code.</param>

@@ -40,6 +40,11 @@
             <param name="emailAddress">The email address to log in as.</param>
             <returns>The generated token.</returns>
         </member>
+        <member name="M:Fursvp.Api.Controllers.AuthController.DebugError">
+            <summary>
+            Throws an exception.
+            </summary>
+        </member>
         <member name="M:Fursvp.Api.Controllers.AuthController.VerifyEmail(Fursvp.Api.Requests.VerifyEmailRequest)">
             <summary>
             Logs in a tester with the email address provided by verifying a cached verification code.
@@ -156,11 +161,13 @@
             Intercepts http and https calls when an exception is thrown.
             </summary>
         </member>
-        <member name="M:Fursvp.Api.Filters.ApiExceptionFilter.#ctor(Microsoft.Extensions.Logging.ILogger{Fursvp.Api.Filters.ApiExceptionFilter})">
+        <member name="M:Fursvp.Api.Filters.ApiExceptionFilter.#ctor(Microsoft.Extensions.Logging.ILogger{Fursvp.Api.Filters.ApiExceptionFilter},Fursvp.Communication.IEmailer,Fursvp.Domain.Authorization.IUserAccessor)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Api.Filters.ApiExceptionFilter"/> class.
             </summary>
             <param name="logger">The application event logger.</param>
+            <param name="emailer">The sender or suppressor of emails.</param>
+            <param name="userAccessor">Accesses the current user info.</param>
         </member>
         <member name="M:Fursvp.Api.Filters.ApiExceptionFilter.OnException(Microsoft.AspNetCore.Mvc.Filters.ExceptionContext)">
             <summary>
