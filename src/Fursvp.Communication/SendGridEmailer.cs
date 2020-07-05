@@ -12,18 +12,18 @@ namespace Fursvp.Communication
 
     public class SendGridEmailer : IEmailer
     {
-        private readonly SendGridOptions _options;
-
         public SendGridEmailer(IOptions<SendGridOptions> options)
         {
-            _options = options.Value;
+            Options = options.Value;
         }
+
+        private SendGridOptions Options { get; }
 
         public void Send(Email email) => SendAsync(email).GetAwaiter().GetResult();
 
         public async Task SendAsync(Email email)
         {
-            var client = new SendGridClient(_options.ApiKey);
+            var client = new SendGridClient(Options.ApiKey);
             var sendGridMessage = ConvertFrom(email);
             var response = await client.SendEmailAsync(sendGridMessage).ConfigureAwait(false);
         }

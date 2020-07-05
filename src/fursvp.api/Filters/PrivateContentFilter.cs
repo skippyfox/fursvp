@@ -14,12 +14,12 @@ namespace Fursvp.Api.Filters
 
     public class PrivateContentFilter : IActionFilter
     {
-        private readonly IServiceProvider serviceProvider;
-
         public PrivateContentFilter(IServiceProvider serviceProvider)
         {
-            this.serviceProvider = serviceProvider;
+            this.ServiceProvider = serviceProvider;
         }
+
+        private IServiceProvider ServiceProvider { get; }
 
         public void OnActionExecuted(ActionExecutedContext context)
         {
@@ -64,7 +64,7 @@ namespace Fursvp.Api.Filters
         private object GetReadAuthorizeService(Type objectType)
         {
             Type readAuthorizeType = typeof(IReadAuthorize<>).MakeGenericType(objectType);
-            var readAuthorize = this.serviceProvider.GetService(readAuthorizeType);
+            var readAuthorize = this.ServiceProvider.GetService(readAuthorizeType);
             return readAuthorize;
         }
 

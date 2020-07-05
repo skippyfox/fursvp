@@ -9,14 +9,15 @@ namespace Fursvp.Domain.Authorization.ReadAuthorization
 
     public class ReadAuthorizeEvent : IReadAuthorize<Event>
     {
-        private readonly IUserAccessor userAccessor;
-        private readonly IReadAuthorize<Member> readAuthorizeMember;
-
         public ReadAuthorizeEvent(IUserAccessor userAccessor, IReadAuthorize<Member> readAuthorizeMember)
         {
-            this.userAccessor = userAccessor;
-            this.readAuthorizeMember = readAuthorizeMember;
+            this.UserAccessor = userAccessor;
+            this.ReadAuthorizeMember = readAuthorizeMember;
         }
+
+        private IUserAccessor UserAccessor { get; }
+
+        private IReadAuthorize<Member> ReadAuthorizeMember { get; }
 
         public bool CanRead(Event @event)
         {
@@ -27,7 +28,7 @@ namespace Fursvp.Domain.Authorization.ReadAuthorization
 
             const bool organizersCanViewUnpublishedEvent = false;
 
-            var actingMember = @event.Members.FirstOrDefault(m => m.EmailAddress == this.userAccessor.User?.EmailAddress);
+            var actingMember = @event.Members.FirstOrDefault(m => m.EmailAddress == this.UserAccessor.User?.EmailAddress);
 
             if (actingMember?.IsAuthor == true)
             {
@@ -49,11 +50,11 @@ namespace Fursvp.Domain.Authorization.ReadAuthorization
                 return;
             }
 
-            @event.Members = @event.Members.Where(this.readAuthorizeMember.CanRead).ToList();
+            @event.Members = @event.Members.Where(this.ReadAuthorizeMember.CanRead).ToList();
 
             foreach (var member in @event.Members)
             {
-                this.readAuthorizeMember.FilterUnauthorizedContent(member);
+                this.ReadAuthorizeMember.FilterUnauthorizedContent(member);
             }
         }
     }

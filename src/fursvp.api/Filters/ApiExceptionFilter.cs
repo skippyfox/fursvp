@@ -5,14 +5,16 @@
 
 namespace Fursvp.Api.Filters
 {
+    using System;
+    using System.ComponentModel.DataAnnotations;
     using Fursvp.Communication;
     using Fursvp.Domain.Authorization;
-    using System.ComponentModel.DataAnnotations;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Filters;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
-    using System;
 
     /// <summary>
     /// Intercepts http and https calls when an exception is thrown.
@@ -25,11 +27,13 @@ namespace Fursvp.Api.Filters
         /// <param name="logger">The application event logger.</param>
         /// <param name="emailer">The sender or suppressor of emails.</param>
         /// <param name="userAccessor">Accesses the current user info.</param>
-        public ApiExceptionFilter(ILogger<ApiExceptionFilter> logger, IEmailer emailer, IUserAccessor userAccessor)
+        /// <param name="webHostEnvironment">The web hosting environment.</param>
+        public ApiExceptionFilter(ILogger<ApiExceptionFilter> logger, IEmailer emailer, IUserAccessor userAccessor, IWebHostEnvironment webHostEnvironment)
         {
             this.Logger = logger;
             this.Emailer = emailer;
             this.UserAccessor = userAccessor;
+            this.WebHostEnvironment = webHostEnvironment;
         }
 
         private ILogger<ApiExceptionFilter> Logger { get; }
@@ -37,6 +41,8 @@ namespace Fursvp.Api.Filters
         private IEmailer Emailer { get; }
 
         private IUserAccessor UserAccessor { get; }
+
+        private IWebHostEnvironment WebHostEnvironment { get; }
 
         /// <summary>
         /// Handle an Exception caught by MVC. Called by MVC when an otherwise uncaught exception is thrown.
@@ -59,7 +65,11 @@ namespace Fursvp.Api.Filters
             else
             {
                 var ex = context.Exception;
-                this.OnException(context, StatusCodes.Status500InternalServerError, ex.GetType().Name, "An internal server error occurred. Sorry about that. The error has been logged.");
+                string message = this.WebHostEnvironment.IsDevelopment()
+                    ? ex.Message
+                    : "An internal server error occurred. Sorry about that. The error has been logged.";
+
+                this.OnException(context, StatusCodes.Status500InternalServerError, ex.GetType().Name, message);
                 this.Logger?.LogError(ex, ex.Message);
 
                 // TODO - put all of these values in config

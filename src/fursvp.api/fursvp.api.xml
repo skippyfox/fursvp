@@ -161,13 +161,14 @@
             Intercepts http and https calls when an exception is thrown.
             </summary>
         </member>
-        <member name="M:Fursvp.Api.Filters.ApiExceptionFilter.#ctor(Microsoft.Extensions.Logging.ILogger{Fursvp.Api.Filters.ApiExceptionFilter},Fursvp.Communication.IEmailer,Fursvp.Domain.Authorization.IUserAccessor)">
+        <member name="M:Fursvp.Api.Filters.ApiExceptionFilter.#ctor(Microsoft.Extensions.Logging.ILogger{Fursvp.Api.Filters.ApiExceptionFilter},Fursvp.Communication.IEmailer,Fursvp.Domain.Authorization.IUserAccessor,Microsoft.AspNetCore.Hosting.IWebHostEnvironment)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Api.Filters.ApiExceptionFilter"/> class.
             </summary>
             <param name="logger">The application event logger.</param>
             <param name="emailer">The sender or suppressor of emails.</param>
             <param name="userAccessor">Accesses the current user info.</param>
+            <param name="webHostEnvironment">The web hosting environment.</param>
         </member>
         <member name="M:Fursvp.Api.Filters.ApiExceptionFilter.OnException(Microsoft.AspNetCore.Mvc.Filters.ExceptionContext)">
             <summary>

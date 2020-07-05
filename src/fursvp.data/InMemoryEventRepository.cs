@@ -18,16 +18,16 @@ namespace Fursvp.Data
     /// </summary>
     public class InMemoryEventRepository : IRepository<Event>
     {
-        private readonly IMapper mapper;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryEventRepository"/> class for debugging and testing.
         /// </summary>
         /// <param name="mapper">The instance of <see cref="IMapper" /> for making deep copies.</param>
         public InMemoryEventRepository(IMapper mapper)
         {
-            this.mapper = mapper;
+            this.Mapper = mapper;
         }
+
+        private IMapper Mapper { get; }
 
         private List<Event> Events { get; } = new List<Event>();
 
@@ -101,6 +101,6 @@ namespace Fursvp.Data
             return null;
         }
 
-        private Event DeepCopy(Event @event) => @event != null ? this.mapper.Map<Event, Event>(@event) : null;
+        private Event DeepCopy(Event @event) => @event != null ? this.Mapper.Map<Event, Event>(@event) : null;
     }
 }

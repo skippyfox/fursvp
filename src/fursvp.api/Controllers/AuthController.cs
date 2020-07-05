@@ -26,10 +26,6 @@ namespace Fursvp.Api.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IConfiguration configuration;
-        private readonly IMemoryCache memoryCache;
-        private readonly IEmailer emailer;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthController"/> class.
         /// </summary>
@@ -38,10 +34,16 @@ namespace Fursvp.Api.Controllers
         /// <param name="emailer">The instance of <see cref="IEmailer"/> used to suppress or send emails.</param>
         public AuthController(IConfiguration configuration, IMemoryCache memoryCache, IEmailer emailer)
         {
-            this.configuration = configuration;
-            this.memoryCache = memoryCache;
-            this.emailer = emailer;
+            this.Configuration = configuration;
+            this.MemoryCache = memoryCache;
+            this.Emailer = emailer;
         }
+
+        private IConfiguration Configuration { get; }
+
+        private IMemoryCache MemoryCache { get; }
+
+        private IEmailer Emailer { get; }
 
         /// <summary>
         /// Instantly logs in a tester with the email address provided. For Debugging only.
@@ -80,7 +82,7 @@ namespace Fursvp.Api.Controllers
         {
             var verificationCodeCacheKey = VerificationCodeCacheKey(verifyEmailRequest.EmailAddress);
 
-            if (this.memoryCache.TryGetValue(verificationCodeCacheKey, out string verificationCode))
+            if (this.MemoryCache.TryGetValue(verificationCodeCacheKey, out string verificationCode))
             {
                 if (verificationCode == verifyEmailRequest.VerificationCode)
                 {
@@ -109,11 +111,11 @@ namespace Fursvp.Api.Controllers
 
             string verificationCode = FursvpRandom.CopyableButHardToGuessCode();
 
-            this.memoryCache.Set(verificationCodeCacheKey, verificationCode, TimeSpan.FromMinutes(60)); // TODO - make this a config variable
+            this.MemoryCache.Set(verificationCodeCacheKey, verificationCode, TimeSpan.FromMinutes(60)); // TODO - make this a config variable
 
             var email = CreateVerificationEmail(sendVerificationCodeRequest.EmailAddress, verificationCode);
 
-            await this.emailer.SendAsync(email);
+            await this.Emailer.SendAsync(email);
 
             return this.Ok();
         }
@@ -142,14 +144,14 @@ If you didn't request this, simply ignore this message.",
 
         private void ExpireVerificationCode(string emailAddress)
         {
-            this.memoryCache.Remove(VerificationCodeCacheKey(emailAddress));
-            this.memoryCache.Remove(VerificationAttemptsCacheKey(emailAddress));
+            this.MemoryCache.Remove(VerificationCodeCacheKey(emailAddress));
+            this.MemoryCache.Remove(VerificationAttemptsCacheKey(emailAddress));
         }
 
         private string CreateVerificationToken(string emailAddress)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(this.configuration["AuthorizationIssuerSigningKey"]);
+            var key = Encoding.ASCII.GetBytes(this.Configuration["AuthorizationIssuerSigningKey"]);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
@@ -167,7 +169,7 @@ If you didn't request this, simply ignore this message.",
         private void IncrementFailedVerificationAttemptsOrExpire(string emailAddress)
         {
             var verificationAttemptsCacheKey = VerificationAttemptsCacheKey(emailAddress);
-            this.memoryCache.TryGetValue(verificationAttemptsCacheKey, out int failedAttempts);
+            this.MemoryCache.TryGetValue(verificationAttemptsCacheKey, out int failedAttempts);
             failedAttempts++;
             if (failedAttempts >= 5) // TODO - make this a config variable
             {
@@ -176,7 +178,7 @@ If you didn't request this, simply ignore this message.",
             }
             else
             {
-                this.memoryCache.Set(verificationAttemptsCacheKey, failedAttempts, TimeSpan.FromMinutes(15)); // TODO - make this a config variable.
+                this.MemoryCache.Set(verificationAttemptsCacheKey, failedAttempts, TimeSpan.FromMinutes(15)); // TODO - make this a config variable.
             }
         }
     }

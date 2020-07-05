@@ -7,18 +7,18 @@ namespace Fursvp.Domain.Authorization.ReadAuthorization
 {
     public class ReadAuthorizeMember : IReadAuthorize<Member>
     {
-        private readonly IUserAccessor userAccessor;
-
         public ReadAuthorizeMember(IUserAccessor userAccessor)
         {
-            this.userAccessor = userAccessor;
+            this.UserAccessor = userAccessor;
         }
+
+        private IUserAccessor UserAccessor { get; }
 
         public bool CanRead(Member member) => true;
 
         public void FilterUnauthorizedContent(Member member)
         {
-            var user = this.userAccessor.User;
+            var user = this.UserAccessor.User;
 
             if (member.EmailAddress != user?.EmailAddress)
             {
