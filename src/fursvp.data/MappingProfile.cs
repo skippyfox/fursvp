@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See the license.md file in the project root for full license information.
 // </copyright>
 
-namespace Fursvp.Api
+namespace Fursvp.Data
 {
     using AutoMapper;
     using Fursvp.Domain;

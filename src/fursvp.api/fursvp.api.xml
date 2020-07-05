@@ -64,13 +64,14 @@
             Manages Events.
             </summary>
         </member>
-        <member name="M:Fursvp.Api.Controllers.EventController.#ctor(Microsoft.Extensions.Logging.ILogger{Fursvp.Api.Controllers.EventController},Fursvp.Domain.IEventService,Fursvp.Data.IRepository{Fursvp.Domain.Event},Fursvp.Communication.IEmailer)">
+        <member name="M:Fursvp.Api.Controllers.EventController.#ctor(Microsoft.Extensions.Logging.ILogger{Fursvp.Api.Controllers.EventController},Fursvp.Domain.IEventService,Fursvp.Data.IRepositoryWrite{Fursvp.Domain.Event},Fursvp.Data.IRepositoryRead{Fursvp.Domain.Event},Fursvp.Communication.IEmailer)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Api.Controllers.EventController"/> class.
             </summary>
             <param name="logger">The application event logger.</param>
             <param name="eventService">The instance of <see cref="T:Fursvp.Domain.IEventService"/> used to create and update Events.</param>
-            <param name="eventRepository">The instance of <see cref="T:Fursvp.Data.IRepository`1"/> used for Event persistence.</param>
+            <param name="eventRepositoryWrite">The instance of <see cref="T:Fursvp.Data.IRepositoryWrite`1"/> used for Event persistence write operations.</param>
+            <param name="eventRepositoryRead">The instance of <see cref="T:Fursvp.Data.IRepositoryRead`1"/> used for Event persistence read operations.</param>
             <param name="emailer">The emailer what sends the emails.</param>
         </member>
         <member name="M:Fursvp.Api.Controllers.EventController.GetEvents">
@@ -194,16 +195,6 @@
             Throws an exception if the environment is not Development.
             </summary>
             <param name="context">The ActionExecutingContext.</param>
-        </member>
-        <member name="T:Fursvp.Api.MappingProfile">
-            <summary>
-            Mapping Profile for use with AutoMapper, including deep copies of objects.
-            </summary>
-        </member>
-        <member name="M:Fursvp.Api.MappingProfile.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:Fursvp.Api.MappingProfile"/> class.
-            </summary>
         </member>
         <member name="T:Fursvp.Api.Program">
             <summary>

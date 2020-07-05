@@ -6,23 +6,15 @@
 namespace Fursvp.Api
 {
     using System.Text;
-    using AutoMapper;
     using Fursvp.Api.Filters;
     using Fursvp.Communication;
-    using Fursvp.Data;
-    using Fursvp.Data.Firestore;
-    using Fursvp.Domain;
     using Fursvp.Domain.Authorization;
-    using Fursvp.Domain.Authorization.ReadAuthorization;
-    using Fursvp.Domain.Authorization.WriteAuthorization;
-    using Fursvp.Domain.Validation;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Infrastructure;
     using Microsoft.AspNetCore.Mvc.Routing;
-    using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -57,10 +49,9 @@ namespace Fursvp.Api
         {
             services.AddCors();
             services.AddControllers();
-            services.AddSingleton<IEventService, EventService>();
-            services.AddSingleton<IValidateTimeZone, ValidateTimeZone>();
-            this.ConfigureRepositoryServices(services);
-            services.AddSingleton<IValidateEmail, ValidateEmail>();
+
+            services.AddDomainServices();
+            services.AddFursvpDataWithFirestore();
 
             if (this.Environment.IsDevelopment())
             {
@@ -72,28 +63,24 @@ namespace Fursvp.Api
                 services.Configure<SendGridOptions>(this.Configuration.GetSection(SendGridOptions.SendGrid));
             }
 
-            services.AddSingleton<IProvideDateTime, UtcDateTimeProvider>();
-            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-            services.AddScoped<IUrlHelper>(x => x.GetRequiredService<IUrlHelperFactory>().GetUrlHelper(x.GetService<IActionContextAccessor>().ActionContext));
-            services.AddTransient<PrivateContentFilter>();
-            services.AddSingleton<DebugModeOnlyFilter>();
             services.AddLogging(lc =>
             {
                 lc.ClearProviders();
                 lc.AddConsole();
             });
+
+            services.AddSingleton<PrivateContentFilter>();
+            services.AddSingleton<DebugModeOnlyFilter>();
             services.AddMvc(options =>
             {
                 options.Filters.Add(typeof(ApiExceptionFilter));
                 options.Filters.AddService<PrivateContentFilter>();
             });
 
-            var key = Encoding.ASCII.GetBytes(this.Configuration["AuthorizationIssuerSigningKey"]);
-
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            services.AddScoped<IUrlHelper>(x => x.GetRequiredService<IUrlHelperFactory>().GetUrlHelper(x.GetService<IActionContextAccessor>().ActionContext));
             services.AddHttpContextAccessor(); // For authorization / access to user info.
             services.AddSingleton<IUserAccessor, ClaimsPrincipalUserAccessor>();
-            services.AddSingleton<IReadAuthorize<Event>, ReadAuthorizeEvent>();
-            services.AddSingleton<IReadAuthorize<Member>, ReadAuthorizeMember>();
             services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -101,6 +88,7 @@ namespace Fursvp.Api
             })
             .AddJwtBearer(x =>
             {
+                var key = Encoding.ASCII.GetBytes(this.Configuration["AuthorizationIssuerSigningKey"]);
                 x.SaveToken = true;
                 x.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -110,9 +98,6 @@ namespace Fursvp.Api
                     ValidateAudience = false,
                 };
             });
-
-            var mappingConfig = new MapperConfiguration(cfg => cfg.AddProfile<MappingProfile>());
-            services.AddSingleton(mappingConfig.CreateMapper());
         }
 
         /// <summary>
@@ -141,31 +126,6 @@ namespace Fursvp.Api
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-            });
-        }
-
-        private void ConfigureRepositoryServices(IServiceCollection services)
-        {
-            services.AddSingleton<IWriteAuthorizeMember, WriteAuthorizeMember>();
-            services.AddSingleton<IWriteAuthorize<Event>, WriteAuthorizeEvent>();
-            services.AddSingleton<IValidate<Event>, ValidateEvent>();
-            services.AddSingleton<IValidateMember, ValidateMember>();
-            services.AddSingleton<IDictionaryMapper<Event>, EventMapper>();
-
-            services.AddSingleton<IRepository<Event>>(s =>
-            {
-                var eventMapper = s.GetRequiredService<IDictionaryMapper<Event>>();
-                var baseEventRepository = new FirestoreRepository<Event>(eventMapper);
-
-                var memoryCache = s.GetRequiredService<IMemoryCache>();
-                var mapper = s.GetRequiredService<IMapper>();
-                var versionControlRepository = new RepositoryWithVersionControl<Event>(baseEventRepository, memoryCache, mapper);
-
-                var validateEvent = s.GetRequiredService<IValidate<Event>>();
-                var validateEventRepository = new RepositoryWithValidation<Event>(versionControlRepository, validateEvent);
-
-                var writeAuthorizeEvent = s.GetRequiredService<IWriteAuthorize<Event>>();
-                return new RepositoryWithAuthorization<Event>(validateEventRepository, writeAuthorizeEvent);
             });
         }
     }

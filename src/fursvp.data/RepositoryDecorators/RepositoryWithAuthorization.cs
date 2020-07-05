@@ -3,60 +3,41 @@
 // Licensed under the MIT license. See the license.md file in the project root for full license information.
 // </copyright>
 
-namespace Fursvp.Data
+namespace Fursvp.Data.RepositoryDecorators
 {
     using System;
     using System.Linq;
     using System.Threading.Tasks;
+    using Fursvp.Data;
     using Fursvp.Domain;
     using Fursvp.Domain.Authorization.WriteAuthorization;
     using Fursvp.Domain.Validation;
 
     /// <summary>
-    /// Authorizes state changes by a user on new, updated or removed documents using a decorated instance <see cref="IRepository{T}"/>.
+    /// Authorizes state changes by a user on new, updated or removed documents using a decorated instance <see cref="IRepositoryWrite{T}"/>.
     /// </summary>
     /// <typeparam name="T">The <see cref="IEntity{T}"/> type.</typeparam>
-    public class RepositoryWithAuthorization<T> : IRepository<T>
+    public class RepositoryWithAuthorization<T> : IRepositoryWrite<T>
         where T : IEntity<T>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryWithAuthorization{T}"/> class.
         /// </summary>
-        /// <param name="decorated">The instance of <see cref="IRepository{T}"/> to decorate.</param>
+        /// <param name="decorated">The instance of <see cref="IRepositoryWrite{T}"/> to decorate.</param>
+        /// <param name="repositoryRead">The instance of <see cref="IRepositoryRead{T}"/> for read operations.</param>
         /// <param name="authorize">The instance of <see cref="IWriteAuthorize{T}"/> to perform authorization.</param>
-        public RepositoryWithAuthorization(IRepository<T> decorated, IWriteAuthorize<T> authorize)
+        public RepositoryWithAuthorization(IRepositoryWrite<T> decorated, IRepositoryRead<T> repositoryRead, IWriteAuthorize<T> authorize)
         {
             this.Decorated = decorated;
+            this.RepositoryRead = repositoryRead;
             this.Authorize = authorize;
         }
 
-        private IRepository<T> Decorated { get; }
+        private IRepositoryWrite<T> Decorated { get; }
+
+        private IRepositoryRead<T> RepositoryRead { get; }
 
         private IWriteAuthorize<T> Authorize { get; }
-
-        /// <summary>
-        /// Gets a result set containing all documents for the entity type by exposing the decorated method.
-        /// </summary>
-        /// <returns>An <see cref="IQueryable{T}"/> against which further filtering can be applied on the result set.</returns>
-        public async Task<IQueryable<T>> GetAll() => await this.Decorated.GetAll();
-
-        /// <summary>
-        /// Gets a single instance of T matching the given Id by exposing the decorated method.
-        /// </summary>
-        /// <param name="guid">The globally unique identifier for the entity.</param>
-        /// <returns>An asynchronous <see cref="Task{T}"/> containing the entity if found, otherwise null.</returns>
-        public async Task<T> GetById(Guid guid) => await this.Decorated.GetById(guid);
-
-        /// <summary>
-        /// Searches for a newer version of an entity in the database if it exists and returns it if found.
-        /// </summary>
-        /// <param name="guid">The globally unique identifier for the entity.</param>
-        /// <param name="version">The presumed most recent version of the entity document.</param>
-        /// <returns>The newer version of the entity if it exists. Otherwise, default(T).</returns>
-        public Task<T> GetNewerVersionIfExists(Guid guid, int version)
-        {
-            return this.Decorated.GetNewerVersionIfExists(guid, version);
-        }
 
         /// <summary>
         /// Persists a new document representing the entity to the repository if the user is authorized.
@@ -77,7 +58,7 @@ namespace Fursvp.Data
         /// <returns>An asynchronous <see cref="Task{T}"/>.</returns>
         public async Task Update(T updatedEntity)
         {
-            var oldEntity = await this.Decorated.GetById(updatedEntity.Id);
+            var oldEntity = await this.RepositoryRead.GetById(updatedEntity.Id);
 
             if (oldEntity == null)
             {
@@ -96,7 +77,7 @@ namespace Fursvp.Data
         /// <returns>An asynchronous <see cref="Task{T}"/>.</returns>
         public async Task Delete(Guid guid)
         {
-            var entity = await this.Decorated.GetById(guid);
+            var entity = await this.RepositoryRead.GetById(guid);
 
             this.Authorize.WriteAuthorize(entity, default);
 

@@ -29,19 +29,23 @@ namespace Fursvp.Api.Controllers
         /// </summary>
         /// <param name="logger">The application event logger.</param>
         /// <param name="eventService">The instance of <see cref="IEventService"/> used to create and update Events.</param>
-        /// <param name="eventRepository">The instance of <see cref="IRepository{Event}"/> used for Event persistence.</param>
+        /// <param name="eventRepositoryWrite">The instance of <see cref="IRepositoryWrite{Event}"/> used for Event persistence write operations.</param>
+        /// <param name="eventRepositoryRead">The instance of <see cref="IRepositoryRead{Event}"/> used for Event persistence read operations.</param>
         /// <param name="emailer">The emailer what sends the emails.</param>
-        public EventController(ILogger<EventController> logger, IEventService eventService, IRepository<Event> eventRepository, IEmailer emailer)
+        public EventController(ILogger<EventController> logger, IEventService eventService, IRepositoryWrite<Event> eventRepositoryWrite, IRepositoryRead<Event> eventRepositoryRead, IEmailer emailer)
         {
             this.Logger = logger;
-            this.EventRepository = eventRepository;
+            this.EventRepositoryWrite = eventRepositoryWrite;
+            this.EventRepositoryRead = eventRepositoryRead;
             this.EventService = eventService;
             this.Emailer = emailer;
         }
 
         private ILogger<EventController> Logger { get; }
 
-        private IRepository<Event> EventRepository { get; }
+        private IRepositoryWrite<Event> EventRepositoryWrite { get; }
+
+        private IRepositoryRead<Event> EventRepositoryRead { get; }
 
         private IEventService EventService { get; }
 
@@ -54,7 +58,7 @@ namespace Fursvp.Api.Controllers
         [HttpGet]
         public async Task<List<Event>> GetEvents()
         {
-            return (await this.EventRepository.GetAll()).ToList();
+            return (await this.EventRepositoryRead.GetAll()).ToList();
         }
 
         /// <summary>
@@ -66,7 +70,7 @@ namespace Fursvp.Api.Controllers
         [Route("{id}")]
         public Task<Event> GetEvent(Guid id)
         {
-            return this.EventRepository.GetById(id);
+            return this.EventRepositoryRead.GetById(id);
         }
 
         /// <summary>
@@ -78,7 +82,7 @@ namespace Fursvp.Api.Controllers
         public async Task<IActionResult> CreateEvent([FromBody] NewMemberRequest author)
         {
             var @event = this.EventService.CreateNewEvent(author.EmailAddress, author.Name);
-            await this.EventRepository.Insert(@event);
+            await this.EventRepositoryWrite.Insert(@event);
             return this.CreatedAtAction(nameof(this.GetEvent), new { id = @event.Id }, @event);
         }
 
@@ -92,7 +96,7 @@ namespace Fursvp.Api.Controllers
         [Route("{eventId}")]
         public async Task<IActionResult> UpdateEvent(Guid eventId, [FromBody] UpdateEventRequest request)
         {
-            var @event = await this.EventRepository.GetById(eventId);
+            var @event = await this.EventRepositoryRead.GetById(eventId);
             if (@event == null)
             {
                 return this.NotFound("Event not found with id " + eventId);
@@ -107,7 +111,7 @@ namespace Fursvp.Api.Controllers
             @event.EndsAt = request.EndsAt;
             @event.TimeZoneId = request.TimeZoneId;
 
-            await this.EventRepository.Update(@event);
+            await this.EventRepositoryWrite.Update(@event);
             return this.Ok(@event);
         }
 
@@ -120,7 +124,7 @@ namespace Fursvp.Api.Controllers
         [Route("{eventId}/publish")]
         public async Task<IActionResult> PublishEvent(Guid eventId)
         {
-            var @event = await this.EventRepository.GetById(eventId);
+            var @event = await this.EventRepositoryRead.GetById(eventId);
             if (@event == null)
             {
                 return this.NotFound("Event not found with id " + eventId);
@@ -128,7 +132,7 @@ namespace Fursvp.Api.Controllers
 
             @event.IsPublished = true;
 
-            await this.EventRepository.Update(@event);
+            await this.EventRepositoryWrite.Update(@event);
             return this.Ok(@event);
         }
 
@@ -141,7 +145,7 @@ namespace Fursvp.Api.Controllers
         [Route("{eventId}/publish")]
         public async Task<IActionResult> UnpublishEvent(Guid eventId)
         {
-            var @event = await this.EventRepository.GetById(eventId);
+            var @event = await this.EventRepositoryRead.GetById(eventId);
             if (@event == null)
             {
                 return this.NotFound("Event not found with id " + eventId);
@@ -149,7 +153,7 @@ namespace Fursvp.Api.Controllers
 
             @event.IsPublished = true;
 
-            await this.EventRepository.Update(@event);
+            await this.EventRepositoryWrite.Update(@event);
             return this.Ok(@event);
         }
 
@@ -163,7 +167,7 @@ namespace Fursvp.Api.Controllers
         [Route("{eventId}/member")]
         public async Task<IActionResult> AddMember(Guid eventId, [FromBody] NewMemberRequest newMember)
         {
-            var @event = await this.EventRepository.GetById(eventId);
+            var @event = await this.EventRepositoryRead.GetById(eventId);
             if (@event == null)
             {
                 return this.NotFound("Event not found with id " + eventId);
@@ -182,7 +186,7 @@ namespace Fursvp.Api.Controllers
             };
 
             this.EventService.AddMember(@event, member);
-            await this.EventRepository.Update(@event);
+            await this.EventRepositoryWrite.Update(@event);
 
             try
             {
@@ -215,7 +219,7 @@ namespace Fursvp.Api.Controllers
         [Route("{eventId}/member/{memberId}")]
         public async Task<IActionResult> UpdateMember(Guid eventId, Guid memberId, [FromBody] UpdateMemberRequest updateMember)
         {
-            var @event = await this.EventRepository.GetById(eventId);
+            var @event = await this.EventRepositoryRead.GetById(eventId);
             if (@event == null)
             {
                 return this.NotFound("Event not found with id " + eventId);
@@ -235,7 +239,7 @@ namespace Fursvp.Api.Controllers
             member.IsAttending = updateMember.IsAttending;
             member.IsOrganizer = updateMember.IsOrganizer;
 
-            await this.EventRepository.Update(@event);
+            await this.EventRepositoryWrite.Update(@event);
             return this.Ok(@event);
         }
 
@@ -249,7 +253,7 @@ namespace Fursvp.Api.Controllers
         [Route("{eventId}/member/{memberId}")]
         public async Task<IActionResult> RemoveMember(Guid eventId, Guid memberId)
         {
-            var @event = await this.EventRepository.GetById(eventId);
+            var @event = await this.EventRepositoryRead.GetById(eventId);
             if (@event == null)
             {
                 return this.NotFound("Event not found with id " + eventId);
@@ -263,7 +267,7 @@ namespace Fursvp.Api.Controllers
 
             @event.Members.Remove(member);
 
-            await this.EventRepository.Update(@event);
+            await this.EventRepositoryWrite.Update(@event);
             return this.NoContent();
         }
     }

@@ -586,5 +586,16 @@
             <param name="message">The message that describes the error.</param>
             <param name="innerException">The exception that is the cause of the current exception, or a null reference (Nothing in Visual Basic) if no inner exception is specified.</param>
         </member>
+        <member name="T:Microsoft.Extensions.DependencyInjection.DependencyInjection">
+            <summary>
+            Provides static DependencyInjection extension methods for installation with .net core service collection.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.DependencyInjection.AddDomainServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Registers services for use with the Fursvp Domain.
+            </summary>
+            <param name="services">The service collection.</param>
+        </member>
     </members>
 </doc>
