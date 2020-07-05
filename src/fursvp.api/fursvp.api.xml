@@ -71,6 +71,7 @@
             <param name="logger">The application event logger.</param>
             <param name="eventService">The instance of <see cref="T:Fursvp.Domain.IEventService"/> used to create and update Events.</param>
             <param name="eventRepository">The instance of <see cref="T:Fursvp.Data.IRepository`1"/> used for Event persistence.</param>
+            <param name="emailer">The emailer what sends the emails.</param>
         </member>
         <member name="M:Fursvp.Api.Controllers.EventController.GetEvents">
             <summary>

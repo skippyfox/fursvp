@@ -72,13 +72,15 @@ namespace Fursvp.Api.Filters
                 this.OnException(context, StatusCodes.Status500InternalServerError, ex.GetType().Name, message);
                 this.Logger?.LogError(ex, ex.Message);
 
-                // TODO - put all of these values in config
-                this.Emailer?.Send(new Email
+                // TODO - put all of these values in config:
+                try
                 {
-                    From = new EmailAddress { Address = "noreply@fursvp.com", Name = "Fursvp.com" },
-                    To = new EmailAddress { Address = "where.is.skippy@gmail.com" },
-                    Subject = "Error on FURsvp.com",
-                    PlainTextContent = @$"FURsvp error.
+                    this.Emailer?.Send(new Email
+                    {
+                        From = new EmailAddress { Address = "noreply@fursvp.com", Name = "Fursvp.com" },
+                        To = new EmailAddress { Address = "where.is.skippy@gmail.com" },
+                        Subject = "Error on FURsvp.com",
+                        PlainTextContent = @$"FURsvp error.
 
 Time: {DateTime.Now}
 Method: {context?.HttpContext?.Request?.Method}
@@ -91,7 +93,22 @@ Trace Identifier: {context?.HttpContext?.TraceIdentifier}
 {ex.ToString()}
 
 Inner Exception: {(ex.InnerException == null ? "null" : ex.InnerException.ToString())}",
-                });
+                        HtmlContent = @$"<p>FURsvp error.</p>
+<p>Time: {DateTime.Now}
+<br />Method: {context?.HttpContext?.Request?.Method}
+<br />QueryString: {context?.HttpContext?.Request?.QueryString}
+<br />Path: {context?.HttpContext?.Request?.Path}
+<br />Client IP: {context?.HttpContext?.Connection?.RemoteIpAddress}
+<br />User: {this.UserAccessor?.User?.EmailAddress}
+<br />Trace Identifier: {context?.HttpContext?.TraceIdentifier}</p>
+<p>{ex.ToString().Replace("\n", "<br />")}</p>
+<p>Inner Exception: {(ex.InnerException == null ? "null" : ex.InnerException.ToString().Replace("\n", "<br />"))}</p>",
+                    });
+                }
+                catch
+                {
+                    // TODO ?
+                }
             }
 
             base.OnException(context);

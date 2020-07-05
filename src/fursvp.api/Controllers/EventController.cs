@@ -9,6 +9,7 @@ namespace Fursvp.Api.Controllers
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using System.Web;
     using Fursvp.Api.Requests;
     using Fursvp.Communication;
     using Fursvp.Data;
@@ -29,6 +30,7 @@ namespace Fursvp.Api.Controllers
         /// <param name="logger">The application event logger.</param>
         /// <param name="eventService">The instance of <see cref="IEventService"/> used to create and update Events.</param>
         /// <param name="eventRepository">The instance of <see cref="IRepository{Event}"/> used for Event persistence.</param>
+        /// <param name="emailer">The emailer what sends the emails.</param>
         public EventController(ILogger<EventController> logger, IEventService eventService, IRepository<Event> eventRepository, IEmailer emailer)
         {
             this.Logger = logger;
@@ -178,8 +180,27 @@ namespace Fursvp.Api.Controllers
                 EmailAddress = newMember.EmailAddress,
                 Name = newMember.Name,
             };
+
             this.EventService.AddMember(@event, member);
             await this.EventRepository.Update(@event);
+
+            try
+            {
+                // TODO: Get hardcoded strings into config
+                this.Emailer?.Send(new Email
+                {
+                    From = new EmailAddress { Address = "noreply@fursvp.com", Name = "Fursvp.com" },
+                    To = new EmailAddress { Address = newMember.EmailAddress, Name = newMember.Name },
+                    Subject = $"{@event.Name}: Your event registration",
+                    PlainTextContent = @$"{newMember.Name}: We've got you on the list! View the event details or review and change your response at Fursvp.com.",
+                    HtmlContent = @$"{HttpUtility.HtmlEncode(newMember.Name)}: We've got you on the list! View the event details or review and change your response at <a href=""https://www.fursvp.com"">FURsvp.com</a>.",
+                });
+            }
+            catch
+            {
+                // TODO ?
+            }
+
             return this.CreatedAtAction(nameof(this.GetEvent), new { id = @event.Id }, @event);
         }
 
