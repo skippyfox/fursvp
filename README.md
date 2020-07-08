@@ -39,9 +39,9 @@ Google Forms is an almost perfect RSVP tool. It lacks two notable features: A pu
 - Third-party payment integration for ticket purchases
 
 ## How do I get started? How can I help?
-If you're reading this is the first part of 2020, this source is not yet functional! We could probably use some help! If you'd like to be a contributor, well, THANKS! Having outside help is the biggest reasons this project is open source. Check the Issues section to see what's still needed.
+If you're reading this in mid-2020, this source is nearly functional! We could probably use some help! If you'd like to be a contributor, well, THANKS! Having outside help is the biggest reasons this project is open source. Check the Issues section to see what's still needed.
 
-You'll likely want to have a copy of Visual Studio handy to get started. You can work against a Google Firestore database by copying your service account key to %appdata%\Microsoft\UserSecrets\fursvp\firestore.json.
+You'll likely want to have a copy of Visual Studio and Docker Desktop installed to get started. You can work against a Google Firestore database by copying your service account key to %appdata%\Microsoft\UserSecrets\fursvp\firestore.json.
 
 We don't have an established set of Contributing Guidelines yet, but we do have a [Code of Conduct](CODE_OF_CONDUCT.md). [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 
