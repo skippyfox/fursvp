@@ -63,10 +63,14 @@
   
   <ItemGroup>
     <None Remove="ClientApp\src\components\About.tsx" />
+    <None Remove="ClientApp\src\components\Contact.tsx" />
+    <None Remove="ClientApp\src\store\FursvpEvents.tsx" />
   </ItemGroup>
   
   <ItemGroup>
     <TypeScriptCompile Include="ClientApp\src\components\About.tsx" />
+    <TypeScriptCompile Include="ClientApp\src\components\Contact.tsx" />
+    <TypeScriptCompile Include="ClientApp\src\store\FursvpEvents.tsx" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
