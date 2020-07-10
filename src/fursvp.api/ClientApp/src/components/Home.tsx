@@ -1,14 +1,16 @@
 import * as React from 'react';
+import { Badge } from 'reactstrap';
 import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { ApplicationState } from '../store';
 import * as FursvpEventsStore from '../store/FursvpEvents';
+import { Link } from 'react-router-dom';
 
 // At runtime, Redux will merge together...
 type FursvpEventProps =
     FursvpEventsStore.FursvpEventsState // ... state we've requested from the Redux store
     & typeof FursvpEventsStore.actionCreators // ... plus action creators we've requested
-    & RouteComponentProps<{ }>; // ... plus incoming routing parameters
+    & RouteComponentProps<{}>; // ... plus incoming routing parameters
 
 
 class Home extends React.PureComponent<FursvpEventProps> {
@@ -42,9 +44,10 @@ class Home extends React.PureComponent<FursvpEventProps> {
                 {this.props.events.map((event: FursvpEventsStore.FursvpEvent) =>
                     <div key={event.id} className="container-fluid">
                         <small>{event.startsAt} | {event.location} &nbsp;</small>
-                        <span className="badge badge-info">{event.members.length}</span>
+                        <Badge color="info">{event.members.length}</Badge>
                         <p>
                             <h5>{event.name}</h5>
+                            <Link to="/">Details</Link>
                         </p>
                     </div>
                 )}
