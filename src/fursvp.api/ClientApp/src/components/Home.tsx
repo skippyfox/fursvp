@@ -19,11 +19,6 @@ class Home extends React.PureComponent<FursvpEventProps> {
         this.ensureDataFetched();
     }
 
-    // This method is called when the route parameters change
-    public componentDidUpdate() {
-        this.ensureDataFetched();
-    }
-
     public render() {
         return (
             <React.Fragment>
