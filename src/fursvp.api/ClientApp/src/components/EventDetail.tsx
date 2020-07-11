@@ -51,6 +51,6 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
 }
 
 export default connect(
-    (state: ApplicationState) => state.fursvpEvents, // Selects which state properties are merged into the component's props
+    (state: ApplicationState) => state.targetEvent, // Selects which state properties are merged into the component's props
     EventDetailStore.actionCreators // Selects which action creators are merged into the component's props
 )(EventDetail as any);

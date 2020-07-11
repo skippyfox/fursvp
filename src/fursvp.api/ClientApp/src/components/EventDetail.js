@@ -52,7 +52,7 @@ var EventDetail = /** @class */ (function (_super) {
     };
     return EventDetail;
 }(React.PureComponent));
-exports.default = react_redux_1.connect(function (state) { return state.fursvpEvents; }, // Selects which state properties are merged into the component's props
+exports.default = react_redux_1.connect(function (state) { return state.targetEvent; }, // Selects which state properties are merged into the component's props
 EventDetailStore.actionCreators // Selects which action creators are merged into the component's props
 )(EventDetail);
 //# sourceMappingURL=EventDetail.js.map
