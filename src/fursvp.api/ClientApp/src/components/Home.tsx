@@ -5,6 +5,7 @@ import { RouteComponentProps } from 'react-router';
 import { ApplicationState } from '../store';
 import * as FursvpEventsStore from '../store/FursvpEvents';
 import { Link } from 'react-router-dom';
+import DateTime from './DateTime';
 
 // At runtime, Redux will merge together...
 type FursvpEventProps =
@@ -38,7 +39,7 @@ class Home extends React.PureComponent<FursvpEventProps> {
             <>
                 {this.props.events.map((event: FursvpEventsStore.FursvpEvent) =>
                     <div key={event.id} className="container-fluid">
-                        <small>{event.startsAt} | {event.location} &nbsp;</small>
+                        <small><DateTime date={event.startsAt} timeZoneId={event.timeZoneId} id={"home_startsAt_" + event.id} /> | {event.location} &nbsp;</small>
                         <Badge color="info">{event.members.length}</Badge>
                         <h5>{event.name}</h5>
                         <p>

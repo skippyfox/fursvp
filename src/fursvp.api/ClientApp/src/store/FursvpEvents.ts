@@ -12,8 +12,8 @@ export interface FursvpEventsState {
 export interface FursvpEvent {
     id: string;
     version: number;
-    startsAt: Date;
-    endsAt: Date;
+    startsAt: string;
+    endsAt: string;
     timeZoneId: string;
     members: Member[];
     form: FormPrompt[];
@@ -21,7 +21,7 @@ export interface FursvpEvent {
     otherDetails: string;
     location: string;
     rsvpOpen: boolean;
-    rsvpClosesAt: Date | null;
+    rsvpClosesAt: string | null;
     isPublished: boolean;
 }
 
@@ -33,7 +33,7 @@ export interface Member {
     isOrganizer: boolean;
     isAuthor: boolean;
     responses: FormResponses[];
-    rsvpedAt: Date;
+    rsvpedAt: string;
 }
 
 export interface FormPrompt {

@@ -64,6 +64,7 @@
   <ItemGroup>
     <None Remove="ClientApp\src\components\About.tsx" />
     <None Remove="ClientApp\src\components\Contact.tsx" />
+    <None Remove="ClientApp\src\components\DateTime.tsx" />
     <None Remove="ClientApp\src\components\EventDetail.tsx" />
     <None Remove="ClientApp\src\store\EventDetailStore.ts" />
     <None Remove="ClientApp\src\store\FursvpEvents.ts" />
@@ -72,6 +73,7 @@
   <ItemGroup>
     <TypeScriptCompile Include="ClientApp\src\components\About.tsx" />
     <TypeScriptCompile Include="ClientApp\src\components\Contact.tsx" />
+    <TypeScriptCompile Include="ClientApp\src\components\DateTime.tsx" />
     <TypeScriptCompile Include="ClientApp\src\components\EventDetail.tsx" />
     <TypeScriptCompile Include="ClientApp\src\store\EventDetailStore.ts" />
     <TypeScriptCompile Include="ClientApp\src\store\FursvpEvents.ts" />
