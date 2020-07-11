@@ -43,7 +43,9 @@ var EventDetail = /** @class */ (function (_super) {
                         " \u00A0"),
                     React.createElement(reactstrap_1.Badge, { color: "info" }, this.props.fursvpEvent.members.length))));
         }
-        return (React.createElement(React.Fragment, null, "Loading..."));
+        else {
+            return (React.createElement(React.Fragment, null, "(Loading)"));
+        }
     };
     EventDetail.prototype.ensureDataFetched = function () {
         this.props.requestFursvpEvent(this.props.match.params.id);

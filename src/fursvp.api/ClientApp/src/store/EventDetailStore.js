@@ -7,13 +7,13 @@ exports.actionCreators = {
     requestFursvpEvent: function (id) { return function (dispatch, getState) {
         // Only load data if it's something we don't already have (and are not already loading)
         var appState = getState();
-        if (appState && appState.targetEvent) {
+        if (appState && appState.targetEvent && id !== appState.targetEvent.id) {
             fetch("api/event/" + id)
                 .then(function (response) { return response.json(); })
                 .then(function (data) {
-                dispatch({ type: 'RECEIVE_FURSVP_EVENT', fursvpEvent: data });
+                dispatch({ type: 'RECEIVE_FURSVP_EVENT', fursvpEvent: data, id: id });
             });
-            dispatch({ type: 'REQUEST_FURSVP_EVENT' });
+            dispatch({ type: 'REQUEST_FURSVP_EVENT', id: id });
         }
     }; }
 };
@@ -29,12 +29,14 @@ exports.reducer = function (state, incomingAction) {
         case 'REQUEST_FURSVP_EVENT':
             return {
                 fursvpEvent: state.fursvpEvent,
-                isLoading: true
+                isLoading: true,
+                id: action.id
             };
         case 'RECEIVE_FURSVP_EVENT':
             return {
                 fursvpEvent: action.fursvpEvent,
-                isLoading: false
+                isLoading: false,
+                id: action.id
             };
         default:
             return state;

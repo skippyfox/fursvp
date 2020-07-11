@@ -7,6 +7,7 @@ import { FursvpEvent, Member, FormPrompt, FormResponses } from './FursvpEvents';
 
 export interface EventDetailState {
     isLoading: boolean;
+    id?: string;
     fursvpEvent: FursvpEvent | undefined;
 }
 
@@ -16,11 +17,13 @@ export interface EventDetailState {
 
 interface RequestFursvpEventAction {
     type: 'REQUEST_FURSVP_EVENT';
+    id: string;
 }
 
 interface ReceiveFursvpEventAction {
     type: 'RECEIVE_FURSVP_EVENT';
     fursvpEvent: FursvpEvent;
+    id: string;
 }
 
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
@@ -35,14 +38,14 @@ export const actionCreators = {
     requestFursvpEvent: (id: string): AppThunkAction<KnownAction> => (dispatch, getState) => {
         // Only load data if it's something we don't already have (and are not already loading)
         const appState = getState();
-        if (appState && appState.targetEvent) {
+        if (appState && appState.targetEvent && id !== appState.targetEvent.id) {
             fetch(`api/event/${id}`)
                 .then(response => response.json() as Promise<FursvpEvent>)
                 .then(data => {
-                    dispatch({ type: 'RECEIVE_FURSVP_EVENT', fursvpEvent: data });
+                    dispatch({ type: 'RECEIVE_FURSVP_EVENT', fursvpEvent: data, id: id });
                 });
 
-            dispatch({ type: 'REQUEST_FURSVP_EVENT' });
+            dispatch({ type: 'REQUEST_FURSVP_EVENT', id: id });
         }
     }
 };
@@ -62,12 +65,14 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
         case 'REQUEST_FURSVP_EVENT':
             return {
                 fursvpEvent: state.fursvpEvent,
-                isLoading: true
+                isLoading: true,
+                id: action.id
             };
         case 'RECEIVE_FURSVP_EVENT':
             return {
                 fursvpEvent: action.fursvpEvent,
-                isLoading: false
+                isLoading: false,
+                id: action.id
             };
         default:
             return state;

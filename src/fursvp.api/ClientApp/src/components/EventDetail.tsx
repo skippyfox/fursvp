@@ -36,12 +36,13 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                 </React.Fragment>
             );
         }
-
-        return (
-            <React.Fragment>
-                Loading...
-            </React.Fragment>
+        else {
+            return (
+                <React.Fragment>
+                    (Loading)
+                </React.Fragment>
             );
+        }
     }
 
     private ensureDataFetched() {

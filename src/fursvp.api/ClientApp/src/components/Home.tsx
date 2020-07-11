@@ -40,9 +40,9 @@ class Home extends React.PureComponent<FursvpEventProps> {
                     <div key={event.id} className="container-fluid">
                         <small>{event.startsAt} | {event.location} &nbsp;</small>
                         <Badge color="info">{event.members.length}</Badge>
+                        <h5>{event.name}</h5>
                         <p>
-                            <h5>{event.name}</h5>
-                            <Link to="/">Details</Link>
+                            <Link to={`/event/${event.id}`}>Details</Link>
                         </p>
                     </div>
                 )}
