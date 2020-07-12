@@ -88,7 +88,7 @@ namespace Fursvp.Api.Filters
         private void EmailException(ExceptionContext context, Exception ex)
         {
             // TODO - put all of these values in config:
-            _ = Task.Run(() =>
+            try
             {
                 Emailer?.Send(new Email
                 {
@@ -119,13 +119,17 @@ Inner Exception: {(ex.InnerException == null ? "null" : ex.InnerException.ToStri
 <p>{HttpUtility.HtmlEncode(ex)}</p>
 <p>Inner Exception: {(ex.InnerException == null ? "null" : ex.InnerException.ToString().Replace("\n", "<br />", StringComparison.InvariantCulture))}</p>",
                 });
-            });
+            }
+            catch (Exception secondException)
+            {
+                HandleSecondException(secondException);
+            }
         }
 
         private void EmailException(string message)
         {
             // TODO - put all of these values in config:
-            _ = Task.Run(() =>
+            try
             {
                 Emailer?.Send(new Email
                 {
@@ -143,7 +147,16 @@ User: {UserAccessor?.User?.EmailAddress}
 <br />User: {UserAccessor?.User?.EmailAddress}
 <p>{HttpUtility.HtmlEncode(message)}</p>",
                 });
-            });
+            }
+            catch (Exception secondException)
+            {
+                HandleSecondException(secondException);
+            }
+        }
+
+        private void HandleSecondException(Exception secondException)
+        {
+            Logger?.LogError(secondException, "Encountered an exception while emailing an alert for another exception: " + secondException.Message);
         }
 
         private void OnException(ExceptionContext context, int statusCode, string exception, string errorMessage, string entity = null)

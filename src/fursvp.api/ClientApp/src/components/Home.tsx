@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { Badge } from 'reactstrap';
+﻿import * as React from 'react';
+import { Badge, ListGroup, ListGroupItem, ListGroupItemHeading, ListGroupItemText } from 'reactstrap';
 import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { ApplicationState } from '../store';
@@ -25,7 +25,7 @@ class Home extends React.PureComponent<FursvpEventProps> {
             <React.Fragment>
                 <h1 id="tabelLabel">Upcoming Events</h1>
                 <br />
-                {this.renderEventsTable()}
+                {this.listEvents()}
             </React.Fragment>
         );
     }
@@ -34,21 +34,29 @@ class Home extends React.PureComponent<FursvpEventProps> {
         this.props.requestFursvpEvents();
     }
 
-    private renderEventsTable() {
+    private listEvents() {
         return (
-            <>
+            <ListGroup>
+                <ListGroupItem active tag="button" action>
+                    Add an event
+                </ListGroupItem>
                 {this.props.events.map((event: FursvpEventsStore.FursvpEvent) =>
-                    <div key={event.id} className="container-fluid">
-                        <small><DateTime date={event.startsAt} timeZoneId={event.timeZoneId} id={"home_startsAt_" + event.id} /> | {event.location} &nbsp;</small>
-                        <Badge color="info">{event.members.length}</Badge>
-                        <h5>{event.name}</h5>
-                        <p>
-                            <Link to={`/event/${event.id}`}>Details</Link>
-                        </p>
-                    </div>
+                    <ListGroupItem key={event.id} tag="button" action onClick={this.showEvent.bind(this, event)}>
+                        <ListGroupItemHeading>{event.name}&nbsp;<Badge color="info">{event.members.length}</Badge></ListGroupItemHeading>
+                        <ListGroupItemText>
+                            <DateTime date={event.startsAt} timeZoneId={event.timeZoneId} id={"home_startsAt_" + event.id} />
+                            <br />{event.location}
+                        </ListGroupItemText>
+                    </ListGroupItem>
                 )}
-            </>
+            </ListGroup>
         );
+    }
+
+    ///event/${event.id}
+
+    private showEvent(event: FursvpEventsStore.FursvpEvent) {
+        this.props.history.push('/event/' + event.id);
     }
 }
 

@@ -48,7 +48,7 @@ namespace Fursvp.Domain
         public ICollection<Member> Members { get; } = new Collection<Member>();
 
         /// <summary>
-        /// Gets or sets form responses for an Event.
+        /// Gets or sets form prompts and options for an Event.
         /// </summary>
         public ICollection<FormPrompt> Form { get; } = new Collection<FormPrompt>();
 

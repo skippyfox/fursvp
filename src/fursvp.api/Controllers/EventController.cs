@@ -68,9 +68,16 @@ namespace Fursvp.Api.Controllers
         /// <returns>An object representing the Event matching the id.</returns>
         [HttpGet]
         [Route("{id}")]
-        public Task<Event> GetEvent(Guid id)
+        public async Task<IActionResult> GetEvent(Guid id)
         {
-            return EventRepositoryRead.GetById(id);
+            var @event = await EventRepositoryRead.GetById(id).ConfigureAwait(false);
+
+            if (@event == null)
+            {
+                return NotFound("Event not found with id " + id);
+            }
+
+            return Ok(@event);
         }
 
         /// <summary>
@@ -120,6 +127,16 @@ namespace Fursvp.Api.Controllers
             @event.StartsAt = request.StartsAt;
             @event.EndsAt = request.EndsAt;
             @event.TimeZoneId = request.TimeZoneId;
+            @event.Form.Clear();
+            foreach (var prompt in request.Form)
+            {
+                if (prompt.Id == Guid.Empty)
+                {
+                    prompt.Id = Guid.NewGuid(); //TODO - move to EventService
+                }
+
+                @event.Form.Add(prompt);
+            }
 
             await EventRepositoryWrite.Update(@event).ConfigureAwait(false);
             return Ok(@event);

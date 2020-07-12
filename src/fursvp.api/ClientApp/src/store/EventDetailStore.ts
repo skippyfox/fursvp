@@ -9,6 +9,8 @@ export interface EventDetailState {
     isLoading: boolean;
     id?: string;
     fursvpEvent: FursvpEvent | undefined;
+    modalIsOpen: boolean;
+    modalMember: Member | undefined;
 }
 
 // -----------------
@@ -24,37 +26,105 @@ interface ReceiveFursvpEventAction {
     type: 'RECEIVE_FURSVP_EVENT';
     fursvpEvent: FursvpEvent;
     id: string;
+    member: Member | undefined;
+}
+
+interface ToggleModalAction {
+    type: 'TOGGLE_MODAL_ACTION';
+}
+
+interface OpenModalAction {
+    type: 'OPEN_MODAL_ACTION';
+    member: Member | undefined;
+}
+
+interface FursvpEventNotFoundAction {
+    type: 'FURSVP_EVENT_NOT_FOUND';
 }
 
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
-type KnownAction = RequestFursvpEventAction | ReceiveFursvpEventAction;
+type KnownAction = RequestFursvpEventAction | ReceiveFursvpEventAction | ToggleModalAction | OpenModalAction | FursvpEventNotFoundAction;
+
+const getMemberById = (event: FursvpEvent, memberId: string | undefined): Member | undefined => {
+    if (memberId === undefined) {
+        return undefined;
+    }
+
+    for (let m of event.members) {
+        if (m.id === memberId) {
+            return m;
+        }
+    }
+
+    return undefined;
+}
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
 // They don't directly mutate state, but they can have external side-effects (such as loading data).
-
 export const actionCreators = {
-    requestFursvpEvent: (id: string): AppThunkAction<KnownAction> => (dispatch, getState) => {
+    requestFursvpEvent: (eventId: string, memberId: string | undefined): AppThunkAction<KnownAction> => (dispatch, getState) => {
         // Only load data if it's something we don't already have (and are not already loading)
         const appState = getState();
-        if (appState && appState.targetEvent && id !== appState.targetEvent.id) {
-            fetch(`api/event/${id}`)
-                .then(response => response.json() as Promise<FursvpEvent>)
-                .then(data => {
-                    dispatch({ type: 'RECEIVE_FURSVP_EVENT', fursvpEvent: data, id: id });
-                });
+        if (appState && appState.targetEvent) {
+            if (eventId !== appState.targetEvent.id) {
+                fetch(`api/event/${eventId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error();
+                        }
 
-            dispatch({ type: 'REQUEST_FURSVP_EVENT', id: id });
+                        return response.json() as Promise<FursvpEvent>;
+                    })
+                    .then(data => {
+                        if (data === undefined) {
+                            throw new Error();
+                        }
+                        dispatch({ type: 'RECEIVE_FURSVP_EVENT', fursvpEvent: data, id: eventId, member: getMemberById(data, memberId) });
+                    })
+                    .catch(err => {
+                        dispatch({ type: 'FURSVP_EVENT_NOT_FOUND' });
+                    });
+
+                dispatch({ type: 'REQUEST_FURSVP_EVENT', id: eventId });
+            }
+            else if (appState.targetEvent.fursvpEvent !== undefined && memberId !== undefined) {
+                //Same event is already loaded, memberId provided
+                var member = getMemberById(appState.targetEvent.fursvpEvent, memberId);
+                if (member !== undefined) {
+                    dispatch({ type: 'OPEN_MODAL_ACTION', member });
+                }
+                else {
+                    //Handle member 404
+                    dispatch({ type: 'OPEN_MODAL_ACTION', member: undefined })
+                }
+            }
+            else if (appState.targetEvent.modalIsOpen) {
+                //Same event is not yet loaded or member is not specified, and modal is open for some reason
+                dispatch({ type: 'TOGGLE_MODAL_ACTION' });
+            }
         }
+    },
+
+    toggleModal: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        dispatch({ type: 'TOGGLE_MODAL_ACTION' });
+    },
+
+    openModal: (member: Member): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        dispatch({ type: 'OPEN_MODAL_ACTION', member: member });
     }
+};
+
+const unloadedState: EventDetailState = {
+    fursvpEvent: undefined,
+    isLoading: true,
+    modalIsOpen: false,
+    modalMember: undefined
 };
 
 // ----------------
 // REDUCER - For a given state and action, returns the new state. To support time travel, this must not mutate the old state.
-
-const unloadedState: EventDetailState = { fursvpEvent: undefined, isLoading: false };
-
 export const reducer: Reducer<EventDetailState> = (state: EventDetailState | undefined, incomingAction: Action): EventDetailState => {
     if (state === undefined) {
         return unloadedState;
@@ -66,14 +136,42 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
             return {
                 fursvpEvent: state.fursvpEvent,
                 isLoading: true,
-                id: action.id
+                id: action.id,
+                modalIsOpen: state.modalIsOpen,
+                modalMember: state.modalMember
             };
         case 'RECEIVE_FURSVP_EVENT':
             return {
                 fursvpEvent: action.fursvpEvent,
                 isLoading: false,
-                id: action.id
+                id: action.id,
+                modalIsOpen: state.modalIsOpen || action.member !== undefined,
+                modalMember: action.member !== undefined ? action.member : state.modalMember
             };
+        case 'TOGGLE_MODAL_ACTION':
+            return {
+                fursvpEvent: state.fursvpEvent,
+                isLoading: state.isLoading,
+                id: state.id,
+                modalIsOpen: !state.modalIsOpen,
+                modalMember: state.modalMember
+            };
+        case 'OPEN_MODAL_ACTION':
+            return {
+                fursvpEvent: state.fursvpEvent,
+                isLoading: state.isLoading,
+                id: state.id,
+                modalIsOpen: true,
+                modalMember: action.member
+            };
+        case 'FURSVP_EVENT_NOT_FOUND':
+            return {
+                fursvpEvent: state.fursvpEvent,
+                isLoading: false,
+                id: state.id,
+                modalIsOpen: state.modalIsOpen,
+                modalMember: state.modalMember
+            }
         default:
             return state;
     }

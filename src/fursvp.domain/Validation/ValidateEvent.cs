@@ -67,7 +67,7 @@ namespace Fursvp.Domain.Validation
 
             foreach (var prompt in newState.Form)
             {
-                Assert.That(!promptBehaviors.Contains(prompt.Behavior), "A prompt behavior must be one of: " + string.Join(", ", promptBehaviors));
+                Assert.That(promptBehaviors.Contains(prompt.Behavior), "A prompt behavior must be one of: " + string.Join(", ", promptBehaviors));
                 switch (prompt.Behavior)
                 {
                     case "Text":

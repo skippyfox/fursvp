@@ -52,17 +52,21 @@ namespace Fursvp.Data.Firestore
 
             foreach (var r in ((List<object>)dictionary["Form"]).Cast<Dictionary<string, object>>())
             {
-                var form = new FormPrompt((string)r["Behavior"])
+                var form = new FormPrompt
                 {
                     Id = Guid.Parse((string)r["Id"]),
+                    Behavior = (string)r["Behavior"],
                     Prompt = (string)r["Prompt"],
                     Required = r.TryGetValue("Required", out object required) ? (bool)required : false,
                     SortOrder = r.TryGetValue("SortOrder", out object sortOrder) ? Convert.ToInt32((long)sortOrder) : 0,
                 };
 
-                foreach (var s in (List<string>)r["Options"])
+                if (r["Options"] is List<string> options)
                 {
-                    form.Options.Add(s);
+                    foreach (var option in options)
+                    {
+                        form.Options.Add(option);
+                    }
                 }
 
                 result.Form.Add(form);
@@ -88,9 +92,12 @@ namespace Fursvp.Data.Firestore
                         PromptId = Guid.Parse((string)r["PromptId"])
                     };
 
-                    foreach (var s in (List<string>)m["Responses"])
+                    if (m["Responses"] is List<string> responses)
                     {
-                        formResponses.Responses.Add(s);
+                        foreach (var response in responses)
+                        {
+                            formResponses.Responses.Add(response);
+                        }
                     }
 
                     member.Responses.Add(formResponses);

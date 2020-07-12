@@ -5,7 +5,10 @@
 
 namespace Fursvp.Api.Requests
 {
+    using Fursvp.Domain.Forms;
     using System;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.ComponentModel.DataAnnotations;
 
     /// <summary>
@@ -57,5 +60,10 @@ namespace Fursvp.Api.Requests
         /// Gets or sets the time zone id for the event.
         /// </summary>
         public string TimeZoneId { get; set; }
+
+        /// <summary>
+        /// Gets or sets form prompts and options for an Event.
+        /// </summary>
+        public ICollection<FormPrompt> Form { get; set; }
     }
 }

@@ -241,7 +241,7 @@
         </member>
         <member name="P:Fursvp.Domain.Event.Form">
             <summary>
-            Gets or sets form responses for an Event.
+            Gets or sets form prompts and options for an Event.
             </summary>
         </member>
         <member name="P:Fursvp.Domain.Event.Name">
@@ -311,12 +311,6 @@
             <summary>
             Represents a question and a list of possible answers.
             </summary>
-        </member>
-        <member name="M:Fursvp.Domain.Forms.FormPrompt.#ctor(System.String)">
-            <summary>
-            Initializes a new instance of the <see cref="T:Fursvp.Domain.Forms.FormPrompt"/> class.
-            </summary>
-            <param name="behavior">The descriminator that indicates which implementation of FormPrompt to persist.</param>
         </member>
         <member name="P:Fursvp.Domain.Forms.FormPrompt.Id">
             <summary>

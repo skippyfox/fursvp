@@ -15,15 +15,6 @@ namespace Fursvp.Domain.Forms
     public class FormPrompt
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FormPrompt"/> class.
-        /// </summary>
-        /// <param name="behavior">The descriminator that indicates which implementation of FormPrompt to persist.</param>
-        public FormPrompt(string behavior)
-        {
-            Behavior = behavior;
-        }
-
-        /// <summary>
         /// Gets or sets the globally unique identifier for the prompt.
         /// </summary>
         public Guid Id { get; set; }
@@ -31,7 +22,7 @@ namespace Fursvp.Domain.Forms
         /// <summary>
         /// Gets the discriminator for implementations of FormPrompt.
         /// </summary>
-        public string Behavior { get; }
+        public string Behavior { get; set; }
 
         /// <summary>
         /// Gets or sets the text prompt or question.

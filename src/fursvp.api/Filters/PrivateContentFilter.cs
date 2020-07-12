@@ -96,6 +96,11 @@ namespace Fursvp.Api.Filters
                 return;
             }
 
+            if (objectResult.Value == null)
+            {
+                return;
+            }
+
             // Try to filter a single Event being returned
             var objectType = objectResult.Value.GetType();
             if (objectType != null)

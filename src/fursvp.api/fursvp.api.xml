@@ -345,6 +345,11 @@
             Gets or sets the time zone id for the event.
             </summary>
         </member>
+        <member name="P:Fursvp.Api.Requests.UpdateEventRequest.Form">
+            <summary>
+            Gets or sets form prompts and options for an Event.
+            </summary>
+        </member>
         <member name="T:Fursvp.Api.Requests.UpdateMemberRequest">
             <summary>
             The request model pertaining to inserting or updating Member info.
