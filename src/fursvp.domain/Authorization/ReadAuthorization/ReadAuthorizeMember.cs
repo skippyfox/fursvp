@@ -10,7 +10,8 @@ namespace Fursvp.Domain.Authorization.ReadAuthorization
     /// <summary>
     /// Authorizes and filters access to objects of type <see cref="Member" />.
     /// </summary>
-    public class ReadAuthorizeMember : IReadAuthorize<Member>
+    public class ReadAuthorizeMember<T> : IReadAuthorize<T>
+        where T : IReadAuthorizableMember
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ReadAuthorizeMember"/> class.
@@ -28,13 +29,13 @@ namespace Fursvp.Domain.Authorization.ReadAuthorization
         /// </summary>
         /// <param name="member">The member information being viewed.</param>
         /// <returns>A value indicating whether the user is allowed to view any information related to this member.</returns>
-        public bool CanRead(Member member) => true;
+        public bool CanRead(T member) => true;
 
         /// <summary>
         /// Finds any unauthorized content within the Member object and redacts it if the user is not authorized to view it.
         /// </summary>
         /// <param name="member">The member information being viewed.</param>
-        public void FilterUnauthorizedContent(Member member)
+        public void FilterUnauthorizedContent(T member)
         {
             if (member == null)
             {

@@ -84,19 +84,19 @@ namespace Fursvp.Domain.Validation
 
             if (!newState.RsvpOpen)
             {
-                Assert.That(!newState.RsvpClosesAt.HasValue, "RsvpClosesAt cannot be set if Rsvp is closed.");
+                Assert.That(!newState.RsvpClosesAtUtc.HasValue, "RsvpClosesAt cannot be set if Rsvp is closed.");
             }
 
             if (newState.RsvpOpen)
             {
-                Assert.That(newState.RsvpClosesAt.HasValue, "RsvpClosesAt must be set if Rsvp is open.");
+                Assert.That(newState.RsvpClosesAtUtc.HasValue, "RsvpClosesAt must be set if Rsvp is open.");
             }
 
             if (newState.IsPublished)
             {
-                Assert.That(newState.StartsAt != default, "Event must have a start date and time.");
-                Assert.That(newState.EndsAt != default, "Event must have an end date and time.");
-                Assert.That(newState.StartsAt < newState.EndsAt, "Start time must be before End time.");
+                Assert.That(newState.StartsAtUtc != default, "Event must have a start date and time.");
+                Assert.That(newState.EndsAtUtc != default, "Event must have an end date and time.");
+                Assert.That(newState.StartsAtUtc < newState.EndsAtUtc, "Start time must be before End time.");
 
                 Assert.That(newState.TimeZoneId != null, "Time Zone is required.");
                 ValidateTimeZone.Validate(newState.TimeZoneId);

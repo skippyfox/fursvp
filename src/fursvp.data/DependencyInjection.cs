@@ -25,7 +25,6 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="services">The service collection.</param>
         public static void AddFursvpDataWithFirestore(this IServiceCollection services)
         {
-            ConfigureAutoMapper(services);
             services.AddSingleton<IDictionaryMapper<Event>, EventMapper>();
             ConfigureRepositoryServices<Event, FirestoreRepository<Event>>(services);
         }
@@ -36,14 +35,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="services">The service collection.</param>
         public static void AddFursvpDataWithFakeRepository(this IServiceCollection services)
         {
-            ConfigureAutoMapper(services);
             ConfigureRepositoryServices<Event, FakeRepository<Event>>(services);
-        }
-
-        private static void ConfigureAutoMapper(IServiceCollection services)
-        {
-            var mappingConfig = new MapperConfiguration(cfg => cfg.AddProfile<MappingProfile>());
-            services.AddSingleton(mappingConfig.CreateMapper());
         }
 
         private static void ConfigureRepositoryServices<T, TRepository>(IServiceCollection services)

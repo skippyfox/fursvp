@@ -60,14 +60,14 @@ namespace Fursvp.Domain.Authorization.WriteAuthorization
                     return;
                 }
 
-                Assert.That(oldState.StartsAt == newState.StartsAt, nameof(oldState.StartsAt) + " can only be altered by an event's Author or Organizer.");
-                Assert.That(oldState.EndsAt == newState.EndsAt, nameof(oldState.EndsAt) + " can only be altered by an event's Author or Organizer.");
-                Assert.That(oldState.TimeZoneId == newState.TimeZoneId, nameof(oldState.StartsAt) + " can only be altered by an event's Author or Organizer.");
+                Assert.That(oldState.StartsAtUtc == newState.StartsAtUtc, nameof(oldState.StartsAtUtc) + " can only be altered by an event's Author or Organizer.");
+                Assert.That(oldState.EndsAtUtc == newState.EndsAtUtc, nameof(oldState.EndsAtUtc) + " can only be altered by an event's Author or Organizer.");
+                Assert.That(oldState.TimeZoneId == newState.TimeZoneId, nameof(oldState.StartsAtUtc) + " can only be altered by an event's Author or Organizer.");
                 Assert.That(oldState.Name == newState.Name, nameof(oldState.Name) + " can only be altered by an event's Author or Organizer.");
                 Assert.That(oldState.OtherDetails == newState.OtherDetails, nameof(oldState.OtherDetails) + " can only be altered by an event's Author or Organizer.");
                 Assert.That(oldState.Location == newState.Location, nameof(oldState.Location) + " can only be altered by an event's Author or Organizer.");
                 Assert.That(oldState.RsvpOpen == newState.RsvpOpen, nameof(oldState.RsvpOpen) + " can only be altered by an event's Author or Organizer.");
-                Assert.That(oldState.RsvpClosesAt == newState.RsvpClosesAt, nameof(oldState.RsvpClosesAt) + " can only be altered by an event's Author or Organizer.");
+                Assert.That(oldState.RsvpClosesAtUtc == newState.RsvpClosesAtUtc, nameof(oldState.RsvpClosesAtUtc) + " can only be altered by an event's Author or Organizer.");
                 Assert.That(oldState.IsPublished == newState.IsPublished, nameof(oldState.IsPublished) + " can only be altered by an event's Author or Organizer.");
 
                 // Assert that the old form and new form are equivalent.

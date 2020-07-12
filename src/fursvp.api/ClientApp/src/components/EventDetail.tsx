@@ -51,10 +51,10 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                         {event.name}{padlock}
                     </h1>
                     <Container>
-                        <span className="text-muted">Starts</span> <DateTime date={event.startsAt} timeZoneId={event.timeZoneId} id="eventDetail_startsAt" />
+                        <span className="text-muted">Starts</span> <DateTime date={event.startsAtLocal} timeZoneOffset={event.timeZoneOffset} id="eventDetail_startsAt" />
                     </Container>
                     <Container>
-                        <span className="text-muted">Ends</span> <DateTime date={event.endsAt} timeZoneId={event.timeZoneId} id="eventDetail_endsAt" />
+                        <span className="text-muted">Ends</span> <DateTime date={event.endsAtLocal} timeZoneOffset={event.timeZoneOffset} id="eventDetail_endsAt" />
                     </Container>
                     <Container>
                         <span className="text-muted">Location</span> {event.location}
@@ -82,7 +82,7 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                                 <ModalBody>
                                     <ListGroup>
                                         {member.emailAddress ? <ListGroupItem>✉{member.emailAddress}</ListGroupItem> : <></>}
-                                        <ListGroupItem>✔<DateTime date={member.rsvpedAt} timeZoneId={event.timeZoneId} id="eventDetail_memberModal_rsvpedAt" /></ListGroupItem>
+                                        <ListGroupItem>✔<DateTime date={member.rsvpedAtLocal} timeZoneOffset={event.timeZoneOffset} id="eventDetail_memberModal_rsvpedAt" /></ListGroupItem>
                                         {this.matchResponsesToPrompts(responses, event.form).map(response =>
                                             <ListGroupItem>
                                                 <ListGroupItemHeading>{response.prompt}</ListGroupItemHeading>

@@ -6,9 +6,12 @@
 namespace Fursvp.Api
 {
     using System.Text;
+    using AutoMapper;
     using Fursvp.Api.Filters;
+    using Fursvp.Api.Responses;
     using Fursvp.Communication;
     using Fursvp.Domain.Authorization;
+    using Fursvp.Domain.Authorization.ReadAuthorization;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -105,6 +108,20 @@ namespace Fursvp.Api
                     ValidateAudience = false,
                 };
             });
+
+            services.AddSingleton<IReadAuthorize<EventResponse>, ReadAuthorizeEvent<EventResponse, MemberResponse>>();
+            services.AddSingleton<IReadAuthorize<MemberResponse>, ReadAuthorizeMember<MemberResponse>>();
+            ConfigureAutoMapper(services);
+        }
+
+        private void ConfigureAutoMapper(IServiceCollection services)
+        {
+            var mappingConfig = new MapperConfiguration(cfg => 
+            {
+                cfg.AddProfile<Fursvp.Data.MappingProfile>();
+                cfg.AddProfile<Responses.ResponseMappingProfile>();
+            });
+            services.AddSingleton(mappingConfig.CreateMapper());
         }
 
         /// <summary>

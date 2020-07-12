@@ -65,7 +65,7 @@
             Manages Events.
             </summary>
         </member>
-        <member name="M:Fursvp.Api.Controllers.EventController.#ctor(Microsoft.Extensions.Logging.ILogger{Fursvp.Api.Controllers.EventController},Fursvp.Domain.IEventService,Fursvp.Data.IRepositoryWrite{Fursvp.Domain.Event},Fursvp.Data.IRepositoryRead{Fursvp.Domain.Event},Fursvp.Communication.IEmailer)">
+        <member name="M:Fursvp.Api.Controllers.EventController.#ctor(Microsoft.Extensions.Logging.ILogger{Fursvp.Api.Controllers.EventController},Fursvp.Domain.IEventService,Fursvp.Data.IRepositoryWrite{Fursvp.Domain.Event},Fursvp.Data.IRepositoryRead{Fursvp.Domain.Event},Fursvp.Communication.IEmailer,AutoMapper.IMapper)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Api.Controllers.EventController"/> class.
             </summary>
@@ -325,19 +325,19 @@
             Gets or sets a value indicating whether RSVPs for an Event are open before RsvpClosesAt.
             </summary>
         </member>
-        <member name="P:Fursvp.Api.Requests.UpdateEventRequest.RsvpClosesAt">
+        <member name="P:Fursvp.Api.Requests.UpdateEventRequest.RsvpClosesAtLocal">
             <summary>
-            Gets or sets the date and time at which RSVPs for the Event are scheduled to close.
+            Gets or sets the local date and time at which RSVPs for the Event are scheduled to close.
             </summary>
         </member>
-        <member name="P:Fursvp.Api.Requests.UpdateEventRequest.StartsAt">
+        <member name="P:Fursvp.Api.Requests.UpdateEventRequest.StartsAtLocal">
             <summary>
-            Gets or sets the date and time at which the Event is scheduled to start.
+            Gets or sets the local date and time at which the Event is scheduled to start.
             </summary>
         </member>
-        <member name="P:Fursvp.Api.Requests.UpdateEventRequest.EndsAt">
+        <member name="P:Fursvp.Api.Requests.UpdateEventRequest.EndsAtLocal">
             <summary>
-            Gets or sets the date and time at which the Event is scheduled to end.
+            Gets or sets the local date and time at which the Event is scheduled to end.
             </summary>
         </member>
         <member name="P:Fursvp.Api.Requests.UpdateEventRequest.TimeZoneId">
@@ -393,6 +393,156 @@
         <member name="P:Fursvp.Api.Requests.VerifyEmailRequest.VerificationCode">
             <summary>
             Gets or sets the verification code.
+            </summary>
+        </member>
+        <member name="T:Fursvp.Api.Responses.EventResponse">
+            <summary>
+            A client-consumable representation of the Event's settings and current state.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.EventResponse.Id">
+            <summary>
+            Gets or sets the globally unique identifier for the Event.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.EventResponse.Version">
+            <summary>
+            Gets or sets the Version of this entity used for version control.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.EventResponse.StartsAtUtc">
+            <summary>
+            Gets or sets the UTC date and time at which the Event is scheduled to start.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.EventResponse.EndsAtUtc">
+            <summary>
+            Gets or sets the UTC date and time at which the Event is scheduled to end.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.EventResponse.StartsAtLocal">
+            <summary>
+            Gets or sets the event-local date and time at which the Event is scheduled to start.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.EventResponse.EndsAtLocal">
+            <summary>
+            Gets or sets the event-local date and time at which the Event is scheduled to end.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.EventResponse.TimeZoneId">
+            <summary>
+            Gets or sets the Event's Time Zone Id.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.EventResponse.TimeZoneOffset">
+            <summary>
+            Gets or sets the Event's Time Zone offset from UTC.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.EventResponse.Members">
+            <summary>
+            Gets or sets the collection of Members associated with this Event.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.EventResponse.Form">
+            <summary>
+            Gets or sets form prompts and options for an Event.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.EventResponse.Name">
+            <summary>
+            Gets or sets the Event Name.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.EventResponse.OtherDetails">
+            <summary>
+            Gets or sets miscellaneous information about an Event.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.EventResponse.Location">
+            <summary>
+            Gets or sets the location of the Event.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.EventResponse.RsvpOpen">
+            <summary>
+            Gets or sets a value indicating whether RSVPs for an Event are open before RsvpClosesAt.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.EventResponse.RsvpClosesAtUtc">
+            <summary>
+            Gets or sets the UTC date and time at which RSVPs for the Event are scheduled to close.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.EventResponse.RsvpClosesAtLocal">
+            <summary>
+            Gets or sets the event-local date and time at which RSVPs for the Event are scheduled to close.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.EventResponse.IsPublished">
+            <summary>
+            Gets or sets a value indicating whether an Event is publicly visible.
+            </summary>
+        </member>
+        <member name="T:Fursvp.Api.Responses.MemberResponse">
+            <summary>
+            A client-consumable representation of the Member's information.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.MemberResponse.Id">
+            <summary>
+            Gets or sets the globally unique identifier for an event member.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.MemberResponse.EmailAddress">
+            <summary>
+            Gets or sets the email address for an event member.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.MemberResponse.Name">
+            <summary>
+            Gets or sets the display name for an event member.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.MemberResponse.IsAttending">
+            <summary>
+            Gets or sets a value indicating whether an event member is attending the event.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.MemberResponse.IsOrganizer">
+            <summary>
+            Gets or sets a value indicating whether an event member is an organizer for the event.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.MemberResponse.IsAuthor">
+            <summary>
+            Gets or sets a value indicating whether an event member is the author of the event.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.MemberResponse.Responses">
+            <summary>
+            Gets or sets the collection of form responses for an event attendee.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.MemberResponse.RsvpedAtUtc">
+            <summary>
+            Gets or sets the Utc time that the member was RSVPed to the event.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.MemberResponse.RsvpedAtLocal">
+            <summary>
+            Gets or sets the event-local time that the member was RSVPed to the event.
+            </summary>
+        </member>
+        <member name="T:Fursvp.Api.Responses.ResponseMappingProfile">
+            <summary>
+            Response object Mapping Profile for use with AutoMapper.
+            </summary>
+        </member>
+        <member name="M:Fursvp.Api.Responses.ResponseMappingProfile.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fursvp.Api.Responses.ResponseMappingProfile"/> class.
             </summary>
         </member>
         <member name="T:Fursvp.Api.Startup">

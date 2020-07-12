@@ -44,7 +44,7 @@ class Home extends React.PureComponent<FursvpEventProps> {
                     <ListGroupItem key={event.id} tag="button" action onClick={this.showEvent.bind(this, event)}>
                         <ListGroupItemHeading>{event.name}&nbsp;<Badge color="info">{event.members.length}</Badge></ListGroupItemHeading>
                         <ListGroupItemText>
-                            <DateTime date={event.startsAt} timeZoneId={event.timeZoneId} id={"home_startsAt_" + event.id} />
+                            <DateTime date={event.startsAtLocal} timeZoneOffset={event.timeZoneOffset} id={"home_startsAt_" + event.id} />
                             <br />{event.location}
                         </ListGroupItemText>
                     </ListGroupItem>

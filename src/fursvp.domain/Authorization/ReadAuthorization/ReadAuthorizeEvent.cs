@@ -10,14 +10,16 @@ namespace Fursvp.Domain.Authorization.ReadAuthorization
     /// <summary>
     /// Authorizes and filters access to objects of type <see cref="Member" />.
     /// </summary>
-    public class ReadAuthorizeEvent : IReadAuthorize<Event>
+    public class ReadAuthorizeEvent<TEvent, TMember> : IReadAuthorize<TEvent>
+        where TEvent : IReadAuthorizableEvent<TMember>
+        where TMember : IReadAuthorizableMember
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ReadAuthorizeEvent"/> class.
         /// </summary>
         /// <param name="userAccessor">An instance of IUserAccessor to identify user access.</param>
         /// <param name="readAuthorizeMember">An instance of IReadAuthorize to perform deeper authorization against members being viewed within this event.</param>
-        public ReadAuthorizeEvent(IUserAccessor userAccessor, IReadAuthorize<Member> readAuthorizeMember)
+        public ReadAuthorizeEvent(IUserAccessor userAccessor, IReadAuthorize<TMember> readAuthorizeMember)
         {
             UserAccessor = userAccessor;
             ReadAuthorizeMember = readAuthorizeMember;
@@ -25,14 +27,14 @@ namespace Fursvp.Domain.Authorization.ReadAuthorization
 
         private IUserAccessor UserAccessor { get; }
 
-        private IReadAuthorize<Member> ReadAuthorizeMember { get; }
+        private IReadAuthorize<TMember> ReadAuthorizeMember { get; }
 
         /// <summary>
         /// Indicates whether the current user is allowed to view any information related to this event.
         /// </summary>
         /// <param name="event">The event information being viewed.</param>
         /// <returns>A value indicating whether the user is allowed to view any information related to this event.</returns>
-        public bool CanRead(Event @event)
+        public bool CanRead(TEvent @event)
         {
             if (@event == null || @event.IsPublished == true)
             {
@@ -60,7 +62,7 @@ namespace Fursvp.Domain.Authorization.ReadAuthorization
         /// Finds any unauthorized content within the Event object and redacts it if the user is not authorized to view it.
         /// </summary>
         /// <param name="event">The event information being viewed.</param>
-        public void FilterUnauthorizedContent(Event @event)
+        public void FilterUnauthorizedContent(TEvent @event)
         {
             if (@event?.Members == null)
             {

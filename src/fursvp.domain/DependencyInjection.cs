@@ -28,8 +28,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddSingleton<IEventService, EventService>();
 
-            services.AddSingleton<IReadAuthorize<Event>, ReadAuthorizeEvent>();
-            services.AddSingleton<IReadAuthorize<Member>, ReadAuthorizeMember>();
+            services.AddSingleton<IReadAuthorize<Event>, ReadAuthorizeEvent<Event, Member>>();
+            services.AddSingleton<IReadAuthorize<Member>, ReadAuthorizeMember<Member>>();
 
             services.AddSingleton<IWriteAuthorize<Event>, WriteAuthorizeEvent>();
             services.AddSingleton<IWriteAuthorizeMember, WriteAuthorizeMember>();

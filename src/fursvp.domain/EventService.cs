@@ -41,7 +41,7 @@ namespace Fursvp.Domain
                 IsOrganizer = true,
                 IsAttending = true,
                 Name = name,
-                RsvpedAt = DateTimeProvider.Now,
+                RsvpedAtUtc = DateTimeProvider.Now,
             };
 
             var @event = new Event()
@@ -72,7 +72,7 @@ namespace Fursvp.Domain
             }
 
             member.Id = Guid.NewGuid();
-            member.RsvpedAt = DateTimeProvider.Now;
+            member.RsvpedAtUtc = DateTimeProvider.Now;
             @event.Members.Add(member);
         }
 
@@ -88,7 +88,7 @@ namespace Fursvp.Domain
                 return false;
             }
 
-            return DateTimeProvider.Now < @event.RsvpClosesAt?.ToUtc(@event.TimeZoneId);
+            return DateTimeProvider.Now < @event.RsvpClosesAtUtc?.ToUtc(@event.TimeZoneId);
         }
     }
 }

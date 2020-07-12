@@ -12,16 +12,20 @@ export interface FursvpEventsState {
 export interface FursvpEvent {
     id: string;
     version: number;
-    startsAt: string;
-    endsAt: string;
+    startsAtUtc: string;
+    startsAtLocal: string;
+    endsAtUtc: string;
+    endsAtLocal: string;
     timeZoneId: string;
+    timeZoneOffset: string;
     members: Member[];
     form: FormPrompt[];
     name: string;
     otherDetails: string;
     location: string;
     rsvpOpen: boolean;
-    rsvpClosesAt: string | null;
+    rsvpClosesAtUtc: string | null;
+    rsvpClosesAtLocal: string | null;
     isPublished: boolean;
 }
 
@@ -33,7 +37,8 @@ export interface Member {
     isOrganizer: boolean;
     isAuthor: boolean;
     responses: FormResponses[];
-    rsvpedAt: string;
+    rsvpedAtUtc: string;
+    rsvpedAtLocal: string;
 }
 
 export interface FormPrompt {

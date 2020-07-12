@@ -14,7 +14,5 @@ exports.default = (function (props) { return (React.createElement(React.Fragment
     }).format(new Date(props.date))),
     "\u00A0",
     React.createElement(reactstrap_1.Badge, { id: "timeZoneBadge_" + props.id, color: "secondary" }, "T"),
-    React.createElement(reactstrap_1.UncontrolledTooltip, { target: "timeZoneBadge_" + props.id },
-        "Time Zone: ",
-        props.timeZoneId))); });
+    React.createElement(reactstrap_1.UncontrolledTooltip, { target: "timeZoneBadge_" + props.id }, props.timeZoneOffset))); });
 //# sourceMappingURL=DateTime.js.map

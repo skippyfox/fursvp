@@ -1,7 +1,7 @@
 ﻿import * as React from 'react';
 import { Badge, UncontrolledTooltip } from 'reactstrap';
 
-export default (props: { date: string, timeZoneId: string; id: string }) => (
+export default (props: { date: string, timeZoneOffset: string; id: string }) => (
     <>
         <span>{
             new Intl.DateTimeFormat("en-US", {
@@ -15,6 +15,6 @@ export default (props: { date: string, timeZoneId: string; id: string }) => (
             }).format(new Date(props.date))
         }</span>
         &nbsp;<Badge id={"timeZoneBadge_" + props.id} color="secondary">T</Badge>
-        <UncontrolledTooltip target={"timeZoneBadge_" + props.id}>Time Zone: {props.timeZoneId}</UncontrolledTooltip>
+        <UncontrolledTooltip target={"timeZoneBadge_" + props.id}>{props.timeZoneOffset}</UncontrolledTooltip>
     </>
 );

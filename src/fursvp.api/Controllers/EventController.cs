@@ -10,10 +10,13 @@ namespace Fursvp.Api.Controllers
     using System.Linq;
     using System.Threading.Tasks;
     using System.Web;
+    using AutoMapper;
     using Fursvp.Api.Requests;
+    using Fursvp.Api.Responses;
     using Fursvp.Communication;
     using Fursvp.Data;
     using Fursvp.Domain;
+    using Fursvp.Helpers;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
 
@@ -32,14 +35,17 @@ namespace Fursvp.Api.Controllers
         /// <param name="eventRepositoryWrite">The instance of <see cref="IRepositoryWrite{Event}"/> used for Event persistence write operations.</param>
         /// <param name="eventRepositoryRead">The instance of <see cref="IRepositoryRead{Event}"/> used for Event persistence read operations.</param>
         /// <param name="emailer">The emailer what sends the emails.</param>
-        public EventController(ILogger<EventController> logger, IEventService eventService, IRepositoryWrite<Event> eventRepositoryWrite, IRepositoryRead<Event> eventRepositoryRead, IEmailer emailer)
+        public EventController(ILogger<EventController> logger, IEventService eventService, IRepositoryWrite<Event> eventRepositoryWrite, IRepositoryRead<Event> eventRepositoryRead, IEmailer emailer, IMapper mapper)
         {
             Logger = logger;
             EventRepositoryWrite = eventRepositoryWrite;
             EventRepositoryRead = eventRepositoryRead;
             EventService = eventService;
             Emailer = emailer;
+            Mapper = mapper;
         }
+
+        private IMapper Mapper { get; }
 
         private ILogger<EventController> Logger { get; }
 
@@ -56,9 +62,13 @@ namespace Fursvp.Api.Controllers
         /// </summary>
         /// <returns>A list of objects representing each Event.</returns>
         [HttpGet]
-        public async Task<List<Event>> GetEvents()
+        public async Task<List<EventResponse>> GetEvents()
         {
-            return (await EventRepositoryRead.GetAll().ConfigureAwait(false)).ToList();
+            var allEvents = await EventRepositoryRead.GetAll().ConfigureAwait(false);
+
+            // TODO: Only get events that are not over yet
+
+            return allEvents.Select(Mapper.MapResponse).ToList();
         }
 
         /// <summary>
@@ -77,7 +87,7 @@ namespace Fursvp.Api.Controllers
                 return NotFound("Event not found with id " + id);
             }
 
-            return Ok(@event);
+            return Ok(Mapper.MapResponse(@event));
         }
 
         /// <summary>
@@ -95,7 +105,7 @@ namespace Fursvp.Api.Controllers
 
             var @event = EventService.CreateNewEvent(newEvent.AuthorEmailAddress, newEvent.AuthorEmailAddress);
             await EventRepositoryWrite.Insert(@event).ConfigureAwait(false);
-            return CreatedAtAction(nameof(GetEvent), new { id = @event.Id }, @event);
+            return CreatedAtAction(nameof(GetEvent), new { id = @event.Id }, Mapper.MapResponse(@event));
         }
 
         /// <summary>
@@ -119,13 +129,12 @@ namespace Fursvp.Api.Controllers
                 return NotFound("Event not found with id " + eventId);
             }
 
+            // TODO: Move this into EventService
+
             @event.Location = request.Location;
             @event.Name = request.Name;
             @event.OtherDetails = request.OtherDetails;
             @event.RsvpOpen = request.RsvpOpen;
-            @event.RsvpClosesAt = request.RsvpClosesAt;
-            @event.StartsAt = request.StartsAt;
-            @event.EndsAt = request.EndsAt;
             @event.TimeZoneId = request.TimeZoneId;
             @event.Form.Clear();
             foreach (var prompt in request.Form)
@@ -138,8 +147,24 @@ namespace Fursvp.Api.Controllers
                 @event.Form.Add(prompt);
             }
 
+            if (request.RsvpClosesAtLocal.HasValue)
+            {
+                request.RsvpClosesAtLocal.Value.TryToUtc(request.TimeZoneId, out var rsvpClosesAtUtc);
+                @event.RsvpClosesAtUtc = rsvpClosesAtUtc;
+            }
+            else
+            {
+                @event.RsvpClosesAtUtc = null;
+            }
+            
+            request.StartsAtLocal.TryToUtc(request.TimeZoneId, out var startsAtUtc);
+            @event.StartsAtUtc = startsAtUtc;
+            
+            request.EndsAtLocal.TryToUtc(request.TimeZoneId, out var endsAtUtc);
+            @event.EndsAtUtc = endsAtUtc;
+
             await EventRepositoryWrite.Update(@event).ConfigureAwait(false);
-            return Ok(@event);
+            return Ok(Mapper.MapResponse(@event));
         }
 
         /// <summary>
@@ -160,7 +185,7 @@ namespace Fursvp.Api.Controllers
             @event.IsPublished = true;
 
             await EventRepositoryWrite.Update(@event).ConfigureAwait(false);
-            return Ok(@event);
+            return Ok(Mapper.MapResponse(@event));
         }
 
         /// <summary>
@@ -181,7 +206,7 @@ namespace Fursvp.Api.Controllers
             @event.IsPublished = true;
 
             await EventRepositoryWrite.Update(@event).ConfigureAwait(false);
-            return Ok(@event);
+            return Ok(Mapper.MapResponse(@event));
         }
 
         /// <summary>
@@ -233,7 +258,7 @@ namespace Fursvp.Api.Controllers
                   });
               });
 
-            return CreatedAtAction(nameof(GetEvent), new { id = @event.Id }, @event);
+            return CreatedAtAction(nameof(GetEvent), new { id = @event.Id }, Mapper.MapResponse(@event));
         }
 
         /// <summary>
@@ -276,7 +301,7 @@ namespace Fursvp.Api.Controllers
             }
 
             await EventRepositoryWrite.Update(@event).ConfigureAwait(false);
-            return Ok(@event);
+            return Ok(Mapper.MapResponse(@event));
         }
 
         /// <summary>

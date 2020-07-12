@@ -8,12 +8,13 @@ namespace Fursvp.Domain
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using Fursvp.Domain.Authorization.ReadAuthorization;
     using Fursvp.Domain.Forms;
 
     /// <summary>
     /// A Member of an Event.
     /// </summary>
-    public class Member
+    public class Member : IReadAuthorizableMember
     {
         /// <summary>
         /// Gets or sets the globally unique identifier for an event member.
@@ -53,6 +54,6 @@ namespace Fursvp.Domain
         /// <summary>
         /// Gets or sets the Utc time that the member was RSVPed to the event.
         /// </summary>
-        public DateTime RsvpedAt { get; set; }
+        public DateTime RsvpedAtUtc { get; set; }
     }
 }

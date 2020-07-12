@@ -31,9 +31,51 @@
             <summary>
             Converts a DateTime from local time zone to utc time.
             </summary>
-            <param name="dateTime">The local datetime.</param>
+            <param name="localDateTime">The local datetime.</param>
             <param name="sourceTimeZoneId">The local time zone from which to convert to utc time.</param>
             <returns>The converted datetime in utc.</returns>
+        </member>
+        <member name="M:Fursvp.Helpers.DateTimeExtensions.ToUtc(System.DateTime,System.TimeZoneInfo)">
+            <summary>
+            Converts a DateTime from local time zone to utc time.
+            </summary>
+            <param name="localDateTime">The local datetime.</param>
+            <param name="sourceTimeZoneInfo">The local time zone from which to convert to utc time.</param>
+            <returns>The converted datetime in utc.</returns>
+        </member>
+        <member name="M:Fursvp.Helpers.DateTimeExtensions.TryToUtc(System.DateTime,System.String,System.DateTime@)">
+            <summary>
+            Converts a DateTime from local time zone to utc time.
+            </summary>
+            <param name="localDateTime">The local datetime.</param>
+            <param name="sourceTimeZoneId">The local time zone from which to convert to utc time.</param>
+            <param name="utcDateTime">The utc datetime result, or the local datetime if conversion was unsuccessful.</param>
+            <returns>A value indicating whether the conversion was successful.</returns>
+        </member>
+        <member name="M:Fursvp.Helpers.DateTimeExtensions.ToLocal(System.DateTime,System.String)">
+            <summary>
+            Converts a DateTime from utc time to a local time zone.
+            </summary>
+            <param name="utcDateTime">The utc datetime.</param>
+            <param name="targetTimeZoneId">The local time zone to which to convert from utc time.</param>
+            <returns>The local datetime.</returns>
+        </member>
+        <member name="M:Fursvp.Helpers.DateTimeExtensions.ToLocal(System.DateTime,System.TimeZoneInfo)">
+            <summary>
+            Converts a DateTime from utc time to a local time zone.
+            </summary>
+            <param name="utcDateTime">The utc datetime.</param>
+            <param name="targetTimeZoneInfo">The local time zone to which to convert from utc time.</param>
+            <returns>The local datetime.</returns>
+        </member>
+        <member name="M:Fursvp.Helpers.DateTimeExtensions.TryToLocal(System.DateTime,System.String,System.DateTime@)">
+            <summary>
+            Converts a DateTime from utc time to a local time zone.
+            </summary>
+            <param name="utcDateTime">The utc datetime.</param>
+            <param name="targetTimeZoneId">The local time zone to which to convert from utc time.</param>
+            <param name="localDateTime">The local datetime result, or the utc datetime if conversion was unsuccessful.</param>
+            <returns>A value indicating whether the conversion was successful.</returns>
         </member>
         <member name="T:Fursvp.Helpers.FursvpRandom">
             <summary>

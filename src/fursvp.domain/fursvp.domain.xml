@@ -77,50 +77,50 @@
             </summary>
             <param name="content">The content being read and filtered for privacy.</param>
         </member>
-        <member name="T:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeEvent">
+        <member name="T:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeEvent`2">
             <summary>
             Authorizes and filters access to objects of type <see cref="T:Fursvp.Domain.Member" />.
             </summary>
         </member>
-        <member name="M:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeEvent.#ctor(Fursvp.Domain.Authorization.IUserAccessor,Fursvp.Domain.Authorization.ReadAuthorization.IReadAuthorize{Fursvp.Domain.Member})">
+        <member name="M:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeEvent`2.#ctor(Fursvp.Domain.Authorization.IUserAccessor,Fursvp.Domain.Authorization.ReadAuthorization.IReadAuthorize{`1})">
             <summary>
-            Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeEvent"/> class.
+            Initializes a new instance of the <see cref="!:ReadAuthorizeEvent"/> class.
             </summary>
             <param name="userAccessor">An instance of IUserAccessor to identify user access.</param>
             <param name="readAuthorizeMember">An instance of IReadAuthorize to perform deeper authorization against members being viewed within this event.</param>
         </member>
-        <member name="M:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeEvent.CanRead(Fursvp.Domain.Event)">
+        <member name="M:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeEvent`2.CanRead(`0)">
             <summary>
             Indicates whether the current user is allowed to view any information related to this event.
             </summary>
             <param name="event">The event information being viewed.</param>
             <returns>A value indicating whether the user is allowed to view any information related to this event.</returns>
         </member>
-        <member name="M:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeEvent.FilterUnauthorizedContent(Fursvp.Domain.Event)">
+        <member name="M:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeEvent`2.FilterUnauthorizedContent(`0)">
             <summary>
             Finds any unauthorized content within the Event object and redacts it if the user is not authorized to view it.
             </summary>
             <param name="event">The event information being viewed.</param>
         </member>
-        <member name="T:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeMember">
+        <member name="T:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeMember`1">
             <summary>
             Authorizes and filters access to objects of type <see cref="T:Fursvp.Domain.Member" />.
             </summary>
         </member>
-        <member name="M:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeMember.#ctor(Fursvp.Domain.Authorization.IUserAccessor)">
+        <member name="M:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeMember`1.#ctor(Fursvp.Domain.Authorization.IUserAccessor)">
             <summary>
-            Initializes a new instance of the <see cref="T:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeMember"/> class.
+            Initializes a new instance of the <see cref="!:ReadAuthorizeMember"/> class.
             </summary>
             <param name="userAccessor">An instance of IUserAccessor to identify user access.</param>
         </member>
-        <member name="M:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeMember.CanRead(Fursvp.Domain.Member)">
+        <member name="M:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeMember`1.CanRead(`0)">
             <summary>
             Indicates whether the current user is allowed to view any information related to this member.
             </summary>
             <param name="member">The member information being viewed.</param>
             <returns>A value indicating whether the user is allowed to view any information related to this member.</returns>
         </member>
-        <member name="M:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeMember.FilterUnauthorizedContent(Fursvp.Domain.Member)">
+        <member name="M:Fursvp.Domain.Authorization.ReadAuthorization.ReadAuthorizeMember`1.FilterUnauthorizedContent(`0)">
             <summary>
             Finds any unauthorized content within the Member object and redacts it if the user is not authorized to view it.
             </summary>
@@ -219,14 +219,14 @@
             Gets or sets the Version of this entity used for database version control.
             </summary>
         </member>
-        <member name="P:Fursvp.Domain.Event.StartsAt">
+        <member name="P:Fursvp.Domain.Event.StartsAtUtc">
             <summary>
-            Gets or sets the local date and time at which the Event is scheduled to start.
+            Gets or sets the UTC date and time at which the Event is scheduled to start.
             </summary>
         </member>
-        <member name="P:Fursvp.Domain.Event.EndsAt">
+        <member name="P:Fursvp.Domain.Event.EndsAtUtc">
             <summary>
-            Gets or sets the local date and time at which the Event is scheduled to end.
+            Gets or sets the UTC date and time at which the Event is scheduled to end.
             </summary>
         </member>
         <member name="P:Fursvp.Domain.Event.TimeZoneId">
@@ -264,9 +264,9 @@
             Gets or sets a value indicating whether RSVPs for an Event are open before RsvpClosesAt.
             </summary>
         </member>
-        <member name="P:Fursvp.Domain.Event.RsvpClosesAt">
+        <member name="P:Fursvp.Domain.Event.RsvpClosesAtUtc">
             <summary>
-            Gets or sets the local date and time at which RSVPs for the Event are scheduled to close.
+            Gets or sets the UTC date and time at which RSVPs for the Event are scheduled to close.
             </summary>
         </member>
         <member name="P:Fursvp.Domain.Event.IsPublished">
@@ -455,7 +455,7 @@
             Gets or sets the collection of form responses for an event attendee.
             </summary>
         </member>
-        <member name="P:Fursvp.Domain.Member.RsvpedAt">
+        <member name="P:Fursvp.Domain.Member.RsvpedAtUtc">
             <summary>
             Gets or sets the Utc time that the member was RSVPed to the event.
             </summary>

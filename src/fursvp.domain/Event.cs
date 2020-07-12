@@ -8,6 +8,8 @@ namespace Fursvp.Domain
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Linq;
+    using Fursvp.Domain.Authorization.ReadAuthorization;
     using Fursvp.Domain.Forms;
 
 
@@ -15,7 +17,7 @@ namespace Fursvp.Domain
     /// The Domain Event representing the settings and current state of an Event.
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1716:Identifiers should not match keywords", Justification = "Can't think of a suitable alternative. If this changes, rename, or correctly map to, any database collection.")]
-    public class Event : IEntity<Event>
+    public class Event : IEntity<Event>, IReadAuthorizableEvent<Member>
     {
         /// <summary>
         /// Gets or sets the globally unique identifier for the Event.
@@ -28,14 +30,14 @@ namespace Fursvp.Domain
         public int Version { get; set; }
 
         /// <summary>
-        /// Gets or sets the local date and time at which the Event is scheduled to start.
+        /// Gets or sets the UTC date and time at which the Event is scheduled to start.
         /// </summary>
-        public DateTime StartsAt { get; set; }
+        public DateTime StartsAtUtc { get; set; }
 
         /// <summary>
-        /// Gets or sets the local date and time at which the Event is scheduled to end.
+        /// Gets or sets the UTC date and time at which the Event is scheduled to end.
         /// </summary>
-        public DateTime EndsAt { get; set; }
+        public DateTime EndsAtUtc { get; set; }
 
         /// <summary>
         /// Gets or sets the Event's Time Zone Id.
@@ -73,9 +75,9 @@ namespace Fursvp.Domain
         public bool RsvpOpen { get; set; }
 
         /// <summary>
-        /// Gets or sets the local date and time at which RSVPs for the Event are scheduled to close.
+        /// Gets or sets the UTC date and time at which RSVPs for the Event are scheduled to close.
         /// </summary>
-        public DateTime? RsvpClosesAt { get; set; }
+        public DateTime? RsvpClosesAtUtc { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether an Event is publicly visible.

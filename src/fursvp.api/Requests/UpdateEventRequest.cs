@@ -40,21 +40,21 @@ namespace Fursvp.Api.Requests
         public bool RsvpOpen { get; set; }
 
         /// <summary>
-        /// Gets or sets the date and time at which RSVPs for the Event are scheduled to close.
+        /// Gets or sets the local date and time at which RSVPs for the Event are scheduled to close.
         /// </summary>
-        public DateTime? RsvpClosesAt { get; set; }
+        public DateTime? RsvpClosesAtLocal { get; set; }
 
         /// <summary>
-        /// Gets or sets the date and time at which the Event is scheduled to start.
+        /// Gets or sets the local date and time at which the Event is scheduled to start.
         /// </summary>
         [Required]
-        public DateTime StartsAt { get; set; }
+        public DateTime StartsAtLocal { get; set; }
 
         /// <summary>
-        /// Gets or sets the date and time at which the Event is scheduled to end.
+        /// Gets or sets the local date and time at which the Event is scheduled to end.
         /// </summary>
         [Required]
-        public DateTime EndsAt { get; set; }
+        public DateTime EndsAtLocal { get; set; }
 
         /// <summary>
         /// Gets or sets the time zone id for the event.
