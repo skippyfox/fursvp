@@ -166,14 +166,6 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
         return <></>;
     }
 
-    private emailToolTip(member: FursvpEventsStore.Member): JSX.Element {
-        if (member.emailAddress === undefined || member.emailAddress === null) {
-            return <></>;
-        }
-
-        return this.toolTip("✉", member.emailAddress, "emailAddress_" + member.id);
-    }
-
     private showMember(member: FursvpEventsStore.Member) {
         this.props.history.push('/event/' + this.props.id + '/member/' + member.id);
         this.props.openModal(member);

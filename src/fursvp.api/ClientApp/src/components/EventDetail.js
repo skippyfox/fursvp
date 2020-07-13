@@ -145,12 +145,6 @@ var EventDetail = /** @class */ (function (_super) {
         }
         return React.createElement(React.Fragment, null);
     };
-    EventDetail.prototype.emailToolTip = function (member) {
-        if (member.emailAddress === undefined || member.emailAddress === null) {
-            return React.createElement(React.Fragment, null);
-        }
-        return this.toolTip("✉", member.emailAddress, "emailAddress_" + member.id);
-    };
     EventDetail.prototype.showMember = function (member) {
         this.props.history.push('/event/' + this.props.id + '/member/' + member.id);
         this.props.openModal(member);

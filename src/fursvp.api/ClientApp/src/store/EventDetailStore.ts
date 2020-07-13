@@ -30,11 +30,11 @@ interface ReceiveFursvpEventAction {
 }
 
 interface ToggleModalAction {
-    type: 'TOGGLE_MODAL_ACTION';
+    type: 'TOGGLE_MEMBER_MODAL_ACTION';
 }
 
 interface OpenModalAction {
-    type: 'OPEN_MODAL_ACTION';
+    type: 'OPEN_MEMBER_MODAL_ACTION';
     member: Member | undefined;
 }
 
@@ -93,26 +93,26 @@ export const actionCreators = {
                 //Same event is already loaded, memberId provided
                 var member = getMemberById(appState.targetEvent.fursvpEvent, memberId);
                 if (member !== undefined) {
-                    dispatch({ type: 'OPEN_MODAL_ACTION', member });
+                    dispatch({ type: 'OPEN_MEMBER_MODAL_ACTION', member });
                 }
                 else {
                     //Handle member 404
-                    dispatch({ type: 'OPEN_MODAL_ACTION', member: undefined })
+                    dispatch({ type: 'OPEN_MEMBER_MODAL_ACTION', member: undefined })
                 }
             }
             else if (appState.targetEvent.modalIsOpen) {
                 //Same event is not yet loaded or member is not specified, and modal is open for some reason
-                dispatch({ type: 'TOGGLE_MODAL_ACTION' });
+                dispatch({ type: 'TOGGLE_MEMBER_MODAL_ACTION' });
             }
         }
     },
 
     toggleModal: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
-        dispatch({ type: 'TOGGLE_MODAL_ACTION' });
+        dispatch({ type: 'TOGGLE_MEMBER_MODAL_ACTION' });
     },
 
     openModal: (member: Member): AppThunkAction<KnownAction> => (dispatch, getState) => {
-        dispatch({ type: 'OPEN_MODAL_ACTION', member: member });
+        dispatch({ type: 'OPEN_MEMBER_MODAL_ACTION', member: member });
     }
 };
 
@@ -148,7 +148,7 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
                 modalIsOpen: state.modalIsOpen || action.member !== undefined,
                 modalMember: action.member !== undefined ? action.member : state.modalMember
             };
-        case 'TOGGLE_MODAL_ACTION':
+        case 'TOGGLE_MEMBER_MODAL_ACTION':
             return {
                 fursvpEvent: state.fursvpEvent,
                 isLoading: state.isLoading,
@@ -156,7 +156,7 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
                 modalIsOpen: !state.modalIsOpen,
                 modalMember: state.modalMember
             };
-        case 'OPEN_MODAL_ACTION':
+        case 'OPEN_MEMBER_MODAL_ACTION':
             return {
                 fursvpEvent: state.fursvpEvent,
                 isLoading: state.isLoading,
