@@ -5,7 +5,6 @@ import Home from './components/Home';
 import About from './components/About';
 import Contact from './components/Contact';
 import EventDetail from './components/EventDetail';
-import User from './components/User';
 
 import './custom.css'
 
@@ -15,6 +14,5 @@ export default () => (
         <Route path='/contact' component={Contact} />
         <Route path='/about' component={About} />
         <Route path='/event/:eventId/(member)?/:memberId?' component={EventDetail} />
-        <User />
     </Layout>
 );

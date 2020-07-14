@@ -134,11 +134,9 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
     switch (action.type) {
         case 'REQUEST_FURSVP_EVENT':
             return {
-                fursvpEvent: state.fursvpEvent,
+                ...state,
                 isLoading: true,
-                id: action.id,
-                modalIsOpen: state.modalIsOpen,
-                modalMember: state.modalMember
+                id: action.id
             };
         case 'RECEIVE_FURSVP_EVENT':
             return {
@@ -150,27 +148,19 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
             };
         case 'TOGGLE_MEMBER_MODAL_ACTION':
             return {
-                fursvpEvent: state.fursvpEvent,
-                isLoading: state.isLoading,
-                id: state.id,
+                ...state,
                 modalIsOpen: !state.modalIsOpen,
-                modalMember: state.modalMember
             };
         case 'OPEN_MEMBER_MODAL_ACTION':
             return {
-                fursvpEvent: state.fursvpEvent,
-                isLoading: state.isLoading,
-                id: state.id,
+                ...state,
                 modalIsOpen: true,
                 modalMember: action.member
             };
         case 'FURSVP_EVENT_NOT_FOUND':
             return {
-                fursvpEvent: state.fursvpEvent,
-                isLoading: false,
-                id: state.id,
-                modalIsOpen: state.modalIsOpen,
-                modalMember: state.modalMember
+                ...state,
+                isLoading: false
             }
         default:
             return state;

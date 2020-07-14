@@ -1,9 +1,10 @@
 ﻿import * as React from 'react';
-import { Modal, ModalHeader, ModalBody, ModalFooter, Button, FormGroup, Form, Label, Input } from 'reactstrap';
+import { Modal, ModalHeader, ModalBody, ModalFooter, Button, FormGroup, Form, Label, Input, NavLink } from 'reactstrap';
 import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { ApplicationState } from '../store';
 import * as UserStore from '../store/UserStore';
+import { Link } from 'react-router-dom';
 
 // At runtime, Redux will merge together...
 type UserProps =
@@ -23,7 +24,7 @@ class User extends React.PureComponent<UserProps> {
     public render() {
         return (            
             <React.Fragment>
-                <Button outline color="primary" onClick={this.props.openUserInfoModal}>{this.props.verifiedEmail === undefined ? "Log In" : "Log Out"}</Button>
+                <NavLink tag={Link} onClick={this.props.openUserInfoModal} className="text-dark">{this.props.verifiedEmail == undefined ? "Log In" : "Account"}</NavLink>
                 <Modal isOpen={this.props.loginModalIsOpen} toggle={this.props.toggleModal}>
                     <ModalHeader toggle={this.props.toggleModal}>Log In</ModalHeader>
                     <ModalBody>
@@ -42,7 +43,7 @@ class User extends React.PureComponent<UserProps> {
                 <Modal isOpen={this.props.verifyModalIsOpen} toggle={this.props.toggleModal}>
                     <ModalHeader toggle={this.props.toggleModal}>Verify Email</ModalHeader>
                     <ModalBody>
-                        Enter the verification code we sent to {this.props.emailBeingVerified}.
+                        Enter the verification code we sent to <code>{this.props.emailBeingVerified}</code>.
                         <Form>
                             <FormGroup>
                                 <Label for="exampleEmail">Verification Code</Label>
@@ -58,7 +59,10 @@ class User extends React.PureComponent<UserProps> {
                 <Modal isOpen={this.props.userInfoModalIsOpen} toggle={this.props.toggleModal}>
                     <ModalHeader toggle={this.props.toggleModal}>{this.props.verifiedEmail === undefined ? "Not Logged In" : "Logged In"}</ModalHeader>
                     <ModalBody>
-                        {this.props.verifiedEmail === undefined ? "You are not logged in." : "You are logged in as " + this.props.verifiedEmail + "."}
+                        {this.props.verifiedEmail === undefined
+                            ? <>You are not logged in.</>
+                            : <>You are verified as <code>{this.props.verifiedEmail}</code>.</>
+                        }
                     </ModalBody>
                     <ModalFooter>
                         <Button color="primary" onClick={this.props.toggleModal} disabled={this.props.verificationCodeIsSending}>Continue</Button>{' '}

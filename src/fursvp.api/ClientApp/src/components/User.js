@@ -17,6 +17,7 @@ var React = require("react");
 var reactstrap_1 = require("reactstrap");
 var react_redux_1 = require("react-redux");
 var UserStore = require("../store/UserStore");
+var react_router_dom_1 = require("react-router-dom");
 var User = /** @class */ (function (_super) {
     __extends(User, _super);
     function User(props) {
@@ -27,7 +28,7 @@ var User = /** @class */ (function (_super) {
     }
     User.prototype.render = function () {
         return (React.createElement(React.Fragment, null,
-            React.createElement(reactstrap_1.Button, { outline: true, color: "primary", onClick: this.props.openUserInfoModal }, this.props.verifiedEmail === undefined ? "Log In" : "Log Out"),
+            React.createElement(reactstrap_1.NavLink, { tag: react_router_dom_1.Link, onClick: this.props.openUserInfoModal, className: "text-dark" }, this.props.verifiedEmail == undefined ? "Log In" : "Account"),
             React.createElement(reactstrap_1.Modal, { isOpen: this.props.loginModalIsOpen, toggle: this.props.toggleModal },
                 React.createElement(reactstrap_1.ModalHeader, { toggle: this.props.toggleModal }, "Log In"),
                 React.createElement(reactstrap_1.ModalBody, null,
@@ -43,7 +44,7 @@ var User = /** @class */ (function (_super) {
                 React.createElement(reactstrap_1.ModalHeader, { toggle: this.props.toggleModal }, "Verify Email"),
                 React.createElement(reactstrap_1.ModalBody, null,
                     "Enter the verification code we sent to ",
-                    this.props.emailBeingVerified,
+                    React.createElement("code", null, this.props.emailBeingVerified),
                     ".",
                     React.createElement(reactstrap_1.Form, null,
                         React.createElement(reactstrap_1.FormGroup, null,
@@ -55,7 +56,12 @@ var User = /** @class */ (function (_super) {
                     React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.props.toggleModal, disabled: this.props.verificationCodeIsSending }, "Cancel"))),
             React.createElement(reactstrap_1.Modal, { isOpen: this.props.userInfoModalIsOpen, toggle: this.props.toggleModal },
                 React.createElement(reactstrap_1.ModalHeader, { toggle: this.props.toggleModal }, this.props.verifiedEmail === undefined ? "Not Logged In" : "Logged In"),
-                React.createElement(reactstrap_1.ModalBody, null, this.props.verifiedEmail === undefined ? "You are not logged in." : "You are logged in as " + this.props.verifiedEmail + "."),
+                React.createElement(reactstrap_1.ModalBody, null, this.props.verifiedEmail === undefined
+                    ? React.createElement(React.Fragment, null, "You are not logged in.")
+                    : React.createElement(React.Fragment, null,
+                        "You are verified as ",
+                        React.createElement("code", null, this.props.verifiedEmail),
+                        ".")),
                 React.createElement(reactstrap_1.ModalFooter, null,
                     React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.props.toggleModal, disabled: this.props.verificationCodeIsSending }, "Continue"),
                     ' ',

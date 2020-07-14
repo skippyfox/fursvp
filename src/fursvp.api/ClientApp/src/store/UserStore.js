@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -91,65 +102,17 @@ exports.reducer = function (state, incomingAction) {
     var action = incomingAction;
     switch (action.type) {
         case 'TOGGLE_LOGIN_MODAL_ACTION':
-            return {
-                loginModalIsOpen: false,
-                verificationEmailIsSending: state.verificationEmailIsSending,
-                emailBeingVerified: state.emailBeingVerified,
-                verifyModalIsOpen: false,
-                verifiedEmail: state.verifiedEmail,
-                verificationCodeIsSending: state.verificationCodeIsSending,
-                userInfoModalIsOpen: false
-            };
+            return __assign(__assign({}, state), { loginModalIsOpen: false, verifyModalIsOpen: false, userInfoModalIsOpen: false });
         case 'OPEN_LOGIN_MODAL_ACTION':
-            return {
-                loginModalIsOpen: true,
-                verificationEmailIsSending: state.verificationEmailIsSending,
-                emailBeingVerified: state.emailBeingVerified,
-                verifyModalIsOpen: false,
-                verifiedEmail: state.verifiedEmail,
-                verificationCodeIsSending: state.verificationCodeIsSending,
-                userInfoModalIsOpen: false
-            };
+            return __assign(__assign({}, state), { loginModalIsOpen: true, verifyModalIsOpen: false, userInfoModalIsOpen: false });
         case 'VERIFICATION_EMAIL_IS_SENDING_ACTION':
-            return {
-                loginModalIsOpen: true,
-                verificationEmailIsSending: true,
-                emailBeingVerified: action.emailAddress,
-                verifyModalIsOpen: false,
-                verifiedEmail: state.verifiedEmail,
-                verificationCodeIsSending: state.verificationCodeIsSending,
-                userInfoModalIsOpen: false
-            };
+            return __assign(__assign({}, state), { loginModalIsOpen: true, verificationEmailIsSending: true, emailBeingVerified: action.emailAddress, verifyModalIsOpen: false, userInfoModalIsOpen: false });
         case 'VERIFICATION_EMAIL_WAS_SENT_ACTION':
-            return {
-                loginModalIsOpen: false,
-                verificationEmailIsSending: false,
-                emailBeingVerified: state.emailBeingVerified,
-                verifyModalIsOpen: true,
-                verifiedEmail: state.verifiedEmail,
-                verificationCodeIsSending: state.verificationCodeIsSending,
-                userInfoModalIsOpen: false
-            };
+            return __assign(__assign({}, state), { loginModalIsOpen: false, verificationEmailIsSending: false, verifyModalIsOpen: true, userInfoModalIsOpen: false });
         case 'VERIFICATION_EMAIL_DID_NOT_SEND_ACTION':
-            return {
-                loginModalIsOpen: true,
-                verificationEmailIsSending: false,
-                emailBeingVerified: state.emailBeingVerified,
-                verifyModalIsOpen: false,
-                verifiedEmail: state.verifiedEmail,
-                verificationCodeIsSending: state.verificationCodeIsSending,
-                userInfoModalIsOpen: false
-            };
+            return __assign(__assign({}, state), { loginModalIsOpen: true, verificationEmailIsSending: false, verifyModalIsOpen: false, userInfoModalIsOpen: false });
         case 'VERIFICATION_CODE_IS_SENDING_ACTION':
-            return {
-                loginModalIsOpen: false,
-                verificationEmailIsSending: false,
-                emailBeingVerified: state.emailBeingVerified,
-                verifyModalIsOpen: true,
-                verifiedEmail: state.verifiedEmail,
-                verificationCodeIsSending: true,
-                userInfoModalIsOpen: false
-            };
+            return __assign(__assign({}, state), { loginModalIsOpen: false, verificationEmailIsSending: false, verifyModalIsOpen: true, verificationCodeIsSending: true, userInfoModalIsOpen: false });
         case 'USER_LOGGED_IN_ACTION':
             return {
                 loginModalIsOpen: false,
@@ -161,15 +124,7 @@ exports.reducer = function (state, incomingAction) {
                 userInfoModalIsOpen: true
             };
         case 'VERIFICATION_CODE_WAS_UNSUCCESSFUL_ACTION':
-            return {
-                loginModalIsOpen: false,
-                verificationEmailIsSending: false,
-                emailBeingVerified: state.emailBeingVerified,
-                verifyModalIsOpen: true,
-                verifiedEmail: state.verifiedEmail,
-                verificationCodeIsSending: false,
-                userInfoModalIsOpen: false
-            };
+            return __assign(__assign({}, state), { loginModalIsOpen: false, verificationEmailIsSending: false, verifyModalIsOpen: true, verificationCodeIsSending: false, userInfoModalIsOpen: false });
         case 'USER_LOGGED_OUT_ACTION':
             return {
                 loginModalIsOpen: false,
@@ -181,15 +136,7 @@ exports.reducer = function (state, incomingAction) {
                 userInfoModalIsOpen: true
             };
         case 'OPEN_USER_INFO_MODAL_ACTION':
-            return {
-                loginModalIsOpen: false,
-                verificationEmailIsSending: state.verificationEmailIsSending,
-                emailBeingVerified: state.emailBeingVerified,
-                verifyModalIsOpen: false,
-                verifiedEmail: state.verifiedEmail,
-                verificationCodeIsSending: state.verificationCodeIsSending,
-                userInfoModalIsOpen: true
-            };
+            return __assign(__assign({}, state), { loginModalIsOpen: false, verifyModalIsOpen: false, userInfoModalIsOpen: true });
         default:
             return state;
     }

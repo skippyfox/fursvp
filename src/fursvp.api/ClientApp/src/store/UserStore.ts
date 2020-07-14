@@ -176,61 +176,49 @@ export const reducer: Reducer<UserState> = (state: UserState | undefined, incomi
     switch (action.type) {
         case 'TOGGLE_LOGIN_MODAL_ACTION':
             return {
+                ...state,
                 loginModalIsOpen: false,
-                verificationEmailIsSending: state.verificationEmailIsSending,
-                emailBeingVerified: state.emailBeingVerified,
                 verifyModalIsOpen: false,
-                verifiedEmail: state.verifiedEmail,
-                verificationCodeIsSending: state.verificationCodeIsSending,
                 userInfoModalIsOpen: false
             };
         case 'OPEN_LOGIN_MODAL_ACTION':
             return {
+                ...state,
                 loginModalIsOpen: true,
-                verificationEmailIsSending: state.verificationEmailIsSending,
-                emailBeingVerified: state.emailBeingVerified,
                 verifyModalIsOpen: false,
-                verifiedEmail: state.verifiedEmail,
-                verificationCodeIsSending: state.verificationCodeIsSending,
                 userInfoModalIsOpen: false
             };
         case 'VERIFICATION_EMAIL_IS_SENDING_ACTION':
             return {
+                ...state,
                 loginModalIsOpen: true,
                 verificationEmailIsSending: true,
                 emailBeingVerified: action.emailAddress,
                 verifyModalIsOpen: false,
-                verifiedEmail: state.verifiedEmail,
-                verificationCodeIsSending: state.verificationCodeIsSending,
                 userInfoModalIsOpen: false
             };
         case 'VERIFICATION_EMAIL_WAS_SENT_ACTION':
             return {
+                ...state,
                 loginModalIsOpen: false,
                 verificationEmailIsSending: false,
-                emailBeingVerified: state.emailBeingVerified,
                 verifyModalIsOpen: true,
-                verifiedEmail: state.verifiedEmail,
-                verificationCodeIsSending: state.verificationCodeIsSending,
                 userInfoModalIsOpen: false
             };
         case 'VERIFICATION_EMAIL_DID_NOT_SEND_ACTION':
             return {
+                ...state,
                 loginModalIsOpen: true,
                 verificationEmailIsSending: false,
-                emailBeingVerified: state.emailBeingVerified,
                 verifyModalIsOpen: false,
-                verifiedEmail: state.verifiedEmail,
-                verificationCodeIsSending: state.verificationCodeIsSending,
                 userInfoModalIsOpen: false
             }
         case 'VERIFICATION_CODE_IS_SENDING_ACTION':
             return {
+                ...state,
                 loginModalIsOpen: false,
                 verificationEmailIsSending: false,
-                emailBeingVerified: state.emailBeingVerified,
                 verifyModalIsOpen: true,
-                verifiedEmail: state.verifiedEmail,
                 verificationCodeIsSending: true,
                 userInfoModalIsOpen: false
             };
@@ -246,11 +234,10 @@ export const reducer: Reducer<UserState> = (state: UserState | undefined, incomi
             };
         case 'VERIFICATION_CODE_WAS_UNSUCCESSFUL_ACTION':
             return {
+                ...state,
                 loginModalIsOpen: false,
                 verificationEmailIsSending: false,
-                emailBeingVerified: state.emailBeingVerified,
                 verifyModalIsOpen: true,
-                verifiedEmail: state.verifiedEmail,
                 verificationCodeIsSending: false,
                 userInfoModalIsOpen: false
             }
@@ -266,12 +253,9 @@ export const reducer: Reducer<UserState> = (state: UserState | undefined, incomi
             }
         case 'OPEN_USER_INFO_MODAL_ACTION':
             return {
+                ...state,
                 loginModalIsOpen: false,
-                verificationEmailIsSending: state.verificationEmailIsSending,
-                emailBeingVerified: state.emailBeingVerified,
                 verifyModalIsOpen: false,
-                verifiedEmail: state.verifiedEmail,
-                verificationCodeIsSending: state.verificationCodeIsSending,
                 userInfoModalIsOpen: true
             }
         default:

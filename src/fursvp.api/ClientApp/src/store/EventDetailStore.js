@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var getMemberById = function (event, memberId) {
     if (memberId === undefined) {
@@ -78,13 +89,7 @@ exports.reducer = function (state, incomingAction) {
     var action = incomingAction;
     switch (action.type) {
         case 'REQUEST_FURSVP_EVENT':
-            return {
-                fursvpEvent: state.fursvpEvent,
-                isLoading: true,
-                id: action.id,
-                modalIsOpen: state.modalIsOpen,
-                modalMember: state.modalMember
-            };
+            return __assign(__assign({}, state), { isLoading: true, id: action.id });
         case 'RECEIVE_FURSVP_EVENT':
             return {
                 fursvpEvent: action.fursvpEvent,
@@ -94,29 +99,11 @@ exports.reducer = function (state, incomingAction) {
                 modalMember: action.member !== undefined ? action.member : state.modalMember
             };
         case 'TOGGLE_MEMBER_MODAL_ACTION':
-            return {
-                fursvpEvent: state.fursvpEvent,
-                isLoading: state.isLoading,
-                id: state.id,
-                modalIsOpen: !state.modalIsOpen,
-                modalMember: state.modalMember
-            };
+            return __assign(__assign({}, state), { modalIsOpen: !state.modalIsOpen });
         case 'OPEN_MEMBER_MODAL_ACTION':
-            return {
-                fursvpEvent: state.fursvpEvent,
-                isLoading: state.isLoading,
-                id: state.id,
-                modalIsOpen: true,
-                modalMember: action.member
-            };
+            return __assign(__assign({}, state), { modalIsOpen: true, modalMember: action.member });
         case 'FURSVP_EVENT_NOT_FOUND':
-            return {
-                fursvpEvent: state.fursvpEvent,
-                isLoading: false,
-                id: state.id,
-                modalIsOpen: state.modalIsOpen,
-                modalMember: state.modalMember
-            };
+            return __assign(__assign({}, state), { isLoading: false });
         default:
             return state;
     }
