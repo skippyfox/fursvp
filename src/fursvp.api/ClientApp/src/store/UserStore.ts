@@ -42,8 +42,8 @@ interface VerificationCodeIsSendingAction {
     type: 'VERIFICATION_CODE_IS_SENDING_ACTION';
 }
 
-interface VerificationCodeWasSuccessfulAction {
-    type: 'VERIFICATION_CODE_WAS_SUCCESSFUL_ACTION';
+interface UserLoggedInAction {
+    type: 'USER_LOGGED_IN_ACTION';
     emailAddress: string;
 }
 
@@ -63,7 +63,7 @@ interface OpenUserInfoModalAction {
 // declared type strings (and not any other arbitrary string).
 type KnownAction = OpenLoginModalAction | ToggleLoginModalAction
     | VerificationEmailIsSendingAction | VerificationEmailWasSentAction | VerificationEmailDidNotSendAction
-    | VerificationCodeIsSendingAction | VerificationCodeWasSuccessfulAction | VerificationCodeWasUnsuccessfulAction
+    | VerificationCodeIsSendingAction | UserLoggedInAction | VerificationCodeWasUnsuccessfulAction
     | UserLoggedOutAction | OpenUserInfoModalAction;
 
 // ----------------
@@ -127,7 +127,7 @@ export const actionCreators = {
                 return response.text();
             })
             .then(token => {
-                dispatch({ type: 'VERIFICATION_CODE_WAS_SUCCESSFUL_ACTION', emailAddress });
+                dispatch({ type: 'USER_LOGGED_IN_ACTION', emailAddress });
                 localStorage.setItem("verifiedEmail", emailAddress);
                 localStorage.setItem("token", token);
             })
@@ -234,7 +234,7 @@ export const reducer: Reducer<UserState> = (state: UserState | undefined, incomi
                 verificationCodeIsSending: true,
                 userInfoModalIsOpen: false
             };
-        case 'VERIFICATION_CODE_WAS_SUCCESSFUL_ACTION':
+        case 'USER_LOGGED_IN_ACTION':
             return {
                 loginModalIsOpen: false,
                 verificationEmailIsSending: false,

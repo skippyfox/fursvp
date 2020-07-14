@@ -51,7 +51,7 @@ exports.actionCreators = {
             return response.text();
         })
             .then(function (token) {
-            dispatch({ type: 'VERIFICATION_CODE_WAS_SUCCESSFUL_ACTION', emailAddress: emailAddress });
+            dispatch({ type: 'USER_LOGGED_IN_ACTION', emailAddress: emailAddress });
             localStorage.setItem("verifiedEmail", emailAddress);
             localStorage.setItem("token", token);
         })
@@ -150,7 +150,7 @@ exports.reducer = function (state, incomingAction) {
                 verificationCodeIsSending: true,
                 userInfoModalIsOpen: false
             };
-        case 'VERIFICATION_CODE_WAS_SUCCESSFUL_ACTION':
+        case 'USER_LOGGED_IN_ACTION':
             return {
                 loginModalIsOpen: false,
                 verificationEmailIsSending: false,
