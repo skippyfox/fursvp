@@ -14,5 +14,6 @@ namespace Fursvp.Domain.Authorization
         /// Gets or sets the user's email address.
         /// </summary>
         public string EmailAddress { get; set; }
+        public string SessionId { get; set; }
     }
 }

@@ -6,9 +6,11 @@
 namespace Fursvp.Api
 {
     using System;
+    using System.Linq;
     using System.Security.Claims;
     using Fursvp.Domain.Authorization;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Caching.Memory;
 
     /// <summary>
     /// Provides information about a user via claims based authentication.
@@ -19,9 +21,10 @@ namespace Fursvp.Api
         /// Initializes a new instance of the <see cref="ClaimsPrincipalUserAccessor"/> class.
         /// </summary>
         /// <param name="httpContextAccessor">The HttpContextAccessor.</param>
-        public ClaimsPrincipalUserAccessor(IHttpContextAccessor httpContextAccessor)
+        public ClaimsPrincipalUserAccessor(IHttpContextAccessor httpContextAccessor, IMemoryCache memoryCache)
         {
             HttpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+            MemoryCache = memoryCache;
         }
 
         /// <summary>
@@ -37,13 +40,22 @@ namespace Fursvp.Api
                     return null;
                 }
 
+                var sessionId = claimsPrincipal.Claims.FirstOrDefault(c => c.Type == "sessionId")?.Value;
+                if (sessionId == null || !MemoryCache.TryGetValue("SessionId:" + sessionId, out _))
+                {
+                    // User logged out or session has otherwise expired
+                    return null;
+                }
+
                 return new User
                 {
                     EmailAddress = claimsPrincipal.Identity.Name,
+                    SessionId = sessionId,
                 };
             }
         }
 
         private IHttpContextAccessor HttpContextAccessor { get; }
+        private IMemoryCache MemoryCache { get; }
     }
 }

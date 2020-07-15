@@ -13,6 +13,7 @@ namespace Fursvp.Api.Controllers
     using Fursvp.Api.Filters;
     using Fursvp.Api.Requests;
     using Fursvp.Communication;
+    using Fursvp.Domain.Authorization;
     using Fursvp.Helpers;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Caching.Memory;
@@ -32,11 +33,12 @@ namespace Fursvp.Api.Controllers
         /// <param name="configuration">The application configuration.</param>
         /// <param name="memoryCache">The application memory cache.</param>
         /// <param name="emailer">The instance of <see cref="IEmailer"/> used to suppress or send emails.</param>
-        public AuthController(IConfiguration configuration, IMemoryCache memoryCache, IEmailer emailer)
+        public AuthController(IConfiguration configuration, IMemoryCache memoryCache, IEmailer emailer, IUserAccessor userAccessor)
         {
             Configuration = configuration;
             MemoryCache = memoryCache;
             Emailer = emailer;
+            UserAccessor = userAccessor;
         }
 
         private IConfiguration Configuration { get; }
@@ -44,6 +46,8 @@ namespace Fursvp.Api.Controllers
         private IMemoryCache MemoryCache { get; }
 
         private IEmailer Emailer { get; }
+        
+        private IUserAccessor UserAccessor { get; }
 
         /// <summary>
         /// Instantly logs in a tester with the email address provided. For Debugging only.
@@ -56,7 +60,8 @@ namespace Fursvp.Api.Controllers
         public IActionResult DebugAuth([FromBody]string emailAddress)
         {
             // authentication successful so generate jwt token
-            var token = CreateVerificationToken(emailAddress);
+            var token = CreateVerificationToken(emailAddress, out var sessionId);
+            MemoryCache.Set("SessionId:" + sessionId, true);
             return Ok(token);
         }
 
@@ -94,7 +99,8 @@ namespace Fursvp.Api.Controllers
                 {
                     // authentication successful.
                     ExpireVerificationCode(verifyEmailRequest.EmailAddress);
-                    var token = CreateVerificationToken(verifyEmailRequest.EmailAddress);
+                    var token = CreateVerificationToken(verifyEmailRequest.EmailAddress, out string sessionId);
+                    MemoryCache.Set("SessionId:" + sessionId, true);
                     return Ok(token);
                 }
 
@@ -102,6 +108,20 @@ namespace Fursvp.Api.Controllers
             }
 
             return Unauthorized();
+        }
+
+        [HttpDelete]
+        [Route("logout")]
+        public IActionResult LogOut()
+        {
+            var user = UserAccessor.User;
+
+            if (user != null && user.SessionId != null)
+            {
+                MemoryCache.Remove("SessionId:" + user.SessionId);
+            }
+
+            return Ok();
         }
 
         /// <summary>
@@ -159,17 +179,18 @@ If you didn't request this, simply ignore this message.",
             MemoryCache.Remove(VerificationAttemptsCacheKey(emailAddress));
         }
 
-        private string CreateVerificationToken(string emailAddress)
+        private string CreateVerificationToken(string emailAddress, out string sessionId)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(Configuration["AuthorizationIssuerSigningKey"]);
+            sessionId = Guid.NewGuid().ToString();
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
                     new Claim(ClaimTypes.Name, emailAddress),
+                    new Claim("sessionid", sessionId),
                 }),
-                Expires = DateTime.UtcNow.AddDays(7), // TODO - Make this configurable or not expiring (store token in cookie) if elected
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
             };
             var createdToken = tokenHandler.CreateToken(tokenDescriptor);

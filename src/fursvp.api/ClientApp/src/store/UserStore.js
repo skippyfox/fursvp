@@ -74,6 +74,15 @@ exports.actionCreators = {
         localStorage.removeItem("verifiedEmail");
         localStorage.removeItem("token");
         dispatch({ type: 'USER_LOGGED_OUT_ACTION' });
+        var requestOptions = {
+            method: 'DELETE',
+            credentials: "include",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + getStoredAuthToken()
+            }
+        };
+        fetch("api/auth/logout", requestOptions);
     }; }
 };
 function getStoredAuthToken() {

@@ -140,6 +140,17 @@ export const actionCreators = {
         localStorage.removeItem("verifiedEmail");
         localStorage.removeItem("token");
         dispatch({ type: 'USER_LOGGED_OUT_ACTION' });
+        
+        const requestOptions : RequestInit = {
+            method: 'DELETE',
+            credentials: "include",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + getStoredAuthToken()
+            }
+        };
+
+        fetch("api/auth/logout", requestOptions);
     }
 };
 
