@@ -1,6 +1,7 @@
 ﻿import { Action, Reducer } from 'redux';
 import { AppThunkAction } from '.';
 import { FursvpEvent, Member, FormPrompt, FormResponses } from './FursvpEvents';
+import { getStoredVerifiedEmail, getStoredAuthToken, UserLoggedInAction, UserLoggedOutAction, OpenLoginModalAction } from './UserStore';
 
 // -----------------
 // STATE - This defines the type of data maintained in the Redux store.
@@ -11,6 +12,7 @@ export interface EventDetailState {
     fursvpEvent: FursvpEvent | undefined;
     modalIsOpen: boolean;
     modalMember: Member | undefined;
+    requestedAsUser: string | undefined;
 }
 
 // -----------------
@@ -20,6 +22,7 @@ export interface EventDetailState {
 interface RequestFursvpEventAction {
     type: 'REQUEST_FURSVP_EVENT';
     id: string;
+    requestedAsUser: string | undefined;
 }
 
 interface ReceiveFursvpEventAction {
@@ -44,7 +47,8 @@ interface FursvpEventNotFoundAction {
 
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
-type KnownAction = RequestFursvpEventAction | ReceiveFursvpEventAction | ToggleModalAction | OpenModalAction | FursvpEventNotFoundAction;
+type KnownAction = RequestFursvpEventAction | ReceiveFursvpEventAction | ToggleModalAction | OpenModalAction | FursvpEventNotFoundAction
+    | UserLoggedOutAction | UserLoggedInAction | OpenLoginModalAction;
 
 const getMemberById = (event: FursvpEvent, memberId: string | undefined): Member | undefined => {
     if (memberId === undefined) {
@@ -68,8 +72,26 @@ export const actionCreators = {
         // Only load data if it's something we don't already have (and are not already loading)
         const appState = getState();
         if (appState && appState.targetEvent) {
-            if (eventId !== appState.targetEvent.id) {
-                fetch(`api/event/${eventId}`)
+
+            var userEmail = getStoredVerifiedEmail();
+
+            if (eventId !== appState.targetEvent.id || appState.targetEvent.requestedAsUser != userEmail) {
+
+                var authToken = getStoredAuthToken();
+
+                var requestOptions: RequestInit | undefined = undefined;
+                if (authToken !== undefined) {
+                    requestOptions = {
+                        method: 'GET',
+                        credentials: "include",
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + authToken
+                        }
+                    };
+                }                
+
+                fetch(`api/event/${eventId}`, requestOptions)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error();
@@ -87,7 +109,7 @@ export const actionCreators = {
                         dispatch({ type: 'FURSVP_EVENT_NOT_FOUND' });
                     });
 
-                dispatch({ type: 'REQUEST_FURSVP_EVENT', id: eventId });
+                dispatch({ type: 'REQUEST_FURSVP_EVENT', id: eventId, requestedAsUser: userEmail });
             }
             else if (appState.targetEvent.fursvpEvent !== undefined && memberId !== undefined) {
                 //Same event is already loaded, memberId provided
@@ -120,7 +142,8 @@ const unloadedState: EventDetailState = {
     fursvpEvent: undefined,
     isLoading: true,
     modalIsOpen: false,
-    modalMember: undefined
+    modalMember: undefined,
+    requestedAsUser: undefined
 };
 
 // ----------------
@@ -136,10 +159,12 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
             return {
                 ...state,
                 isLoading: true,
-                id: action.id
+                id: action.id,
+                requestedAsUser: action.requestedAsUser
             };
         case 'RECEIVE_FURSVP_EVENT':
             return {
+                ...state,
                 fursvpEvent: action.fursvpEvent,
                 isLoading: false,
                 id: action.id,
@@ -161,6 +186,13 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
             return {
                 ...state,
                 isLoading: false
+            }
+        case 'USER_LOGGED_OUT_ACTION':
+            return {
+                ...state,
+                modalMember: undefined,
+                fursvpEvent: undefined,
+                isLoading: true
             }
         default:
             return state;

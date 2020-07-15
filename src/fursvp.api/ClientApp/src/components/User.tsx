@@ -24,7 +24,10 @@ class User extends React.PureComponent<UserProps> {
     public render() {
         return (            
             <React.Fragment>
-                <NavLink tag={Link} onClick={this.props.openUserInfoModal} className="text-dark">{this.props.verifiedEmail == undefined ? "Log In" : "Account"}</NavLink>
+                {this.props.verifiedEmail == undefined
+                    ? <NavLink tag={Link} onClick={this.props.openLoginModal} className="text-dark" to="#">Log In</NavLink>
+                    : <NavLink tag={Link} onClick={this.props.openUserInfoModal} className="text-dark" to="#">Account</NavLink>
+                }
                 <Modal isOpen={this.props.loginModalIsOpen} toggle={this.props.toggleModal}>
                     <ModalHeader toggle={this.props.toggleModal}>Log In</ModalHeader>
                     <ModalBody>

@@ -76,19 +76,28 @@ exports.actionCreators = {
         dispatch({ type: 'USER_LOGGED_OUT_ACTION' });
     }; }
 };
-function getVerifiedEmailFromLocalStorage() {
+function getStoredAuthToken() {
+    var token = localStorage.getItem("token");
+    if (token == null) {
+        return undefined;
+    }
+    return token;
+}
+exports.getStoredAuthToken = getStoredAuthToken;
+function getStoredVerifiedEmail() {
     var email = localStorage.getItem("verifiedEmail");
     if (email == null) {
         return undefined;
     }
     return email;
 }
+exports.getStoredVerifiedEmail = getStoredVerifiedEmail;
 var unloadedState = {
     loginModalIsOpen: false,
     verificationEmailIsSending: false,
     emailBeingVerified: undefined,
     verifyModalIsOpen: false,
-    verifiedEmail: getVerifiedEmailFromLocalStorage(),
+    verifiedEmail: getStoredVerifiedEmail(),
     verificationCodeIsSending: false,
     userInfoModalIsOpen: false
 };
@@ -98,7 +107,7 @@ exports.reducer = function (state, incomingAction) {
     if (state === undefined) {
         return unloadedState;
     }
-    console.log('User Reducer: ' + incomingAction.type);
+    //console.log('User Reducer: ' + incomingAction.type);
     var action = incomingAction;
     switch (action.type) {
         case 'TOGGLE_LOGIN_MODAL_ACTION':

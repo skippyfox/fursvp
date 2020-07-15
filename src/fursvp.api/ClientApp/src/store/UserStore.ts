@@ -17,7 +17,7 @@ export interface UserState {
 // -----------------
 // ACTIONS - These are serializable (hence replayable) descriptions of state transitions.
 // They do not themselves have any side-effects; they just describe something that is going to happen.
-interface OpenLoginModalAction {
+export interface OpenLoginModalAction {
     type: 'OPEN_LOGIN_MODAL_ACTION';
 }
 
@@ -42,7 +42,7 @@ interface VerificationCodeIsSendingAction {
     type: 'VERIFICATION_CODE_IS_SENDING_ACTION';
 }
 
-interface UserLoggedInAction {
+export interface UserLoggedInAction {
     type: 'USER_LOGGED_IN_ACTION';
     emailAddress: string;
 }
@@ -51,7 +51,7 @@ interface VerificationCodeWasUnsuccessfulAction {
     type: 'VERIFICATION_CODE_WAS_UNSUCCESSFUL_ACTION';
 }
 
-interface UserLoggedOutAction {
+export interface UserLoggedOutAction {
     type: 'USER_LOGGED_OUT_ACTION';
 }
 
@@ -143,7 +143,17 @@ export const actionCreators = {
     }
 };
 
-function getVerifiedEmailFromLocalStorage(): string | undefined {
+export function getStoredAuthToken(): string | undefined {
+    var token = localStorage.getItem("token");
+
+    if (token == null) {
+        return undefined;
+    }
+
+    return token;
+}
+
+export function getStoredVerifiedEmail(): string | undefined {
     var email = localStorage.getItem("verifiedEmail");
 
     if (email == null) {
@@ -158,7 +168,7 @@ const unloadedState: UserState = {
     verificationEmailIsSending: false,
     emailBeingVerified: undefined,
     verifyModalIsOpen: false,
-    verifiedEmail: getVerifiedEmailFromLocalStorage(),
+    verifiedEmail: getStoredVerifiedEmail(),
     verificationCodeIsSending: false,
     userInfoModalIsOpen: false
 };
@@ -170,7 +180,7 @@ export const reducer: Reducer<UserState> = (state: UserState | undefined, incomi
         return unloadedState;
     }
 
-    console.log('User Reducer: ' + incomingAction.type);
+    //console.log('User Reducer: ' + incomingAction.type);
 
     const action = incomingAction as KnownAction;
     switch (action.type) {

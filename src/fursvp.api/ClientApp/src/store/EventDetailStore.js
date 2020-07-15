@@ -11,6 +11,7 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var UserStore_1 = require("./UserStore");
 var getMemberById = function (event, memberId) {
     if (memberId === undefined) {
         return undefined;
@@ -31,8 +32,21 @@ exports.actionCreators = {
         // Only load data if it's something we don't already have (and are not already loading)
         var appState = getState();
         if (appState && appState.targetEvent) {
-            if (eventId !== appState.targetEvent.id) {
-                fetch("api/event/" + eventId)
+            var userEmail = UserStore_1.getStoredVerifiedEmail();
+            if (eventId !== appState.targetEvent.id || appState.targetEvent.requestedAsUser != userEmail) {
+                var authToken = UserStore_1.getStoredAuthToken();
+                var requestOptions = undefined;
+                if (authToken !== undefined) {
+                    requestOptions = {
+                        method: 'GET',
+                        credentials: "include",
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + authToken
+                        }
+                    };
+                }
+                fetch("api/event/" + eventId, requestOptions)
                     .then(function (response) {
                     if (!response.ok) {
                         throw new Error();
@@ -48,7 +62,7 @@ exports.actionCreators = {
                     .catch(function (err) {
                     dispatch({ type: 'FURSVP_EVENT_NOT_FOUND' });
                 });
-                dispatch({ type: 'REQUEST_FURSVP_EVENT', id: eventId });
+                dispatch({ type: 'REQUEST_FURSVP_EVENT', id: eventId, requestedAsUser: userEmail });
             }
             else if (appState.targetEvent.fursvpEvent !== undefined && memberId !== undefined) {
                 //Same event is already loaded, memberId provided
@@ -78,7 +92,8 @@ var unloadedState = {
     fursvpEvent: undefined,
     isLoading: true,
     modalIsOpen: false,
-    modalMember: undefined
+    modalMember: undefined,
+    requestedAsUser: undefined
 };
 // ----------------
 // REDUCER - For a given state and action, returns the new state. To support time travel, this must not mutate the old state.
@@ -89,21 +104,17 @@ exports.reducer = function (state, incomingAction) {
     var action = incomingAction;
     switch (action.type) {
         case 'REQUEST_FURSVP_EVENT':
-            return __assign(__assign({}, state), { isLoading: true, id: action.id });
+            return __assign(__assign({}, state), { isLoading: true, id: action.id, requestedAsUser: action.requestedAsUser });
         case 'RECEIVE_FURSVP_EVENT':
-            return {
-                fursvpEvent: action.fursvpEvent,
-                isLoading: false,
-                id: action.id,
-                modalIsOpen: state.modalIsOpen || action.member !== undefined,
-                modalMember: action.member !== undefined ? action.member : state.modalMember
-            };
+            return __assign(__assign({}, state), { fursvpEvent: action.fursvpEvent, isLoading: false, id: action.id, modalIsOpen: state.modalIsOpen || action.member !== undefined, modalMember: action.member !== undefined ? action.member : state.modalMember });
         case 'TOGGLE_MEMBER_MODAL_ACTION':
             return __assign(__assign({}, state), { modalIsOpen: !state.modalIsOpen });
         case 'OPEN_MEMBER_MODAL_ACTION':
             return __assign(__assign({}, state), { modalIsOpen: true, modalMember: action.member });
         case 'FURSVP_EVENT_NOT_FOUND':
             return __assign(__assign({}, state), { isLoading: false });
+        case 'USER_LOGGED_OUT_ACTION':
+            return __assign(__assign({}, state), { modalMember: undefined, fursvpEvent: undefined, isLoading: true });
         default:
             return state;
     }
