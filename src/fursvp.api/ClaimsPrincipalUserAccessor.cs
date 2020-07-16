@@ -40,7 +40,7 @@ namespace Fursvp.Api
                     return null;
                 }
 
-                var sessionId = claimsPrincipal.Claims.FirstOrDefault(c => c.Type == "sessionId")?.Value;
+                var sessionId = claimsPrincipal.Claims.FirstOrDefault(c => c.Type == "sessionid")?.Value;
                 if (sessionId == null || !MemoryCache.TryGetValue("SessionId:" + sessionId, out _))
                 {
                     // User logged out or session has otherwise expired
