@@ -133,6 +133,10 @@ export const actionCreators = {
         dispatch({ type: 'TOGGLE_MEMBER_MODAL_ACTION' });
     },
 
+    openLoginModal: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        dispatch({ type: 'OPEN_LOGIN_MODAL_ACTION' });
+    },
+
     openModal: (member: Member): AppThunkAction<KnownAction> => (dispatch, getState) => {
         dispatch({ type: 'OPEN_MEMBER_MODAL_ACTION', member: member });
     }

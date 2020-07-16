@@ -84,6 +84,9 @@ exports.actionCreators = {
     toggleModal: function () { return function (dispatch, getState) {
         dispatch({ type: 'TOGGLE_MEMBER_MODAL_ACTION' });
     }; },
+    openLoginModal: function () { return function (dispatch, getState) {
+        dispatch({ type: 'OPEN_LOGIN_MODAL_ACTION' });
+    }; },
     openModal: function (member) { return function (dispatch, getState) {
         dispatch({ type: 'OPEN_MEMBER_MODAL_ACTION', member: member });
     }; }

@@ -33,7 +33,7 @@ export interface FursvpEvent {
 
 export interface Member {
     id: string;
-    emailAddress: string;
+    emailAddress: string | null;
     name: string;
     isAttending: boolean;
     isOrganizer: boolean;

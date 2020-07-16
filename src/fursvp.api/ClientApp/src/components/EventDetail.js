@@ -19,6 +19,7 @@ var react_redux_1 = require("react-redux");
 var react_router_1 = require("react-router");
 var EventDetailStore = require("../store/EventDetailStore");
 var DateTime_1 = require("./DateTime");
+var UserStore_1 = require("../store/UserStore");
 var EventDetail = /** @class */ (function (_super) {
     __extends(EventDetail, _super);
     function EventDetail(props) {
@@ -34,12 +35,41 @@ var EventDetail = /** @class */ (function (_super) {
     EventDetail.prototype.componentDidUpdate = function () {
         this.ensureDataFetched();
     };
+    EventDetail.prototype.canEditMember = function (userEmail) {
+        if (this.props.modalMember === undefined) {
+            return false;
+        }
+        if (userEmail === undefined) {
+            return false;
+        }
+        if (this.props.modalMember.emailAddress == userEmail) {
+            return true;
+        }
+        var author = this.getAuthor();
+        if (author !== undefined && author.emailAddress == userEmail) {
+            return true;
+        }
+        return false;
+    };
+    EventDetail.prototype.getAuthor = function () {
+        if (this.props.fursvpEvent === undefined) {
+            return undefined;
+        }
+        for (var _i = 0, _a = this.props.fursvpEvent.members; _i < _a.length; _i++) {
+            var member = _a[_i];
+            if (member.isAuthor) {
+                return member;
+            }
+        }
+        return undefined;
+    };
     EventDetail.prototype.render = function () {
         var _this = this;
         if (this.props.fursvpEvent !== undefined) {
             var event = this.props.fursvpEvent;
             var member = this.props.modalMember;
             var responses = this.props.modalMember !== undefined ? this.props.modalMember.responses : [];
+            var userEmail = UserStore_1.getStoredVerifiedEmail();
             var padlock = React.createElement(React.Fragment, null);
             if (!event.isPublished) {
                 padlock = React.createElement(React.Fragment, null,
@@ -88,7 +118,9 @@ var EventDetail = /** @class */ (function (_super) {
                                         response.responses.map(function (individualResponse) { return React.createElement(reactstrap_1.ListGroupItemText, null, individualResponse); }));
                                 }))),
                         React.createElement(reactstrap_1.ModalFooter, null,
-                            React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.toggleModal }, "Edit"),
+                            userEmail === undefined
+                                ? React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.props.openLoginModal }, "Log In To Edit")
+                                : React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.toggleModal, disabled: !this.canEditMember(userEmail) }, "Edit"),
                             ' ',
                             React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.toggleModal }, "Close")))
                     :

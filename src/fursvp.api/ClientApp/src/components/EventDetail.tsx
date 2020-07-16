@@ -6,6 +6,8 @@ import { ApplicationState } from '../store';
 import * as EventDetailStore from '../store/EventDetailStore';
 import * as FursvpEventsStore from '../store/FursvpEvents';
 import DateTime from './DateTime';
+import { getStoredVerifiedEmail } from '../store/UserStore';
+import { Member } from '../store/FursvpEvents';
 
 // At runtime, Redux will merge together...
 type EventDetailProps =
@@ -31,11 +33,49 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
         this.ensureDataFetched();
     }
 
+    private canEditMember(userEmail:string | undefined): boolean {
+
+        if (this.props.modalMember === undefined) {
+            return false;
+        }
+
+        if (userEmail === undefined) {
+            return false;
+        }
+
+        if (this.props.modalMember.emailAddress == userEmail) {
+            return true;
+        }
+
+        var author = this.getAuthor();
+
+        if (author !== undefined && author.emailAddress == userEmail) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private getAuthor(): Member | undefined {
+        if (this.props.fursvpEvent === undefined) {
+            return undefined;
+        }
+
+        for (var member of this.props.fursvpEvent.members) {
+            if (member.isAuthor) {
+                return member;
+            }
+        }
+
+        return undefined;
+    }
+
     public render() {
         if (this.props.fursvpEvent !== undefined) {
             var event = this.props.fursvpEvent;
             var member = this.props.modalMember;
             var responses: FursvpEventsStore.FormResponses[] = this.props.modalMember !== undefined ? this.props.modalMember.responses : [];
+            var userEmail = getStoredVerifiedEmail();
 
             let padlock = <></>;
             if (!event.isPublished) {
@@ -92,8 +132,11 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                                     </ListGroup>
                                 </ModalBody>
                                 <ModalFooter>
-                                    <Button color="primary" onClick={this.toggleModal}>Edit</Button>{' '}
-                                    <Button color="secondary" onClick={this.toggleModal}>Close</Button>
+                                    {userEmail === undefined
+                                        ? <Button color="primary" onClick={this.props.openLoginModal}>Log In To Edit</Button>
+                                        : <Button color="primary" onClick={this.toggleModal} disabled={!this.canEditMember(userEmail)}>Edit</Button>
+                                    }
+                                    {' '}<Button color="secondary" onClick={this.toggleModal}>Close</Button>
                                 </ModalFooter>
                             </>
                             :

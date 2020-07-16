@@ -9,7 +9,7 @@
             Provides information about a user via claims based authentication.
             </summary>
         </member>
-        <member name="M:Fursvp.Api.ClaimsPrincipalUserAccessor.#ctor(Microsoft.AspNetCore.Http.IHttpContextAccessor)">
+        <member name="M:Fursvp.Api.ClaimsPrincipalUserAccessor.#ctor(Microsoft.AspNetCore.Http.IHttpContextAccessor,Microsoft.Extensions.Caching.Memory.IMemoryCache)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Api.ClaimsPrincipalUserAccessor"/> class.
             </summary>
@@ -25,7 +25,7 @@
             Authentication controller.
             </summary>
         </member>
-        <member name="M:Fursvp.Api.Controllers.AuthController.#ctor(Microsoft.Extensions.Configuration.IConfiguration,Microsoft.Extensions.Caching.Memory.IMemoryCache,Fursvp.Communication.IEmailer)">
+        <member name="M:Fursvp.Api.Controllers.AuthController.#ctor(Microsoft.Extensions.Configuration.IConfiguration,Microsoft.Extensions.Caching.Memory.IMemoryCache,Fursvp.Communication.IEmailer,Fursvp.Domain.Authorization.IUserAccessor)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Api.Controllers.AuthController"/> class.
             </summary>
