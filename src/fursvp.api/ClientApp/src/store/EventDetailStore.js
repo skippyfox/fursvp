@@ -75,7 +75,7 @@ exports.actionCreators = {
                     dispatch({ type: 'OPEN_MEMBER_MODAL_ACTION', member: undefined });
                 }
             }
-            else if (appState.targetEvent.modalIsOpen) {
+            else if (appState.targetEvent.modalIsOpen && !appState.targetEvent.modalIsInEditMode) {
                 //Same event is not yet loaded or member is not specified, and modal is open for some reason
                 dispatch({ type: 'TOGGLE_MEMBER_MODAL_ACTION' });
             }
@@ -89,6 +89,12 @@ exports.actionCreators = {
     }; },
     openModal: function (member) { return function (dispatch, getState) {
         dispatch({ type: 'OPEN_MEMBER_MODAL_ACTION', member: member });
+    }; },
+    openNewMemberModal: function () { return function (dispatch, getState) {
+        dispatch({ type: 'OPEN_NEW_MEMBER_MODAL' });
+    }; },
+    openEditExistingMemberModal: function () { return function (dispatch, getState) {
+        dispatch({ type: 'OPEN_EDIT_EXISTING_MEMBER_MODAL' });
     }; }
 };
 var unloadedState = {
@@ -96,7 +102,8 @@ var unloadedState = {
     isLoading: true,
     modalIsOpen: false,
     modalMember: undefined,
-    requestedAsUser: undefined
+    requestedAsUser: undefined,
+    modalIsInEditMode: false
 };
 // ----------------
 // REDUCER - For a given state and action, returns the new state. To support time travel, this must not mutate the old state.
@@ -111,13 +118,17 @@ exports.reducer = function (state, incomingAction) {
         case 'RECEIVE_FURSVP_EVENT':
             return __assign(__assign({}, state), { fursvpEvent: action.fursvpEvent, isLoading: false, id: action.id, modalIsOpen: state.modalIsOpen || action.member !== undefined, modalMember: action.member !== undefined ? action.member : state.modalMember });
         case 'TOGGLE_MEMBER_MODAL_ACTION':
-            return __assign(__assign({}, state), { modalIsOpen: !state.modalIsOpen });
+            return __assign(__assign({}, state), { modalIsOpen: !state.modalIsOpen, modalIsInEditMode: false });
         case 'OPEN_MEMBER_MODAL_ACTION':
             return __assign(__assign({}, state), { modalIsOpen: true, modalMember: action.member });
         case 'FURSVP_EVENT_NOT_FOUND':
             return __assign(__assign({}, state), { isLoading: false });
         case 'USER_LOGGED_OUT_ACTION':
             return __assign(__assign({}, state), { modalMember: undefined, fursvpEvent: undefined, isLoading: true });
+        case 'OPEN_NEW_MEMBER_MODAL':
+            return __assign(__assign({}, state), { modalIsOpen: true, modalMember: undefined, modalIsInEditMode: true });
+        case 'OPEN_EDIT_EXISTING_MEMBER_MODAL':
+            return __assign(__assign({}, state), { modalIsOpen: true, modalIsInEditMode: true });
         default:
             return state;
     }

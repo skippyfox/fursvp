@@ -13,6 +13,7 @@ export interface EventDetailState {
     modalIsOpen: boolean;
     modalMember: Member | undefined;
     requestedAsUser: string | undefined;
+    modalIsInEditMode: boolean;
 }
 
 // -----------------
@@ -45,10 +46,19 @@ interface FursvpEventNotFoundAction {
     type: 'FURSVP_EVENT_NOT_FOUND';
 }
 
+interface OpenNewMemberModalAction {
+    type: 'OPEN_NEW_MEMBER_MODAL';
+}
+
+interface OpenEditExistingMemberModalAction {
+    type: 'OPEN_EDIT_EXISTING_MEMBER_MODAL';
+}
+
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
 type KnownAction = RequestFursvpEventAction | ReceiveFursvpEventAction | ToggleModalAction | OpenModalAction | FursvpEventNotFoundAction
-    | UserLoggedOutAction | UserLoggedInAction | OpenLoginModalAction;
+    | UserLoggedOutAction | UserLoggedInAction | OpenLoginModalAction
+    | OpenNewMemberModalAction | OpenEditExistingMemberModalAction;
 
 const getMemberById = (event: FursvpEvent, memberId: string | undefined): Member | undefined => {
     if (memberId === undefined) {
@@ -122,7 +132,7 @@ export const actionCreators = {
                     dispatch({ type: 'OPEN_MEMBER_MODAL_ACTION', member: undefined })
                 }
             }
-            else if (appState.targetEvent.modalIsOpen) {
+            else if (appState.targetEvent.modalIsOpen && !appState.targetEvent.modalIsInEditMode) {
                 //Same event is not yet loaded or member is not specified, and modal is open for some reason
                 dispatch({ type: 'TOGGLE_MEMBER_MODAL_ACTION' });
             }
@@ -139,6 +149,14 @@ export const actionCreators = {
 
     openModal: (member: Member): AppThunkAction<KnownAction> => (dispatch, getState) => {
         dispatch({ type: 'OPEN_MEMBER_MODAL_ACTION', member: member });
+    },
+
+    openNewMemberModal: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        dispatch({ type: 'OPEN_NEW_MEMBER_MODAL' });
+    },
+
+    openEditExistingMemberModal: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        dispatch({ type: 'OPEN_EDIT_EXISTING_MEMBER_MODAL' });
     }
 };
 
@@ -147,7 +165,8 @@ const unloadedState: EventDetailState = {
     isLoading: true,
     modalIsOpen: false,
     modalMember: undefined,
-    requestedAsUser: undefined
+    requestedAsUser: undefined,
+    modalIsInEditMode: false
 };
 
 // ----------------
@@ -179,6 +198,7 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
             return {
                 ...state,
                 modalIsOpen: !state.modalIsOpen,
+                modalIsInEditMode: false
             };
         case 'OPEN_MEMBER_MODAL_ACTION':
             return {
@@ -198,6 +218,19 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
                 fursvpEvent: undefined,
                 isLoading: true
             }
+        case 'OPEN_NEW_MEMBER_MODAL':
+            return {
+                ...state,
+                modalIsOpen: true,
+                modalMember: undefined,
+                modalIsInEditMode: true
+            };
+        case 'OPEN_EDIT_EXISTING_MEMBER_MODAL':
+            return {
+                ...state,
+                modalIsOpen: true,
+                modalIsInEditMode: true
+            };
         default:
             return state;
     }

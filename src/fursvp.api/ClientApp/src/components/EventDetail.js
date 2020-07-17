@@ -25,6 +25,7 @@ var EventDetail = /** @class */ (function (_super) {
     function EventDetail(props) {
         var _this = _super.call(this, props) || this;
         _this.toggleModal = _this.toggleModal.bind(_this);
+        _this.openNewMemberModal = _this.openNewMemberModal.bind(_this);
         return _this;
     }
     // This method is called when the component is first added to the document
@@ -63,6 +64,95 @@ var EventDetail = /** @class */ (function (_super) {
         }
         return undefined;
     };
+    EventDetail.prototype.renderViewOnlyModalContent = function (event, member, responses, userEmail) {
+        if (member === undefined) {
+            return React.createElement(React.Fragment, null,
+                React.createElement(reactstrap_1.ModalHeader, { toggle: this.toggleModal }, "Member Info Not Found"),
+                React.createElement(reactstrap_1.ModalBody, null, "Sorry! We couldn't find the member info you're looking for."));
+        }
+        return React.createElement(React.Fragment, null,
+            React.createElement(reactstrap_1.ModalHeader, { toggle: this.toggleModal }, member.name),
+            React.createElement(reactstrap_1.ModalBody, null,
+                React.createElement(reactstrap_1.ListGroup, null,
+                    member.emailAddress ? React.createElement(reactstrap_1.ListGroupItem, null,
+                        "\u2709",
+                        member.emailAddress) : React.createElement(React.Fragment, null),
+                    React.createElement(reactstrap_1.ListGroupItem, null,
+                        member.isOrganizer ? "⭐ Organizer" : "",
+                        !member.isOrganizer && member.isAttending ? "🧑 Attending" : "",
+                        !member.isOrganizer && !member.isAttending && member.isAuthor ? "⭐ Author" : ""),
+                    this.matchResponsesToPrompts(responses, event.form).map(function (response) {
+                        return React.createElement(reactstrap_1.ListGroupItem, { key: response.promptId },
+                            React.createElement(reactstrap_1.ListGroupItemHeading, null, response.prompt),
+                            response.responses.map(function (individualResponse) { return React.createElement(reactstrap_1.ListGroupItemText, { key: individualResponse }, individualResponse); }));
+                    }),
+                    React.createElement(reactstrap_1.ListGroupItem, null,
+                        "\u2714",
+                        React.createElement(DateTime_1.default, { date: member.rsvpedAtLocal, timeZoneOffset: event.timeZoneOffset, id: "eventDetail_memberModal_rsvpedAt" })))),
+            React.createElement(reactstrap_1.ModalFooter, null,
+                userEmail === undefined
+                    ? React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.props.openLoginModal }, "Log In To Edit")
+                    : React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.props.openEditExistingMemberModal, disabled: !this.canEditMember(userEmail) }, "Edit"),
+                ' ',
+                React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.toggleModal }, "Close")));
+    };
+    EventDetail.prototype.renderAddNewMemberModalContent = function (event) {
+        return React.createElement(React.Fragment, null,
+            React.createElement(reactstrap_1.ModalHeader, { toggle: this.toggleModal },
+                React.createElement(React.Fragment, null, "Some name textbox here")),
+            React.createElement(reactstrap_1.ModalBody, null,
+                React.createElement(reactstrap_1.ListGroup, null,
+                    React.createElement(React.Fragment, null, "Some email address textbox here"),
+                    event.form.map(function (prompt) {
+                        return React.createElement(reactstrap_1.ListGroupItem, { key: prompt.id },
+                            React.createElement(reactstrap_1.ListGroupItemHeading, null, prompt.prompt),
+                            prompt.behavior == 'Text'
+                                ? React.createElement(React.Fragment, null, "Some textbox here")
+                                : React.createElement(React.Fragment, null),
+                            prompt.behavior == 'Checkboxes'
+                                ? prompt.options.map(function (option) { return React.createElement(reactstrap_1.ListGroupItemText, { key: option }, option); })
+                                : React.createElement(React.Fragment, null),
+                            prompt.behavior == 'Dropdown'
+                                ? prompt.options.map(function (option) { return React.createElement(reactstrap_1.ListGroupItemText, { key: option }, option); })
+                                : React.createElement(React.Fragment, null),
+                            "}");
+                    }))),
+            React.createElement(reactstrap_1.ModalFooter, null,
+                React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.toggleModal }, "Add RSVP"),
+                ' ',
+                React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.toggleModal }, "Cancel")));
+    };
+    EventDetail.prototype.renderEditMemberModalContent = function (event, member) {
+        if (member === undefined) {
+            return this.renderAddNewMemberModalContent(event);
+        }
+        return React.createElement(React.Fragment, null,
+            React.createElement(reactstrap_1.ModalHeader, { toggle: this.toggleModal },
+                React.createElement(React.Fragment, null, "Some name textbox here")),
+            React.createElement(reactstrap_1.ModalBody, null,
+                React.createElement(reactstrap_1.ListGroup, null,
+                    React.createElement(React.Fragment, null, "Some email address textbox here"),
+                    event.form.map(function (prompt) {
+                        return React.createElement(reactstrap_1.ListGroupItem, { key: prompt.id },
+                            React.createElement(reactstrap_1.ListGroupItemHeading, null, prompt.prompt),
+                            prompt.behavior == 'Text'
+                                ? React.createElement(React.Fragment, null, "Some textbox here")
+                                : React.createElement(React.Fragment, null),
+                            prompt.behavior == 'Checkboxes'
+                                ? prompt.options.map(function (option) { return React.createElement(reactstrap_1.ListGroupItemText, { key: option }, option); })
+                                : React.createElement(React.Fragment, null),
+                            prompt.behavior == 'Dropdown'
+                                ? prompt.options.map(function (option) { return React.createElement(reactstrap_1.ListGroupItemText, { key: option }, option); })
+                                : React.createElement(React.Fragment, null),
+                            "}");
+                    }))),
+            React.createElement(reactstrap_1.ModalFooter, null,
+                React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.toggleModal }, "Save Changes"),
+                ' ',
+                React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.toggleModal }, "Cancel"),
+                ' ',
+                React.createElement(reactstrap_1.Button, { outline: true, color: "danger", onClick: this.toggleModal }, "Remove RSVP")));
+    };
     EventDetail.prototype.render = function () {
         var _this = this;
         if (this.props.fursvpEvent !== undefined) {
@@ -95,38 +185,15 @@ var EventDetail = /** @class */ (function (_super) {
                 React.createElement(reactstrap_1.Container, null, event.otherDetails),
                 React.createElement(reactstrap_1.Container, null,
                     React.createElement(reactstrap_1.ListGroup, null,
-                        React.createElement(reactstrap_1.ListGroupItem, { active: true, tag: "button", action: true }, "Add an RSVP"),
+                        React.createElement(reactstrap_1.ListGroupItem, { active: true, tag: "button", action: true, onClick: this.openNewMemberModal }, "Add an RSVP"),
                         event.members.map(function (member) {
                             return React.createElement(reactstrap_1.ListGroupItem, { key: member.id, tag: "button", action: true, onClick: _this.showMember.bind(_this, member) },
                                 _this.memberTypeEmoji(member),
                                 member.name);
                         }))),
-                React.createElement(reactstrap_1.Modal, { isOpen: this.props.modalIsOpen, toggle: this.toggleModal }, member !== undefined ?
-                    React.createElement(React.Fragment, null,
-                        React.createElement(reactstrap_1.ModalHeader, { toggle: this.toggleModal }, member.name),
-                        React.createElement(reactstrap_1.ModalBody, null,
-                            React.createElement(reactstrap_1.ListGroup, null,
-                                member.emailAddress ? React.createElement(reactstrap_1.ListGroupItem, null,
-                                    "\u2709",
-                                    member.emailAddress) : React.createElement(React.Fragment, null),
-                                React.createElement(reactstrap_1.ListGroupItem, null,
-                                    "\u2714",
-                                    React.createElement(DateTime_1.default, { date: member.rsvpedAtLocal, timeZoneOffset: event.timeZoneOffset, id: "eventDetail_memberModal_rsvpedAt" })),
-                                this.matchResponsesToPrompts(responses, event.form).map(function (response) {
-                                    return React.createElement(reactstrap_1.ListGroupItem, null,
-                                        React.createElement(reactstrap_1.ListGroupItemHeading, null, response.prompt),
-                                        response.responses.map(function (individualResponse) { return React.createElement(reactstrap_1.ListGroupItemText, null, individualResponse); }));
-                                }))),
-                        React.createElement(reactstrap_1.ModalFooter, null,
-                            userEmail === undefined
-                                ? React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.props.openLoginModal }, "Log In To Edit")
-                                : React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.toggleModal, disabled: !this.canEditMember(userEmail) }, "Edit"),
-                            ' ',
-                            React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.toggleModal }, "Close")))
-                    :
-                        React.createElement(React.Fragment, null,
-                            React.createElement(reactstrap_1.ModalHeader, { toggle: this.toggleModal }, "Member Info Not Found"),
-                            React.createElement(reactstrap_1.ModalBody, null, "Sorry! We couldn't find the member info you're looking for.")))));
+                React.createElement(reactstrap_1.Modal, { isOpen: this.props.modalIsOpen, toggle: this.toggleModal }, this.props.modalIsInEditMode
+                    ? this.renderEditMemberModalContent(event, member)
+                    : this.renderViewOnlyModalContent(event, member, responses, userEmail))));
         }
         else if (this.props.isLoading) {
             return (React.createElement(React.Fragment, null, "(Loading)"));
@@ -181,15 +248,19 @@ var EventDetail = /** @class */ (function (_super) {
         this.props.history.push('/event/' + this.props.id + '/member/' + member.id);
         this.props.openModal(member);
     };
+    EventDetail.prototype.openNewMemberModal = function () {
+        this.props.openNewMemberModal();
+    };
     EventDetail.prototype.toggleModal = function () {
-        if (this.props.modalIsOpen) {
+        if (this.props.modalIsOpen && this.props.modalMember !== undefined) {
             this.props.history.push('/event/' + this.props.id);
+            this.props.toggleModal();
         }
         else if (this.props.modalMember !== undefined) {
             this.props.history.push('/event/' + this.props.id + '/member/' + this.props.modalMember.id);
         }
         else {
-            return;
+            this.props.toggleModal();
         }
     };
     EventDetail.prototype.ensureDataFetched = function () {

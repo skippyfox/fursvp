@@ -21,6 +21,7 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
         super(props);
 
         this.toggleModal = this.toggleModal.bind(this);
+        this.openNewMemberModal = this.openNewMemberModal.bind(this);
     }
 
     // This method is called when the component is first added to the document
@@ -70,6 +71,114 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
         return undefined;
     }
 
+    private renderViewOnlyModalContent(
+        event: FursvpEventsStore.FursvpEvent,
+        member: Member | undefined,
+        responses: FursvpEventsStore.FormResponses[],
+        userEmail: string | undefined)
+        : React.ReactNode {
+
+        if (member === undefined) {
+            return <>
+                <ModalHeader toggle={this.toggleModal}>Member Info Not Found</ModalHeader>
+                <ModalBody>Sorry! We couldn't find the member info you're looking for.</ModalBody>
+            </>;
+        }
+
+        return <>
+            <ModalHeader toggle={this.toggleModal}>{member.name}</ModalHeader>
+            <ModalBody>
+                <ListGroup>
+                    {member.emailAddress ? <ListGroupItem>✉{member.emailAddress}</ListGroupItem> : <></>}
+                    <ListGroupItem>
+                        {member.isOrganizer ? "⭐ Organizer" : ""}
+                        {!member.isOrganizer && member.isAttending ? "🧑 Attending" : ""}
+                        {!member.isOrganizer && !member.isAttending && member.isAuthor ? "⭐ Author" : ""}
+                    </ListGroupItem>
+                    {this.matchResponsesToPrompts(responses, event.form).map(response =>
+                        <ListGroupItem key={response.promptId}>
+                            <ListGroupItemHeading>{response.prompt}</ListGroupItemHeading>
+                            {response.responses.map(individualResponse => <ListGroupItemText key={individualResponse}>{individualResponse}</ListGroupItemText>)}
+                        </ListGroupItem>
+                    )}
+                    <ListGroupItem>✔<DateTime date={member.rsvpedAtLocal} timeZoneOffset={event.timeZoneOffset} id="eventDetail_memberModal_rsvpedAt" /></ListGroupItem>
+                </ListGroup>
+            </ModalBody>
+            <ModalFooter>
+                {userEmail === undefined
+                    ? <Button color="primary" onClick={this.props.openLoginModal}>Log In To Edit</Button>
+                    : <Button color="primary" onClick={this.props.openEditExistingMemberModal} disabled={!this.canEditMember(userEmail)}>Edit</Button>
+                }
+                {' '}<Button color="secondary" onClick={this.toggleModal}>Close</Button>
+            </ModalFooter>
+        </>;
+    }
+
+    private renderAddNewMemberModalContent(event: FursvpEventsStore.FursvpEvent) : React.ReactNode {
+        return <>
+            <ModalHeader toggle={this.toggleModal}><>Some name textbox here</></ModalHeader>
+            <ModalBody>
+                <ListGroup>
+                    <>Some email address textbox here</>
+                    {event.form.map(prompt =>
+                        <ListGroupItem key={prompt.id}>
+                            <ListGroupItemHeading>{prompt.prompt}</ListGroupItemHeading>
+                            {prompt.behavior == 'Text'
+                                ? <>Some textbox here</>
+                                : <></>}
+                            {prompt.behavior == 'Checkboxes'
+                                ? prompt.options.map(option => <ListGroupItemText key={option}>{option}</ListGroupItemText>)
+                                : <></>}
+                            {prompt.behavior == 'Dropdown'
+                                ? prompt.options.map(option => <ListGroupItemText key={option}>{option}</ListGroupItemText>)
+                                : <></>}
+                            }
+                        </ListGroupItem>
+                    )}
+                </ListGroup>
+            </ModalBody>
+            <ModalFooter>
+                <Button color="primary" onClick={this.toggleModal}>Add RSVP</Button>
+                {' '}<Button color="secondary" onClick={this.toggleModal}>Cancel</Button>
+            </ModalFooter>
+        </>;
+    }
+
+    private renderEditMemberModalContent(event: FursvpEventsStore.FursvpEvent, member: Member | undefined) {
+        if (member === undefined) {
+            return this.renderAddNewMemberModalContent(event);
+        }
+
+        return <>
+            <ModalHeader toggle={this.toggleModal}><>Some name textbox here</></ModalHeader>
+            <ModalBody>
+                <ListGroup>
+                    <>Some email address textbox here</>
+                    {event.form.map(prompt =>
+                        <ListGroupItem key={prompt.id}>
+                            <ListGroupItemHeading>{prompt.prompt}</ListGroupItemHeading>
+                            {prompt.behavior == 'Text'
+                                ? <>Some textbox here</>
+                                : <></>}
+                            {prompt.behavior == 'Checkboxes'
+                                ? prompt.options.map(option => <ListGroupItemText key={option}>{option}</ListGroupItemText>)
+                                : <></>}
+                            {prompt.behavior == 'Dropdown'
+                                ? prompt.options.map(option => <ListGroupItemText key={option}>{option}</ListGroupItemText>)
+                                : <></>}
+                            }
+                        </ListGroupItem>
+                    )}
+                </ListGroup>
+            </ModalBody>
+            <ModalFooter>
+                <Button color="primary" onClick={this.toggleModal}>Save Changes</Button>
+                {' '}<Button color="secondary" onClick={this.toggleModal}>Cancel</Button>
+                {' '}<Button outline color="danger" onClick={this.toggleModal}>Remove RSVP</Button>
+            </ModalFooter>
+        </>;
+    }
+
     public render() {
         if (this.props.fursvpEvent !== undefined) {
             var event = this.props.fursvpEvent;
@@ -104,7 +213,7 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                     </Container>
                     <Container>
                         <ListGroup>
-                            <ListGroupItem active tag="button" action>
+                            <ListGroupItem active tag="button" action onClick={this.openNewMemberModal}>
                                 Add an RSVP
                             </ListGroupItem>
                             {event.members.map((member: FursvpEventsStore.Member) =>
@@ -116,34 +225,9 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                         </ListGroup>
                     </Container>
                     <Modal isOpen={this.props.modalIsOpen} toggle={this.toggleModal}>
-                        {member !== undefined ?
-                            <>
-                                <ModalHeader toggle={this.toggleModal}>{member.name}</ModalHeader>
-                                <ModalBody>
-                                    <ListGroup>
-                                        {member.emailAddress ? <ListGroupItem>✉{member.emailAddress}</ListGroupItem> : <></>}
-                                        <ListGroupItem>✔<DateTime date={member.rsvpedAtLocal} timeZoneOffset={event.timeZoneOffset} id="eventDetail_memberModal_rsvpedAt" /></ListGroupItem>
-                                        {this.matchResponsesToPrompts(responses, event.form).map(response =>
-                                            <ListGroupItem>
-                                                <ListGroupItemHeading>{response.prompt}</ListGroupItemHeading>
-                                                {response.responses.map(individualResponse => <ListGroupItemText>{individualResponse}</ListGroupItemText>)}
-                                            </ListGroupItem>
-                                        )}
-                                    </ListGroup>
-                                </ModalBody>
-                                <ModalFooter>
-                                    {userEmail === undefined
-                                        ? <Button color="primary" onClick={this.props.openLoginModal}>Log In To Edit</Button>
-                                        : <Button color="primary" onClick={this.toggleModal} disabled={!this.canEditMember(userEmail)}>Edit</Button>
-                                    }
-                                    {' '}<Button color="secondary" onClick={this.toggleModal}>Close</Button>
-                                </ModalFooter>
-                            </>
-                            :
-                            <>
-                                <ModalHeader toggle={this.toggleModal}>Member Info Not Found</ModalHeader>
-                                <ModalBody>Sorry! We couldn't find the member info you're looking for.</ModalBody>
-                            </>
+                        {this.props.modalIsInEditMode
+                            ? this.renderEditMemberModalContent(event, member)
+                            : this.renderViewOnlyModalContent(event, member, responses, userEmail)
                         }
                     </Modal>
                 </React.Fragment>
@@ -214,15 +298,20 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
         this.props.openModal(member);
     }
 
+    private openNewMemberModal() {
+        this.props.openNewMemberModal();
+    }
+
     private toggleModal() {
-        if (this.props.modalIsOpen) {
+        if (this.props.modalIsOpen && this.props.modalMember !== undefined) {
             this.props.history.push('/event/' + this.props.id);
+            this.props.toggleModal();
         }
         else if (this.props.modalMember !== undefined) {
             this.props.history.push('/event/' + this.props.id + '/member/' + this.props.modalMember.id);
         }
         else {
-            return;
+            this.props.toggleModal();
         }
     }
 
