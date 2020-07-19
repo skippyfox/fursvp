@@ -74,6 +74,13 @@ namespace Fursvp.Domain.Authorization.ReadAuthorization
                 @event.Members.Remove(member);
             }
 
+            var actingMember = @event.Members.FirstOrDefault(m => m.EmailAddress == UserAccessor.User?.EmailAddress);
+            
+            if (actingMember != null && (actingMember.IsAuthor || actingMember.IsOrganizer))
+            {
+                return;
+            }
+
             foreach (var member in @event.Members)
             {
                 ReadAuthorizeMember.FilterUnauthorizedContent(member);

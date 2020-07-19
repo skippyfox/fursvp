@@ -1,5 +1,5 @@
 ﻿import * as React from 'react';
-import { Container, UncontrolledTooltip, ListGroup, ListGroupItem, Modal, ModalHeader, ModalBody, ModalFooter, Button, ListGroupItemText, ListGroupItemHeading } from 'reactstrap';
+import { Container, UncontrolledTooltip, ListGroup, ListGroupItem, Modal, ModalHeader, ModalBody, ModalFooter, Button, ListGroupItemText, ListGroupItemHeading, Form, FormGroup, Label, Input } from 'reactstrap';
 import { connect } from 'react-redux';
 import { RouteComponentProps, Redirect } from 'react-router';
 import { ApplicationState } from '../store';
@@ -22,6 +22,7 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
 
         this.toggleModal = this.toggleModal.bind(this);
         this.openNewMemberModal = this.openNewMemberModal.bind(this);
+        this.addNewMember = this.addNewMember.bind(this);
     }
 
     // This method is called when the component is first added to the document
@@ -95,11 +96,14 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                         {!member.isOrganizer && member.isAttending ? "🧑 Attending" : ""}
                         {!member.isOrganizer && !member.isAttending && member.isAuthor ? "⭐ Author" : ""}
                     </ListGroupItem>
-                    {this.matchResponsesToPrompts(responses, event.form).map(response =>
-                        <ListGroupItem key={response.promptId}>
-                            <ListGroupItemHeading>{response.prompt}</ListGroupItemHeading>
-                            {response.responses.map(individualResponse => <ListGroupItemText key={individualResponse}>{individualResponse}</ListGroupItemText>)}
-                        </ListGroupItem>
+                    {this.joinResponsesToPrompts(responses, event.form).sort(x => x.prompt.sortOrder).map(promptWithResponse => {
+                        return promptWithResponse.responses !== undefined
+                            ? <ListGroupItem key={promptWithResponse.prompt.id}>
+                                <ListGroupItemHeading>{promptWithResponse.prompt.prompt}</ListGroupItemHeading>
+                                {promptWithResponse.responses.responses.map(individualResponse => <ListGroupItemText key={individualResponse}>{individualResponse}</ListGroupItemText>)}
+                            </ListGroupItem>
+                            : <></>;
+                        }
                     )}
                     <ListGroupItem>✔<DateTime date={member.rsvpedAtLocal} timeZoneOffset={event.timeZoneOffset} id="eventDetail_memberModal_rsvpedAt" /></ListGroupItem>
                 </ListGroup>
@@ -115,68 +119,88 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
     }
 
     private renderAddNewMemberModalContent(event: FursvpEventsStore.FursvpEvent) : React.ReactNode {
-        return <>
-            <ModalHeader toggle={this.toggleModal}><>Some name textbox here</></ModalHeader>
+        return <Form>
+            <ModalHeader toggle={this.toggleModal}>RSVP for {this.props.fursvpEvent ? this.props.fursvpEvent.name : ""}</ModalHeader>
             <ModalBody>
-                <ListGroup>
-                    <>Some email address textbox here</>
-                    {event.form.map(prompt =>
-                        <ListGroupItem key={prompt.id}>
-                            <ListGroupItemHeading>{prompt.prompt}</ListGroupItemHeading>
-                            {prompt.behavior == 'Text'
-                                ? <>Some textbox here</>
-                                : <></>}
-                            {prompt.behavior == 'Checkboxes'
-                                ? prompt.options.map(option => <ListGroupItemText key={option}>{option}</ListGroupItemText>)
-                                : <></>}
-                            {prompt.behavior == 'Dropdown'
-                                ? prompt.options.map(option => <ListGroupItemText key={option}>{option}</ListGroupItemText>)
-                                : <></>}
-                            }
-                        </ListGroupItem>
+                <FormGroup>
+                    <Label for="newMemberName">Name</Label>
+                    <Input id="newMemberName" required />
+                </FormGroup>
+                <FormGroup>
+                    <Label for="newMemberEmail">Email</Label>
+                    <Input type="email" id="newMemberEmail" required />
+                </FormGroup>
+                {event.form.sort(x => x.sortOrder).map(prompt =>
+                    <FormGroup key={prompt.id} check={prompt.behavior == 'Checkboxes'}>
+                        <Label for={"newPrompt" + prompt.id}>{prompt.prompt}</Label>
+                        {prompt.behavior == 'Text'
+                            ? <Input id={"newPrompt" + prompt.id} required={prompt.required} />
+                            : <></>}
+                        {prompt.behavior == 'Checkboxes'
+                            ? <Label check id={"newPrompt" + prompt.id}>
+                                {prompt.options.map(option => <><Input key={option} type="checkbox" />{' '}{option}</>)}
+                                </Label>
+                            : <></>}
+                        {prompt.behavior == 'Dropdown'
+                            ? <Input type="select" id={"newPrompt" + prompt.id} required={prompt.required}>
+                                {prompt.options.map(option => <option key={option}>{option}</option>)}
+                                </Input>
+                            : <></>}
+                    </FormGroup>
                     )}
-                </ListGroup>
             </ModalBody>
             <ModalFooter>
-                <Button color="primary" onClick={this.toggleModal}>Add RSVP</Button>
+                <Button color="primary" onClick={this.props.addNewMember}>Add RSVP</Button>
                 {' '}<Button color="secondary" onClick={this.toggleModal}>Cancel</Button>
             </ModalFooter>
-        </>;
+        </Form>;
     }
 
-    private renderEditMemberModalContent(event: FursvpEventsStore.FursvpEvent, member: Member | undefined) {
+    private renderEditMemberModalContent(
+        event: FursvpEventsStore.FursvpEvent,
+        member: Member | undefined,
+        responses: FursvpEventsStore.FormResponses[],
+    ) {
         if (member === undefined) {
             return this.renderAddNewMemberModalContent(event);
         }
 
-        return <>
-            <ModalHeader toggle={this.toggleModal}><>Some name textbox here</></ModalHeader>
+        return <Form>
+            <ModalHeader toggle={this.toggleModal}>Edit RSVP for {this.props.fursvpEvent ? this.props.fursvpEvent.name : ""}</ModalHeader>
             <ModalBody>
-                <ListGroup>
-                    <>Some email address textbox here</>
-                    {event.form.map(prompt =>
-                        <ListGroupItem key={prompt.id}>
-                            <ListGroupItemHeading>{prompt.prompt}</ListGroupItemHeading>
-                            {prompt.behavior == 'Text'
-                                ? <>Some textbox here</>
-                                : <></>}
-                            {prompt.behavior == 'Checkboxes'
-                                ? prompt.options.map(option => <ListGroupItemText key={option}>{option}</ListGroupItemText>)
-                                : <></>}
-                            {prompt.behavior == 'Dropdown'
-                                ? prompt.options.map(option => <ListGroupItemText key={option}>{option}</ListGroupItemText>)
-                                : <></>}
-                            }
-                        </ListGroupItem>
-                    )}
-                </ListGroup>
+                <FormGroup>
+                    <Label for="editMemberName">Name</Label>
+                    <Input id="editMemberName" required value={member.name} />
+                </FormGroup>
+                <FormGroup>
+                    <Label for="editMemberEmail">Email</Label>
+                    <Input type="email" id="editMemberEmail" required value={member.emailAddress !== null ? member.emailAddress : ""} />
+                </FormGroup>
+                {this.joinResponsesToPrompts(responses, event.form).sort(x => x.prompt.sortOrder).map(promptWithResponse =>
+                    <FormGroup key={promptWithResponse.prompt.id} check={promptWithResponse.prompt.behavior == 'Checkboxes'}>
+                        <Label for={"editPrompt" + promptWithResponse.prompt.id}>{promptWithResponse.prompt.prompt}</Label>
+                        {promptWithResponse.prompt.behavior == 'Text'
+                            ? <Input id={"editPrompt" + promptWithResponse.prompt.id} required={promptWithResponse.prompt.required} value={promptWithResponse.responses !== undefined ? promptWithResponse.responses.responses[0] : ""} />
+                            : <></>}
+                        {promptWithResponse.prompt.behavior == 'Checkboxes'
+                            ? <Label check id={"editPrompt" + promptWithResponse.prompt.id}>
+                                {promptWithResponse.prompt.options.map(option => <><Input key={option} type="checkbox" checked={promptWithResponse.responses !== undefined && promptWithResponse.responses.responses.indexOf(option) > -1} />{' '}{option}</>)}
+                              </Label>
+                            : <></>}
+                        {promptWithResponse.prompt.behavior == 'Dropdown'
+                            ? <Input type="select" id={"editPrompt" + promptWithResponse.prompt.id} required={promptWithResponse.prompt.required}>
+                                {promptWithResponse.prompt.options.map(option => <option key={option} selected={promptWithResponse.responses !== undefined && promptWithResponse.responses.responses[0] == option}>{option}</option>)}
+                              </Input>
+                            : <></>}
+                    </FormGroup>
+                )}
             </ModalBody>
             <ModalFooter>
                 <Button color="primary" onClick={this.toggleModal}>Save Changes</Button>
                 {' '}<Button color="secondary" onClick={this.toggleModal}>Cancel</Button>
                 {' '}<Button outline color="danger" onClick={this.toggleModal}>Remove RSVP</Button>
             </ModalFooter>
-        </>;
+        </Form>;
     }
 
     public render() {
@@ -226,7 +250,7 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                     </Container>
                     <Modal isOpen={this.props.modalIsOpen} toggle={this.toggleModal}>
                         {this.props.modalIsInEditMode
-                            ? this.renderEditMemberModalContent(event, member)
+                            ? this.renderEditMemberModalContent(event, member, responses)
                             : this.renderViewOnlyModalContent(event, member, responses, userEmail)
                         }
                     </Modal>
@@ -246,23 +270,21 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
         }
     }
 
-    private matchResponsesToPrompts(responses: FursvpEventsStore.FormResponses[], prompts: FursvpEventsStore.FormPrompt[]): (FursvpEventsStore.FormResponses & FursvpEventsStore.FormPrompt)[] {
-        var result: (FursvpEventsStore.FormResponses & FursvpEventsStore.FormPrompt)[] = [];
-        for (let r of responses) {
-            for (let p of prompts) {
-                if (r.promptId == p.id) {
-                    result.push({
-                        id: p.id,
-                        behavior: p.behavior,
-                        options: p.options,
-                        sortOrder: p.sortOrder,
-                        prompt: p.prompt,
-                        required: p.required,
-                        promptId: r.promptId,
-                        responses: r.responses
-                    });
+    private joinResponsesToPrompts(responses: FursvpEventsStore.FormResponses[], prompts: FursvpEventsStore.FormPrompt[]): PromptWithResponses[] {
+        var result: PromptWithResponses[] = [];
+
+        for (let prompt of prompts) {
+
+            var responsesForPrompt: FursvpEventsStore.FormResponses | undefined = undefined;
+
+            for (let response of responses) {
+                if (response.promptId == prompt.id) {
+                    responsesForPrompt = response;
+                    break;
                 }
             }
+
+            result.push({ prompt: prompt, responses: responsesForPrompt });
         }
         return result;
     }
@@ -302,6 +324,10 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
         this.props.openNewMemberModal();
     }
 
+    private addNewMember() {
+        this.props.addNewMember();
+    }
+
     private toggleModal() {
         if (this.props.modalIsOpen && this.props.modalMember !== undefined) {
             this.props.history.push('/event/' + this.props.id);
@@ -318,6 +344,11 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
     private ensureDataFetched() {
         this.props.requestFursvpEvent(this.props.match.params.eventId, this.props.match.params.memberId);
     }
+}
+
+interface PromptWithResponses {
+    prompt: FursvpEventsStore.FormPrompt,
+    responses: FursvpEventsStore.FormResponses | undefined
 }
 
 export default connect(

@@ -95,15 +95,43 @@ exports.actionCreators = {
     }; },
     openEditExistingMemberModal: function () { return function (dispatch, getState) {
         dispatch({ type: 'OPEN_EDIT_EXISTING_MEMBER_MODAL' });
+    }; },
+    addNewMember: function () { return function (dispatch, getState) {
+        dispatch({ type: 'SAVING_MEMBER' });
+        var requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                "emailAddress": "",
+                "name": "",
+                "formResponses": collectFormResponses()
+            })
+        };
+        fetch('api/event/{eventId}/member', requestOptions)
+            .then(function (response) {
+            if (response && response.ok) {
+                dispatch({ type: 'NEW_MEMBER_ADDED' });
+            }
+            else {
+                dispatch({ type: 'MEMBER_EDITED' });
+            }
+        });
     }; }
 };
+function collectFormResponses() {
+    return {
+        promptId: "",
+        responses: []
+    };
+}
 var unloadedState = {
     fursvpEvent: undefined,
     isLoading: true,
     modalIsOpen: false,
     modalMember: undefined,
     requestedAsUser: undefined,
-    modalIsInEditMode: false
+    modalIsInEditMode: false,
+    isSaving: false
 };
 // ----------------
 // REDUCER - For a given state and action, returns the new state. To support time travel, this must not mutate the old state.
@@ -129,6 +157,12 @@ exports.reducer = function (state, incomingAction) {
             return __assign(__assign({}, state), { modalIsOpen: true, modalMember: undefined, modalIsInEditMode: true });
         case 'OPEN_EDIT_EXISTING_MEMBER_MODAL':
             return __assign(__assign({}, state), { modalIsOpen: true, modalIsInEditMode: true });
+        case 'SAVING_MEMBER':
+            return __assign(__assign({}, state), { isSaving: true });
+        case 'MEMBER_EDITED':
+            return __assign(__assign({}, state), { isSaving: true, modalIsOpen: false, modalIsInEditMode: false });
+        case 'NEW_MEMBER_ADDED':
+            return __assign(__assign({}, state), { isSaving: false, modalIsOpen: false, modalIsInEditMode: false });
         default:
             return state;
     }

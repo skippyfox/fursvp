@@ -14,6 +14,7 @@ export interface EventDetailState {
     modalMember: Member | undefined;
     requestedAsUser: string | undefined;
     modalIsInEditMode: boolean;
+    isSaving: boolean;
 }
 
 // -----------------
@@ -54,11 +55,24 @@ interface OpenEditExistingMemberModalAction {
     type: 'OPEN_EDIT_EXISTING_MEMBER_MODAL';
 }
 
+interface SavingMemberAction {
+    type: 'SAVING_MEMBER';
+}
+
+interface NewMemberAddedAction {
+    type: 'NEW_MEMBER_ADDED';
+}
+
+interface MemberEditedAction {
+    type: 'MEMBER_EDITED';
+}
+
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
 type KnownAction = RequestFursvpEventAction | ReceiveFursvpEventAction | ToggleModalAction | OpenModalAction | FursvpEventNotFoundAction
     | UserLoggedOutAction | UserLoggedInAction | OpenLoginModalAction
-    | OpenNewMemberModalAction | OpenEditExistingMemberModalAction;
+    | OpenNewMemberModalAction | OpenEditExistingMemberModalAction
+    | SavingMemberAction | NewMemberAddedAction | MemberEditedAction;
 
 const getMemberById = (event: FursvpEvent, memberId: string | undefined): Member | undefined => {
     if (memberId === undefined) {
@@ -73,6 +87,8 @@ const getMemberById = (event: FursvpEvent, memberId: string | undefined): Member
 
     return undefined;
 }
+
+
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -157,8 +173,39 @@ export const actionCreators = {
 
     openEditExistingMemberModal: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
         dispatch({ type: 'OPEN_EDIT_EXISTING_MEMBER_MODAL' });
+    },
+
+    addNewMember: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        dispatch({ type: 'SAVING_MEMBER' });
+
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                "emailAddress": "",
+                "name": "",
+                "formResponses": collectFormResponses()
+            })
+        };
+
+        fetch('api/event/{eventId}/member', requestOptions)
+            .then(response => {
+                if (response && response.ok) {
+                    dispatch({ type: 'NEW_MEMBER_ADDED' });
+                }
+                else {
+                    dispatch({ type: 'MEMBER_EDITED' })
+                }
+            });
     }
 };
+
+function collectFormResponses(): FormResponses {
+    return {
+        promptId: "",
+        responses: []
+    };
+}
 
 const unloadedState: EventDetailState = {
     fursvpEvent: undefined,
@@ -166,7 +213,8 @@ const unloadedState: EventDetailState = {
     modalIsOpen: false,
     modalMember: undefined,
     requestedAsUser: undefined,
-    modalIsInEditMode: false
+    modalIsInEditMode: false,
+    isSaving: false
 };
 
 // ----------------
@@ -230,6 +278,25 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
                 ...state,
                 modalIsOpen: true,
                 modalIsInEditMode: true
+            };
+        case 'SAVING_MEMBER':
+            return {
+                ...state,
+                isSaving: true
+            };
+        case 'MEMBER_EDITED':
+            return {
+                ...state,
+                isSaving: true,
+                modalIsOpen: false,
+                modalIsInEditMode: false
+            };
+        case 'NEW_MEMBER_ADDED':
+            return {
+                ...state,
+                isSaving: false,
+                modalIsOpen: false,
+                modalIsInEditMode: false
             };
         default:
             return state;
