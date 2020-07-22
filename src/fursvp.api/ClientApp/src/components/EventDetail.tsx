@@ -8,13 +8,68 @@ import * as FursvpEventsStore from '../store/FursvpEvents';
 import DateTime from './DateTime';
 import { getStoredVerifiedEmail } from '../store/UserStore';
 import { Member } from '../store/FursvpEvents';
+import { Formik, Form as FormikForm, useField, FormikValues } from 'formik';
+
+const RsvpTextInput = (props : {label: string, id: string, required: boolean}) => {
+    const [field, meta] = useField({ id: props.id, required: props.required, name: props.id});
+    return (
+        <>
+            <Label htmlFor={props.id}>{props.label}</Label>
+            <Input {...field} id={props.id} required={props.required} name={props.id} />
+            {meta.touched && meta.error ? (
+                <div className="error">{meta.error}</div>
+            ) : null}
+        </>
+    );
+};
+
+const RsvpDropdown = (props: { children: JSX.Element[], label: string, id: string, required: boolean }) => {
+    const [field, meta] = useField({ id: props.id, required: props.required, name: props.id, children: props.children });
+    return (
+        <>
+            <Label htmlFor={props.id}>{props.label}</Label>
+            <Input type="select" id={props.id} name={props.id} required={props.required} children={props.children} {...field} />
+            {meta.touched && meta.error ? (
+                <div className="error">{meta.error}</div>
+            ) : null}
+        </>
+    );
+};
+
+const RsvpCheckboxes = (props: { options: string[], id: string }) => {
+    const [field, meta] = useField({ id: props.id, name: props.id });
+    return (
+        <Label check id={props.id}>
+            {props.options.map(option => <><Input id={props.id + option} key={option} type="checkbox" />{' '}{option}</>)}
+        </Label>
+    );
+};
+
+const getNewMemberInitialValues = (form: FursvpEventsStore.FormPrompt[]) => {
+    var result : any = {
+        newMemberName: "",
+        newMemberEmail: ""
+    };
+
+    for (let prompt of form) {
+        if (prompt.behavior == "Checkboxes") {
+            for (let option of prompt.options) {
+                result["newPrompt" + prompt.id + option] = "";
+            }
+        }
+        else {
+            result["newPrompt" + prompt.id] = "";
+        }
+    }
+
+    return result;
+}
 
 // At runtime, Redux will merge together...
 type EventDetailProps =
     EventDetailStore.EventDetailState // ... state we've requested from the Redux store
     & typeof EventDetailStore.actionCreators // ... plus action creators we've requested
     & RouteComponentProps<{ eventId: string, memberId: string }>; // ... plus incoming routing parameters
-
 
 class EventDetail extends React.PureComponent<EventDetailProps> {
     constructor(props : EventDetailProps) {
@@ -118,7 +173,7 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
         </>;
     }
 
-    private renderAddNewMemberModalContent(event: FursvpEventsStore.FursvpEvent) : React.ReactNode {
+    private renderAddNewMemberModalContent_old(event: FursvpEventsStore.FursvpEvent) : React.ReactNode {
         return <Form>
             <ModalHeader toggle={this.toggleModal}>RSVP for {this.props.fursvpEvent ? this.props.fursvpEvent.name : ""}</ModalHeader>
             <ModalBody>
@@ -154,6 +209,42 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                 {' '}<Button color="secondary" onClick={this.toggleModal}>Cancel</Button>
             </ModalFooter>
         </Form>;
+    }
+
+    private renderAddNewMemberModalContent(event: FursvpEventsStore.FursvpEvent): React.ReactNode {
+        return <Formik initialValues={getNewMemberInitialValues(event.form)} onSubmit={(values, { setSubmitting }) => { this.props.addNewMember(values); }}>
+            <FormikForm translate={undefined}>
+                <ModalHeader toggle={this.toggleModal}>RSVP for {this.props.fursvpEvent ? this.props.fursvpEvent.name : ""}</ModalHeader>
+                <ModalBody>
+                    <FormGroup>
+                        <RsvpTextInput id="newMemberName" label="Name" required />
+                    </FormGroup>
+                    <FormGroup>
+                        <RsvpTextInput id="newMemberEmail" label="Email" required />
+                    </FormGroup>
+                    {event.form.sort(x => x.sortOrder).map(prompt =>
+                        <FormGroup key={prompt.id} check={prompt.behavior == 'Checkboxes'}>
+                            {prompt.behavior == 'Text'
+                                ?
+                                <RsvpTextInput id={"newPrompt" + prompt.id} label={prompt.prompt} required={prompt.required} />
+                                : <></>}
+                            {prompt.behavior == 'Checkboxes'
+                                ? <RsvpCheckboxes id={"newPrompt" + prompt.id} options={prompt.options} />
+                                : <></>}
+                            {prompt.behavior == 'Dropdown'
+                                ? <RsvpDropdown label={prompt.prompt} id={"newPrompt" + prompt.id} required={prompt.required}>
+                                    {prompt.options.map(option => <option key={option}>{option}</option>)}
+                                </RsvpDropdown>
+                                : <></>}
+                        </FormGroup>
+                    )}
+                </ModalBody>
+                <ModalFooter>
+                    <Button type="submit" color="primary">Add RSVP</Button>
+                    {' '}<Button color="secondary" onClick={this.toggleModal}>Cancel</Button>
+                </ModalFooter>
+            </FormikForm>
+        </Formik>;
     }
 
     private renderEditMemberModalContent(
@@ -324,8 +415,8 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
         this.props.openNewMemberModal();
     }
 
-    private addNewMember() {
-        this.props.addNewMember();
+    private addNewMember(values : FormikValues) {
+        this.props.addNewMember(values);
     }
 
     private toggleModal() {

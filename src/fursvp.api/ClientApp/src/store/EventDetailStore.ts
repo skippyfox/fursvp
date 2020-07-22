@@ -2,6 +2,7 @@
 import { AppThunkAction } from '.';
 import { FursvpEvent, Member, FormPrompt, FormResponses } from './FursvpEvents';
 import { getStoredVerifiedEmail, getStoredAuthToken, UserLoggedInAction, UserLoggedOutAction, OpenLoginModalAction } from './UserStore';
+import { FormikValues } from 'formik';
 
 // -----------------
 // STATE - This defines the type of data maintained in the Redux store.
@@ -175,36 +176,67 @@ export const actionCreators = {
         dispatch({ type: 'OPEN_EDIT_EXISTING_MEMBER_MODAL' });
     },
 
-    addNewMember: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+    addNewMember: (values : FormikValues): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        var state = getState();
+        if (state.targetEvent === undefined) {
+            return;
+        }
+
         dispatch({ type: 'SAVING_MEMBER' });
+
+        var eventForm = state.targetEvent.fursvpEvent ? state.targetEvent.fursvpEvent.form : undefined;
 
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                "emailAddress": "",
-                "name": "",
-                "formResponses": collectFormResponses()
+                "emailAddress": values["newMemberEmail"],
+                "name": values["newMemberName"],
+                "formResponses": collectNewFormResponses(values, eventForm)
             })
         };
 
-        fetch('api/event/{eventId}/member', requestOptions)
+        fetch('api/event/' + state.targetEvent.id + '/member', requestOptions)
             .then(response => {
-                if (response && response.ok) {
+                if (response.ok) {
                     dispatch({ type: 'NEW_MEMBER_ADDED' });
                 }
                 else {
-                    dispatch({ type: 'MEMBER_EDITED' })
+                    // Handle error
                 }
             });
     }
 };
 
-function collectFormResponses(): FormResponses {
-    return {
-        promptId: "",
-        responses: []
-    };
+function collectNewFormResponses(values : FormikValues, eventForm : FormPrompt[] | undefined): FormResponses[] {
+    if (eventForm === undefined) {
+        return [];
+    }
+
+    console.log(values);
+
+    var result: FormResponses[] = [];
+
+    for (var prompt of eventForm) {
+        var responses : string[] = [];
+
+        var key = "newPrompt" + prompt.id;
+
+        if (prompt.behavior == "Checkboxes") {
+            for (var option in prompt.options) {
+                if (values[key + option] && values[key + option] === true) {
+                    responses.push(option);
+                }
+            }
+        }
+        else if (values[key]) {
+            responses.push(values[key]);
+        }
+
+        result.push({ promptId: prompt.id, responses });
+    }
+
+    return result;
 }
 
 const unloadedState: EventDetailState = {

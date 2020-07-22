@@ -96,33 +96,56 @@ exports.actionCreators = {
     openEditExistingMemberModal: function () { return function (dispatch, getState) {
         dispatch({ type: 'OPEN_EDIT_EXISTING_MEMBER_MODAL' });
     }; },
-    addNewMember: function () { return function (dispatch, getState) {
+    addNewMember: function (values) { return function (dispatch, getState) {
+        var state = getState();
+        if (state.targetEvent === undefined) {
+            return;
+        }
         dispatch({ type: 'SAVING_MEMBER' });
+        var eventForm = state.targetEvent.fursvpEvent ? state.targetEvent.fursvpEvent.form : undefined;
         var requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                "emailAddress": "",
-                "name": "",
-                "formResponses": collectFormResponses()
+                "emailAddress": values["newMemberEmail"],
+                "name": values["newMemberName"],
+                "formResponses": collectNewFormResponses(values, eventForm)
             })
         };
-        fetch('api/event/{eventId}/member', requestOptions)
+        fetch('api/event/' + state.targetEvent.id + '/member', requestOptions)
             .then(function (response) {
-            if (response && response.ok) {
+            if (response.ok) {
                 dispatch({ type: 'NEW_MEMBER_ADDED' });
             }
             else {
-                dispatch({ type: 'MEMBER_EDITED' });
+                // Handle error
             }
         });
     }; }
 };
-function collectFormResponses() {
-    return {
-        promptId: "",
-        responses: []
-    };
+function collectNewFormResponses(values, eventForm) {
+    if (eventForm === undefined) {
+        return [];
+    }
+    console.log(values);
+    var result = [];
+    for (var _i = 0, eventForm_1 = eventForm; _i < eventForm_1.length; _i++) {
+        var prompt = eventForm_1[_i];
+        var responses = [];
+        var key = "newPrompt" + prompt.id;
+        if (prompt.behavior == "Checkboxes") {
+            for (var option in prompt.options) {
+                if (values[key + option] && values[key + option] === true) {
+                    responses.push(option);
+                }
+            }
+        }
+        else if (values[key]) {
+            responses.push(values[key]);
+        }
+        result.push({ promptId: prompt.id, responses: responses });
+    }
+    return result;
 }
 var unloadedState = {
     fursvpEvent: undefined,

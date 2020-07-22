@@ -12,6 +12,17 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
 var reactstrap_1 = require("reactstrap");
@@ -20,6 +31,47 @@ var react_router_1 = require("react-router");
 var EventDetailStore = require("../store/EventDetailStore");
 var DateTime_1 = require("./DateTime");
 var UserStore_1 = require("../store/UserStore");
+var formik_1 = require("formik");
+var RsvpTextInput = function (props) {
+    var _a = formik_1.useField({ id: props.id, required: props.required, name: props.id }), field = _a[0], meta = _a[1];
+    return (React.createElement(React.Fragment, null,
+        React.createElement(reactstrap_1.Label, { htmlFor: props.id }, props.label),
+        React.createElement(reactstrap_1.Input, __assign({}, field, { id: props.id, required: props.required, name: props.id })),
+        meta.touched && meta.error ? (React.createElement("div", { className: "error" }, meta.error)) : null));
+};
+var RsvpDropdown = function (props) {
+    var _a = formik_1.useField({ id: props.id, required: props.required, name: props.id, children: props.children }), field = _a[0], meta = _a[1];
+    return (React.createElement(React.Fragment, null,
+        React.createElement(reactstrap_1.Label, { htmlFor: props.id }, props.label),
+        React.createElement(reactstrap_1.Input, __assign({ type: "select", id: props.id, name: props.id, required: props.required, children: props.children }, field)),
+        meta.touched && meta.error ? (React.createElement("div", { className: "error" }, meta.error)) : null));
+};
+var RsvpCheckboxes = function (props) {
+    var _a = formik_1.useField({ id: props.id, name: props.id }), field = _a[0], meta = _a[1];
+    return (React.createElement(reactstrap_1.Label, { check: true, id: props.id }, props.options.map(function (option) { return React.createElement(React.Fragment, null,
+        React.createElement(reactstrap_1.Input, { id: props.id + option, key: option, type: "checkbox" }),
+        ' ',
+        option); })));
+};
+var getNewMemberInitialValues = function (form) {
+    var result = {
+        newMemberName: "",
+        newMemberEmail: ""
+    };
+    for (var _i = 0, form_1 = form; _i < form_1.length; _i++) {
+        var prompt_1 = form_1[_i];
+        if (prompt_1.behavior == "Checkboxes") {
+            for (var _a = 0, _b = prompt_1.options; _a < _b.length; _a++) {
+                var option = _b[_a];
+                result["newPrompt" + prompt_1.id + option] = "";
+            }
+        }
+        else {
+            result["newPrompt" + prompt_1.id] = "";
+        }
+    }
+    return result;
+};
 var EventDetail = /** @class */ (function (_super) {
     __extends(EventDetail, _super);
     function EventDetail(props) {
@@ -99,7 +151,7 @@ var EventDetail = /** @class */ (function (_super) {
                 ' ',
                 React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.toggleModal }, "Close")));
     };
-    EventDetail.prototype.renderAddNewMemberModalContent = function (event) {
+    EventDetail.prototype.renderAddNewMemberModalContent_old = function (event) {
         return React.createElement(reactstrap_1.Form, null,
             React.createElement(reactstrap_1.ModalHeader, { toggle: this.toggleModal },
                 "RSVP for ",
@@ -131,6 +183,39 @@ var EventDetail = /** @class */ (function (_super) {
                 React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.props.addNewMember }, "Add RSVP"),
                 ' ',
                 React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.toggleModal }, "Cancel")));
+    };
+    EventDetail.prototype.renderAddNewMemberModalContent = function (event) {
+        var _this = this;
+        return React.createElement(formik_1.Formik, { initialValues: getNewMemberInitialValues(event.form), onSubmit: function (values, _a) {
+                var setSubmitting = _a.setSubmitting;
+                _this.props.addNewMember(values);
+            } },
+            React.createElement(formik_1.Form, { translate: undefined },
+                React.createElement(reactstrap_1.ModalHeader, { toggle: this.toggleModal },
+                    "RSVP for ",
+                    this.props.fursvpEvent ? this.props.fursvpEvent.name : ""),
+                React.createElement(reactstrap_1.ModalBody, null,
+                    React.createElement(reactstrap_1.FormGroup, null,
+                        React.createElement(RsvpTextInput, { id: "newMemberName", label: "Name", required: true })),
+                    React.createElement(reactstrap_1.FormGroup, null,
+                        React.createElement(RsvpTextInput, { id: "newMemberEmail", label: "Email", required: true })),
+                    event.form.sort(function (x) { return x.sortOrder; }).map(function (prompt) {
+                        return React.createElement(reactstrap_1.FormGroup, { key: prompt.id, check: prompt.behavior == 'Checkboxes' },
+                            prompt.behavior == 'Text'
+                                ?
+                                    React.createElement(RsvpTextInput, { id: "newPrompt" + prompt.id, label: prompt.prompt, required: prompt.required })
+                                : React.createElement(React.Fragment, null),
+                            prompt.behavior == 'Checkboxes'
+                                ? React.createElement(RsvpCheckboxes, { id: "newPrompt" + prompt.id, options: prompt.options })
+                                : React.createElement(React.Fragment, null),
+                            prompt.behavior == 'Dropdown'
+                                ? React.createElement(RsvpDropdown, { label: prompt.prompt, id: "newPrompt" + prompt.id, required: prompt.required }, prompt.options.map(function (option) { return React.createElement("option", { key: option }, option); }))
+                                : React.createElement(React.Fragment, null));
+                    })),
+                React.createElement(reactstrap_1.ModalFooter, null,
+                    React.createElement(reactstrap_1.Button, { type: "submit", color: "primary" }, "Add RSVP"),
+                    ' ',
+                    React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.toggleModal }, "Cancel"))));
     };
     EventDetail.prototype.renderEditMemberModalContent = function (event, member, responses) {
         if (member === undefined) {
@@ -223,16 +308,16 @@ var EventDetail = /** @class */ (function (_super) {
     EventDetail.prototype.joinResponsesToPrompts = function (responses, prompts) {
         var result = [];
         for (var _i = 0, prompts_1 = prompts; _i < prompts_1.length; _i++) {
-            var prompt_1 = prompts_1[_i];
+            var prompt_2 = prompts_1[_i];
             var responsesForPrompt = undefined;
             for (var _a = 0, responses_1 = responses; _a < responses_1.length; _a++) {
                 var response = responses_1[_a];
-                if (response.promptId == prompt_1.id) {
+                if (response.promptId == prompt_2.id) {
                     responsesForPrompt = response;
                     break;
                 }
             }
-            result.push({ prompt: prompt_1, responses: responsesForPrompt });
+            result.push({ prompt: prompt_2, responses: responsesForPrompt });
         }
         return result;
     };
@@ -262,8 +347,8 @@ var EventDetail = /** @class */ (function (_super) {
     EventDetail.prototype.openNewMemberModal = function () {
         this.props.openNewMemberModal();
     };
-    EventDetail.prototype.addNewMember = function () {
-        this.props.addNewMember();
+    EventDetail.prototype.addNewMember = function (values) {
+        this.props.addNewMember(values);
     };
     EventDetail.prototype.toggleModal = function () {
         if (this.props.modalIsOpen && this.props.modalMember !== undefined) {
