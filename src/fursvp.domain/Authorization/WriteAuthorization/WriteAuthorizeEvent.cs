@@ -74,10 +74,10 @@ namespace Fursvp.Domain.Authorization.WriteAuthorization
                 foreach (var formPrompt in oldState.Form.FullJoin(newState.Form, f => f.Id, f => f.Id, (old, @new) => new { old, @new }))
                 {
                     Assert.That(formPrompt.old != null && formPrompt.@new != null, "Form can only be altered by an event's Author or Organizer.");
-                    Assert.That(formPrompt.old.Prompt != formPrompt.@new.Prompt, "Form can only be altered by an event's Author or Organizer.");
-                    Assert.That(formPrompt.old.Required != formPrompt.@new.Required, "Form can only be altered by an event's Author or Organizer.");
-                    Assert.That(formPrompt.old.Behavior != formPrompt.@new.Behavior, "Form can only be altered by an event's Author or Organizer.");
-                    Assert.That(formPrompt.old.SortOrder != formPrompt.@new.SortOrder, "Form can only be altered by an event's Author or Organizer.");
+                    Assert.That(formPrompt.old.Prompt == formPrompt.@new.Prompt, "Form can only be altered by an event's Author or Organizer.");
+                    Assert.That(formPrompt.old.Required == formPrompt.@new.Required, "Form can only be altered by an event's Author or Organizer.");
+                    Assert.That(formPrompt.old.Behavior == formPrompt.@new.Behavior, "Form can only be altered by an event's Author or Organizer.");
+                    Assert.That(formPrompt.old.SortOrder == formPrompt.@new.SortOrder, "Form can only be altered by an event's Author or Organizer.");
 
                     var oldOptions = formPrompt.old?.Options ?? Enumerable.Empty<string>();
                     var newOptions = formPrompt.@new?.Options ?? Enumerable.Empty<string>();

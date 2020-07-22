@@ -22,6 +22,6 @@ namespace Fursvp.Domain.Forms
         /// <summary>
         /// Gets or sets the collection of text responses to the question.
         /// </summary>
-        public ICollection<string> Responses { get; } = new Collection<string>();
+        public ICollection<string> Responses { get; set; } = new Collection<string>();
     }
 }
