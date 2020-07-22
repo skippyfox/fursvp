@@ -50,7 +50,9 @@ namespace Fursvp.Domain.Authorization.WriteAuthorization
             // I am not the author. I am not allowed to change anyone's status as organizer or author, not even my own.
             if (newMemberState != null)
             {
-                Assert.That(!newMemberState.IsAuthor, nameof(newMemberState.IsAuthor) + " cannot be set.");
+                bool targetMemberWasAuthor = oldMemberState?.IsAuthor == true;
+                Assert.That(targetMemberWasAuthor == newMemberState.IsAuthor, nameof(newMemberState.IsAuthor) + " cannot be set.");
+                
                 bool targetMemberWasOrganizer = oldMemberState?.IsOrganizer == true;
                 Assert.That(targetMemberWasOrganizer == newMemberState.IsOrganizer, nameof(newMemberState.IsOrganizer) + " cannot be set.");
             }
@@ -86,7 +88,7 @@ namespace Fursvp.Domain.Authorization.WriteAuthorization
             // Assert that the old form responses and new form responses are equivalent.
             var oldResponses = oldMemberState.Responses.SelectMany(r => r.Responses.Select(response => new { r.PromptId, response }));
             var newResponses = newMemberState.Responses.SelectMany(r => r.Responses.Select(response => new { r.PromptId, response }));
-            Assert.That(oldResponses.FullJoin(newResponses, s => s, s => s, (o, i) => o == null || i == null).Any(), "You do not have permission to change this member's form responses.");
+            Assert.That(!oldResponses.FullJoin(newResponses, s => s, s => s, (o, i) => o == null || i == null).Any(r => r), "You do not have permission to change this member's form responses.");
         }
     }
 }

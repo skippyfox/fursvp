@@ -40,8 +40,8 @@ namespace Fursvp.Data.Firestore
             {
                 Id = Guid.Parse((string)dictionary["Id"]),
                 Version = Convert.ToInt32((long)dictionary["Version"]),
-                StartsAtUtc = ((Timestamp)dictionary["StartsAt"]).ToDateTime(),
-                EndsAtUtc = ((Timestamp)dictionary["EndsAt"]).ToDateTime(),
+                StartsAtUtc = ((Timestamp)dictionary["StartsAtUtc"]).ToDateTime(),
+                EndsAtUtc = ((Timestamp)dictionary["EndsAtUtc"]).ToDateTime(),
                 TimeZoneId = (string)dictionary["TimeZoneId"],
                 Name = (string)dictionary["Name"],
                 OtherDetails = (string)dictionary["OtherDetails"],
@@ -82,7 +82,7 @@ namespace Fursvp.Data.Firestore
                     IsAttending = (bool)m["IsAttending"],
                     IsOrganizer = (bool)m["IsOrganizer"],
                     IsAuthor = (bool)m["IsAuthor"],
-                    RsvpedAtUtc = m.TryGetValue("RsvpedAt", out var rsvpedAt) ? ((Timestamp)rsvpedAt).ToDateTime() : DateTime.MinValue,
+                    RsvpedAtUtc = m.TryGetValue("RsvpedAtUtc", out var rsvpedAt) ? ((Timestamp)rsvpedAt).ToDateTime() : DateTime.MinValue,
                 };
 
                 foreach (var r in ((List<object>)m["Responses"]).Cast<Dictionary<string, object>>())
@@ -106,7 +106,7 @@ namespace Fursvp.Data.Firestore
                 result.Members.Add(member);
             }
 
-            if (dictionary["RsvpClosesAt"] is Timestamp rsvpClosesAt)
+            if (dictionary["RsvpClosesAtUtc"] is Timestamp rsvpClosesAt)
             {
                 result.RsvpClosesAtUtc = rsvpClosesAt.ToDateTime();
             }
@@ -146,7 +146,7 @@ namespace Fursvp.Data.Firestore
                         {
                             nameof(m.Responses), m.Responses.Select(r => new Dictionary<string, object>
                             {
-                                { nameof(r.PromptId), r.PromptId },
+                                { nameof(r.PromptId), r.PromptId.ToString() },
                                 { nameof(r.Responses), r.Responses.ToList() },
                             }).ToList()
                         },

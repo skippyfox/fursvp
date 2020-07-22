@@ -103,7 +103,7 @@ namespace Fursvp.Api.Controllers
                 throw new ArgumentNullException(nameof(newEvent));
             }
 
-            var @event = EventService.CreateNewEvent(newEvent.AuthorEmailAddress, newEvent.AuthorEmailAddress);
+            var @event = EventService.CreateNewEvent(newEvent.AuthorEmailAddress, newEvent.AuthorName);
             await EventRepositoryWrite.Insert(@event).ConfigureAwait(false);
             return CreatedAtAction(nameof(GetEvent), new { id = @event.Id }, Mapper.MapResponse(@event));
         }
