@@ -176,7 +176,8 @@ exports.actionCreators = {
                 "formResponses": collectNewFormResponses(values, eventForm)
             })
         };
-        fetch("api/event/" + state.targetEvent.id + "/member", requestOptions)
+        var eventId = state.targetEvent.id !== undefined ? state.targetEvent.id : "";
+        fetch("api/event/" + eventId + "/member", requestOptions)
             .then(function (response) {
             if (response.ok) {
                 dispatch({ type: 'NEW_MEMBER_ADDED' });
@@ -184,6 +185,35 @@ exports.actionCreators = {
             else {
                 // Handle error
             }
+        })
+            .then(function () {
+            var userEmail = UserStore_1.getStoredVerifiedEmail();
+            var authToken = UserStore_1.getStoredAuthToken();
+            dispatch({ type: 'REQUEST_FURSVP_EVENT', id: eventId, requestedAsUser: userEmail });
+            var getRequestOptions = {
+                method: 'GET',
+                credentials: "include",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + authToken
+                }
+            };
+            return fetch("api/event/" + eventId, getRequestOptions);
+        })
+            .then(function (response) {
+            if (!response.ok) {
+                throw new Error();
+            }
+            return response.json();
+        })
+            .then(function (data) {
+            if (data === undefined) {
+                throw new Error();
+            }
+            dispatch({ type: 'RECEIVE_FURSVP_EVENT', fursvpEvent: data, id: eventId, member: undefined });
+        })
+            .catch(function (err) {
+            // Handle error
         });
     }; }
 };
