@@ -77,8 +77,12 @@ var EventDetail = /** @class */ (function (_super) {
     function EventDetail(props) {
         var _this = _super.call(this, props) || this;
         _this.toggleModal = _this.toggleModal.bind(_this);
+        _this.toggleRemoveRsvpModal = _this.toggleRemoveRsvpModal.bind(_this);
+        _this.removeRsvp = _this.removeRsvp.bind(_this);
+        _this.askForRemoveRsvpConfirmation = _this.askForRemoveRsvpConfirmation.bind(_this);
         _this.openNewMemberModal = _this.openNewMemberModal.bind(_this);
         _this.addNewMember = _this.addNewMember.bind(_this);
+        _this.toggleRsvpRemovedModal = _this.toggleRsvpRemovedModal.bind(_this);
         return _this;
     }
     // This method is called when the component is first added to the document
@@ -151,44 +155,11 @@ var EventDetail = /** @class */ (function (_super) {
                 ' ',
                 React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.toggleModal }, "Close")));
     };
-    EventDetail.prototype.renderAddNewMemberModalContent_old = function (event) {
-        return React.createElement(reactstrap_1.Form, null,
-            React.createElement(reactstrap_1.ModalHeader, { toggle: this.toggleModal },
-                "RSVP for ",
-                this.props.fursvpEvent ? this.props.fursvpEvent.name : ""),
-            React.createElement(reactstrap_1.ModalBody, null,
-                React.createElement(reactstrap_1.FormGroup, null,
-                    React.createElement(reactstrap_1.Label, { for: "newMemberName" }, "Name"),
-                    React.createElement(reactstrap_1.Input, { id: "newMemberName", required: true })),
-                React.createElement(reactstrap_1.FormGroup, null,
-                    React.createElement(reactstrap_1.Label, { for: "newMemberEmail" }, "Email"),
-                    React.createElement(reactstrap_1.Input, { type: "email", id: "newMemberEmail", required: true })),
-                event.form.sort(function (x) { return x.sortOrder; }).map(function (prompt) {
-                    return React.createElement(reactstrap_1.FormGroup, { key: prompt.id, check: prompt.behavior == 'Checkboxes' },
-                        React.createElement(reactstrap_1.Label, { for: "newPrompt" + prompt.id }, prompt.prompt),
-                        prompt.behavior == 'Text'
-                            ? React.createElement(reactstrap_1.Input, { id: "newPrompt" + prompt.id, required: prompt.required })
-                            : React.createElement(React.Fragment, null),
-                        prompt.behavior == 'Checkboxes'
-                            ? React.createElement(reactstrap_1.Label, { check: true, id: "newPrompt" + prompt.id }, prompt.options.map(function (option) { return React.createElement(React.Fragment, null,
-                                React.createElement(reactstrap_1.Input, { key: option, type: "checkbox" }),
-                                ' ',
-                                option); }))
-                            : React.createElement(React.Fragment, null),
-                        prompt.behavior == 'Dropdown'
-                            ? React.createElement(reactstrap_1.Input, { type: "select", id: "newPrompt" + prompt.id, required: prompt.required }, prompt.options.map(function (option) { return React.createElement("option", { key: option }, option); }))
-                            : React.createElement(React.Fragment, null));
-                })),
-            React.createElement(reactstrap_1.ModalFooter, null,
-                React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.props.addNewMember }, "Add RSVP"),
-                ' ',
-                React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.toggleModal }, "Cancel")));
-    };
     EventDetail.prototype.renderAddNewMemberModalContent = function (event) {
         var _this = this;
         return React.createElement(formik_1.Formik, { initialValues: getNewMemberInitialValues(event.form), onSubmit: function (values, _a) {
                 var setSubmitting = _a.setSubmitting;
-                _this.props.addNewMember(values);
+                _this.addNewMember(values);
             } },
             React.createElement(formik_1.Form, { translate: undefined },
                 React.createElement(reactstrap_1.ModalHeader, { toggle: this.toggleModal },
@@ -213,9 +184,9 @@ var EventDetail = /** @class */ (function (_super) {
                                 : React.createElement(React.Fragment, null));
                     })),
                 React.createElement(reactstrap_1.ModalFooter, null,
-                    React.createElement(reactstrap_1.Button, { type: "submit", color: "primary" }, "Add RSVP"),
+                    React.createElement(reactstrap_1.Button, { type: "submit", color: "primary", disabled: this.props.isSaving }, "Add RSVP"),
                     ' ',
-                    React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.toggleModal }, "Cancel"))));
+                    React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.toggleModal, disabled: this.props.isSaving }, "Cancel"))));
     };
     EventDetail.prototype.renderEditMemberModalContent = function (event, member, responses) {
         if (member === undefined) {
@@ -249,11 +220,11 @@ var EventDetail = /** @class */ (function (_super) {
                             : React.createElement(React.Fragment, null));
                 })),
             React.createElement(reactstrap_1.ModalFooter, null,
-                React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.toggleModal }, "Save Changes"),
+                React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.toggleModal, disabled: this.props.isSaving }, "Save Changes"),
                 ' ',
-                React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.toggleModal }, "Cancel"),
+                React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.toggleModal, disabled: this.props.isSaving }, "Cancel"),
                 ' ',
-                React.createElement(reactstrap_1.Button, { outline: true, color: "danger", onClick: this.toggleModal }, "Remove RSVP")));
+                React.createElement(reactstrap_1.Button, { outline: true, color: "danger", onClick: this.askForRemoveRsvpConfirmation, disabled: this.props.isSaving }, "Remove RSVP")));
     };
     EventDetail.prototype.render = function () {
         var _this = this;
@@ -295,7 +266,22 @@ var EventDetail = /** @class */ (function (_super) {
                         }))),
                 React.createElement(reactstrap_1.Modal, { isOpen: this.props.modalIsOpen, toggle: this.toggleModal }, this.props.modalIsInEditMode
                     ? this.renderEditMemberModalContent(event, member, responses)
-                    : this.renderViewOnlyModalContent(event, member, responses, userEmail))));
+                    : this.renderViewOnlyModalContent(event, member, responses, userEmail)),
+                React.createElement(reactstrap_1.Modal, { isOpen: this.props.isAskingForRemoveRsvpConfirmation, toggle: this.toggleRemoveRsvpModal },
+                    React.createElement(reactstrap_1.ModalHeader, null, "Remove RSVP?"),
+                    React.createElement(reactstrap_1.ModalBody, null,
+                        "Please confirm that you wish to withdraw ",
+                        member !== undefined ? member.name : "this member",
+                        "'s RSVP from this event."),
+                    React.createElement(reactstrap_1.ModalFooter, null,
+                        React.createElement(reactstrap_1.Button, { color: "danger", onClick: function () { return _this.removeRsvp(event.id, member !== undefined ? member.id : undefined); } }, "Remove RSVP"),
+                        ' ',
+                        React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.toggleRemoveRsvpModal }, "Cancel"))),
+                React.createElement(reactstrap_1.Modal, { isOpen: this.props.rsvpRemovedModalIsOpen, toggle: this.toggleRsvpRemovedModal },
+                    React.createElement(reactstrap_1.ModalHeader, null, "RSVP Removed"),
+                    React.createElement(reactstrap_1.ModalBody, null, "This RSVP has been removed."),
+                    React.createElement(reactstrap_1.ModalFooter, null,
+                        React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.toggleRsvpRemovedModal }, "Close")))));
         }
         else if (this.props.isLoading) {
             return (React.createElement(React.Fragment, null, "(Loading)"));
@@ -361,6 +347,19 @@ var EventDetail = /** @class */ (function (_super) {
         else {
             this.props.toggleModal();
         }
+    };
+    EventDetail.prototype.toggleRemoveRsvpModal = function () {
+        this.props.toggleRemoveRsvpModal();
+    };
+    EventDetail.prototype.toggleRsvpRemovedModal = function () {
+        this.props.history.push('/event/' + this.props.id);
+        this.props.toggleRsvpRemovedModal();
+    };
+    EventDetail.prototype.removeRsvp = function (eventId, memberId) {
+        this.props.removeRsvp(eventId, memberId);
+    };
+    EventDetail.prototype.askForRemoveRsvpConfirmation = function () {
+        this.props.askForRemoveRsvpConfirmation();
     };
     EventDetail.prototype.ensureDataFetched = function () {
         this.props.requestFursvpEvent(this.props.match.params.eventId, this.props.match.params.memberId);

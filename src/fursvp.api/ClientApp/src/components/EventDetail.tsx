@@ -76,8 +76,12 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
         super(props);
 
         this.toggleModal = this.toggleModal.bind(this);
+        this.toggleRemoveRsvpModal = this.toggleRemoveRsvpModal.bind(this);
+        this.removeRsvp = this.removeRsvp.bind(this);
+        this.askForRemoveRsvpConfirmation = this.askForRemoveRsvpConfirmation.bind(this);
         this.openNewMemberModal = this.openNewMemberModal.bind(this);
         this.addNewMember = this.addNewMember.bind(this);
+        this.toggleRsvpRemovedModal = this.toggleRsvpRemovedModal.bind(this);
     }
 
     // This method is called when the component is first added to the document
@@ -173,46 +177,8 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
         </>;
     }
 
-    private renderAddNewMemberModalContent_old(event: FursvpEventsStore.FursvpEvent) : React.ReactNode {
-        return <Form>
-            <ModalHeader toggle={this.toggleModal}>RSVP for {this.props.fursvpEvent ? this.props.fursvpEvent.name : ""}</ModalHeader>
-            <ModalBody>
-                <FormGroup>
-                    <Label for="newMemberName">Name</Label>
-                    <Input id="newMemberName" required />
-                </FormGroup>
-                <FormGroup>
-                    <Label for="newMemberEmail">Email</Label>
-                    <Input type="email" id="newMemberEmail" required />
-                </FormGroup>
-                {event.form.sort(x => x.sortOrder).map(prompt =>
-                    <FormGroup key={prompt.id} check={prompt.behavior == 'Checkboxes'}>
-                        <Label for={"newPrompt" + prompt.id}>{prompt.prompt}</Label>
-                        {prompt.behavior == 'Text'
-                            ? <Input id={"newPrompt" + prompt.id} required={prompt.required} />
-                            : <></>}
-                        {prompt.behavior == 'Checkboxes'
-                            ? <Label check id={"newPrompt" + prompt.id}>
-                                {prompt.options.map(option => <><Input key={option} type="checkbox" />{' '}{option}</>)}
-                                </Label>
-                            : <></>}
-                        {prompt.behavior == 'Dropdown'
-                            ? <Input type="select" id={"newPrompt" + prompt.id} required={prompt.required}>
-                                {prompt.options.map(option => <option key={option}>{option}</option>)}
-                                </Input>
-                            : <></>}
-                    </FormGroup>
-                    )}
-            </ModalBody>
-            <ModalFooter>
-                <Button color="primary" onClick={this.props.addNewMember}>Add RSVP</Button>
-                {' '}<Button color="secondary" onClick={this.toggleModal}>Cancel</Button>
-            </ModalFooter>
-        </Form>;
-    }
-
     private renderAddNewMemberModalContent(event: FursvpEventsStore.FursvpEvent): React.ReactNode {
-        return <Formik initialValues={getNewMemberInitialValues(event.form)} onSubmit={(values, { setSubmitting }) => { this.props.addNewMember(values); }}>
+        return <Formik initialValues={getNewMemberInitialValues(event.form)} onSubmit={(values, { setSubmitting }) => { this.addNewMember(values); }}>
             <FormikForm translate={undefined}>
                 <ModalHeader toggle={this.toggleModal}>RSVP for {this.props.fursvpEvent ? this.props.fursvpEvent.name : ""}</ModalHeader>
                 <ModalBody>
@@ -240,8 +206,8 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                     )}
                 </ModalBody>
                 <ModalFooter>
-                    <Button type="submit" color="primary">Add RSVP</Button>
-                    {' '}<Button color="secondary" onClick={this.toggleModal}>Cancel</Button>
+                    <Button type="submit" color="primary" disabled={this.props.isSaving}>Add RSVP</Button>
+                    {' '}<Button color="secondary" onClick={this.toggleModal} disabled={this.props.isSaving}>Cancel</Button>
                 </ModalFooter>
             </FormikForm>
         </Formik>;
@@ -287,9 +253,9 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                 )}
             </ModalBody>
             <ModalFooter>
-                <Button color="primary" onClick={this.toggleModal}>Save Changes</Button>
-                {' '}<Button color="secondary" onClick={this.toggleModal}>Cancel</Button>
-                {' '}<Button outline color="danger" onClick={this.toggleModal}>Remove RSVP</Button>
+                <Button color="primary" onClick={this.toggleModal} disabled={this.props.isSaving}>Save Changes</Button>
+                {' '}<Button color="secondary" onClick={this.toggleModal} disabled={this.props.isSaving}>Cancel</Button>
+                {' '}<Button outline color="danger" onClick={this.askForRemoveRsvpConfirmation} disabled={this.props.isSaving}>Remove RSVP</Button>
             </ModalFooter>
         </Form>;
     }
@@ -344,6 +310,21 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                             ? this.renderEditMemberModalContent(event, member, responses)
                             : this.renderViewOnlyModalContent(event, member, responses, userEmail)
                         }
+                    </Modal>
+                    <Modal isOpen={this.props.isAskingForRemoveRsvpConfirmation} toggle={this.toggleRemoveRsvpModal}>
+                        <ModalHeader>Remove RSVP?</ModalHeader>
+                        <ModalBody>Please confirm that you wish to withdraw {member !== undefined ? member.name : "this member"}'s RSVP from this event.</ModalBody>
+                        <ModalFooter>
+                            <Button color="danger" onClick={() => this.removeRsvp(event.id, member !== undefined ? member.id : undefined)}>Remove RSVP</Button>
+                            {' '}<Button color="secondary" onClick={this.toggleRemoveRsvpModal}>Cancel</Button>
+                        </ModalFooter>
+                    </Modal>
+                    <Modal isOpen={this.props.rsvpRemovedModalIsOpen} toggle={this.toggleRsvpRemovedModal}>
+                        <ModalHeader>RSVP Removed</ModalHeader>
+                        <ModalBody>This RSVP has been removed.</ModalBody>
+                        <ModalFooter>
+                            <Button color="primary" onClick={this.toggleRsvpRemovedModal}>Close</Button>
+                        </ModalFooter>
                     </Modal>
                 </React.Fragment>
             );
@@ -430,6 +411,23 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
         else {
             this.props.toggleModal();
         }
+    }
+
+    private toggleRemoveRsvpModal() {
+        this.props.toggleRemoveRsvpModal();
+    }
+
+    private toggleRsvpRemovedModal() {
+        this.props.history.push('/event/' + this.props.id);
+        this.props.toggleRsvpRemovedModal();
+    }
+
+    private removeRsvp(eventId:string, memberId:string | undefined) {
+        this.props.removeRsvp(eventId, memberId);
+    }
+
+    private askForRemoveRsvpConfirmation() {
+        this.props.askForRemoveRsvpConfirmation();
     }
 
     private ensureDataFetched() {

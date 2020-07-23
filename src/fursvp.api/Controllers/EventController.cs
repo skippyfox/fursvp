@@ -93,7 +93,7 @@ namespace Fursvp.Api.Controllers
         /// <summary>
         /// Creates a new Event.
         /// </summary>
-        /// <param name="newEvent">The <see cref="NewMemberRequest"/> for the author of the Event.</param>
+        /// <param name="newEvent">The <see cref="NewEventRequest"/> containing information about the author of the new Event.</param>
         /// <returns>201 Created on success.</returns>
         [HttpPost]
         public async Task<IActionResult> CreateEvent([FromBody] NewEventRequest newEvent)

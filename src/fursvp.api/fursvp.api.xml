@@ -92,7 +92,7 @@
             <summary>
             Creates a new Event.
             </summary>
-            <param name="newEvent">The <see cref="T:Fursvp.Api.Requests.NewMemberRequest"/> for the author of the Event.</param>
+            <param name="newEvent">The <see cref="T:Fursvp.Api.Requests.NewEventRequest"/> containing information about the author of the new Event.</param>
             <returns>201 Created on success.</returns>
         </member>
         <member name="M:Fursvp.Api.Controllers.EventController.UpdateEvent(System.Guid,Fursvp.Api.Requests.UpdateEventRequest)">

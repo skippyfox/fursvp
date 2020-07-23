@@ -16,6 +16,8 @@ export interface EventDetailState {
     requestedAsUser: string | undefined;
     modalIsInEditMode: boolean;
     isSaving: boolean;
+    isAskingForRemoveRsvpConfirmation: boolean;
+    rsvpRemovedModalIsOpen: boolean;
 }
 
 // -----------------
@@ -68,12 +70,33 @@ interface MemberEditedAction {
     type: 'MEMBER_EDITED';
 }
 
+interface AskForRemoveRsvpAction {
+    type: 'ASK_FOR_REMOVE_RSVP_CONFIRMATION';
+}
+
+interface RemovingRsvpAction {
+    type: 'REMOVING_RSVP';
+}
+
+interface RsvpRemovedAction {
+    type: 'RSVP_REMOVED';
+}
+
+interface ToggleRsvpRemovedModalAction {
+    type: 'TOGGLE_RSVP_REMOVED_MODAL';
+}
+
+interface ToggleRemoveRsvpModalAction {
+    type: 'TOGGLE_REMOVE_RSVP_MODAL_ACTION';
+}
+
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
 type KnownAction = RequestFursvpEventAction | ReceiveFursvpEventAction | ToggleModalAction | OpenModalAction | FursvpEventNotFoundAction
     | UserLoggedOutAction | UserLoggedInAction | OpenLoginModalAction
     | OpenNewMemberModalAction | OpenEditExistingMemberModalAction
-    | SavingMemberAction | NewMemberAddedAction | MemberEditedAction;
+    | SavingMemberAction | NewMemberAddedAction | MemberEditedAction
+    | AskForRemoveRsvpAction | RemovingRsvpAction | RsvpRemovedAction | ToggleRemoveRsvpModalAction | ToggleRsvpRemovedModalAction;
 
 const getMemberById = (event: FursvpEvent, memberId: string | undefined): Member | undefined => {
     if (memberId === undefined) {
@@ -160,6 +183,81 @@ export const actionCreators = {
         dispatch({ type: 'TOGGLE_MEMBER_MODAL_ACTION' });
     },
 
+    toggleRemoveRsvpModal: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        dispatch({ type: 'TOGGLE_REMOVE_RSVP_MODAL_ACTION' });
+    },
+
+    toggleRsvpRemovedModal: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        dispatch({ type: 'TOGGLE_RSVP_REMOVED_MODAL' });
+    },
+    
+    askForRemoveRsvpConfirmation: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        dispatch({ type: 'ASK_FOR_REMOVE_RSVP_CONFIRMATION' });
+    },
+
+    removeRsvp: (eventId: string, memberId: string | undefined): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        if (memberId === undefined) {
+            return;
+        }
+
+        var authToken = getStoredAuthToken();
+        if (authToken === undefined) {
+            return;
+        }
+
+        dispatch({ type: 'REMOVING_RSVP' });
+
+        var deleteRequestOptions: RequestInit = {
+            method: 'DELETE',
+            credentials: "include",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + authToken
+            }
+        };
+
+        fetch(`api/event/${eventId}/member/${memberId}`, deleteRequestOptions)
+            .then(response => {
+                if (response.ok) {
+                    dispatch({ type: 'RSVP_REMOVED' });
+                }
+                else {
+                    throw new Error();
+                }
+            })
+            .then(() => {
+                var userEmail = getStoredVerifiedEmail();
+                dispatch({ type: 'REQUEST_FURSVP_EVENT', id: eventId, requestedAsUser: userEmail });
+
+                var getRequestOptions: RequestInit = {
+                    method: 'GET',
+                    credentials: "include",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + authToken
+                    }
+                };
+
+                return fetch(`api/event/${eventId}`, getRequestOptions);
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error();
+                }
+
+                return response.json() as Promise<FursvpEvent>;
+            })
+            .then(data => {
+                if (data === undefined) {
+                    throw new Error();
+                }
+                dispatch({ type: 'RECEIVE_FURSVP_EVENT', fursvpEvent: data, id: eventId, member: getMemberById(data, memberId) });
+            })
+            .catch(err => {
+                // Handle error
+            });
+    },
+
     openLoginModal: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
         dispatch({ type: 'OPEN_LOGIN_MODAL_ACTION' });
     },
@@ -196,7 +294,7 @@ export const actionCreators = {
             })
         };
 
-        fetch('api/event/' + state.targetEvent.id + '/member', requestOptions)
+        fetch(`api/event/${state.targetEvent.id}/member`, requestOptions)
             .then(response => {
                 if (response.ok) {
                     dispatch({ type: 'NEW_MEMBER_ADDED' });
@@ -246,7 +344,9 @@ const unloadedState: EventDetailState = {
     modalMember: undefined,
     requestedAsUser: undefined,
     modalIsInEditMode: false,
-    isSaving: false
+    isSaving: false,
+    isAskingForRemoveRsvpConfirmation: false,
+    rsvpRemovedModalIsOpen: false
 };
 
 // ----------------
@@ -329,6 +429,43 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
                 isSaving: false,
                 modalIsOpen: false,
                 modalIsInEditMode: false
+            };
+        case 'ASK_FOR_REMOVE_RSVP_CONFIRMATION':
+            return {
+                ...state,
+                isAskingForRemoveRsvpConfirmation: true
+            }
+        case 'REMOVING_RSVP':
+            return {
+                ...state,
+                isAskingForRemoveRsvpConfirmation: false,
+                isSaving: true,
+            }
+        case 'RSVP_REMOVED':
+            return {
+                ...state,
+                isLoading: true,
+                isSaving: false,
+                isAskingForRemoveRsvpConfirmation: false,
+                rsvpRemovedModalIsOpen: true
+            }
+        case 'TOGGLE_RSVP_REMOVED_MODAL':
+            return {
+                ...state,
+                modalIsOpen: false,
+                modalMember: undefined,
+                modalIsInEditMode: false,
+                rsvpRemovedModalIsOpen: false
+            }
+        case 'TOGGLE_REMOVE_RSVP_MODAL_ACTION':
+            return {
+                ...state,
+                isAskingForRemoveRsvpConfirmation: false
+            }
+        case 'TOGGLE_MEMBER_MODAL_ACTION':
+            return {
+                ...state,
+                isAskingForRemoveRsvpConfirmation: false
             };
         default:
             return state;

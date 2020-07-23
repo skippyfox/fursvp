@@ -84,6 +84,70 @@ exports.actionCreators = {
     toggleModal: function () { return function (dispatch, getState) {
         dispatch({ type: 'TOGGLE_MEMBER_MODAL_ACTION' });
     }; },
+    toggleRemoveRsvpModal: function () { return function (dispatch, getState) {
+        dispatch({ type: 'TOGGLE_REMOVE_RSVP_MODAL_ACTION' });
+    }; },
+    toggleRsvpRemovedModal: function () { return function (dispatch, getState) {
+        dispatch({ type: 'TOGGLE_RSVP_REMOVED_MODAL' });
+    }; },
+    askForRemoveRsvpConfirmation: function () { return function (dispatch, getState) {
+        dispatch({ type: 'ASK_FOR_REMOVE_RSVP_CONFIRMATION' });
+    }; },
+    removeRsvp: function (eventId, memberId) { return function (dispatch, getState) {
+        if (memberId === undefined) {
+            return;
+        }
+        var authToken = UserStore_1.getStoredAuthToken();
+        if (authToken === undefined) {
+            return;
+        }
+        dispatch({ type: 'REMOVING_RSVP' });
+        var deleteRequestOptions = {
+            method: 'DELETE',
+            credentials: "include",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + authToken
+            }
+        };
+        fetch("api/event/" + eventId + "/member/" + memberId, deleteRequestOptions)
+            .then(function (response) {
+            if (response.ok) {
+                dispatch({ type: 'RSVP_REMOVED' });
+            }
+            else {
+                throw new Error();
+            }
+        })
+            .then(function () {
+            var userEmail = UserStore_1.getStoredVerifiedEmail();
+            dispatch({ type: 'REQUEST_FURSVP_EVENT', id: eventId, requestedAsUser: userEmail });
+            var getRequestOptions = {
+                method: 'GET',
+                credentials: "include",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + authToken
+                }
+            };
+            return fetch("api/event/" + eventId, getRequestOptions);
+        })
+            .then(function (response) {
+            if (!response.ok) {
+                throw new Error();
+            }
+            return response.json();
+        })
+            .then(function (data) {
+            if (data === undefined) {
+                throw new Error();
+            }
+            dispatch({ type: 'RECEIVE_FURSVP_EVENT', fursvpEvent: data, id: eventId, member: getMemberById(data, memberId) });
+        })
+            .catch(function (err) {
+            // Handle error
+        });
+    }; },
     openLoginModal: function () { return function (dispatch, getState) {
         dispatch({ type: 'OPEN_LOGIN_MODAL_ACTION' });
     }; },
@@ -112,7 +176,7 @@ exports.actionCreators = {
                 "formResponses": collectNewFormResponses(values, eventForm)
             })
         };
-        fetch('api/event/' + state.targetEvent.id + '/member', requestOptions)
+        fetch("api/event/" + state.targetEvent.id + "/member", requestOptions)
             .then(function (response) {
             if (response.ok) {
                 dispatch({ type: 'NEW_MEMBER_ADDED' });
@@ -154,7 +218,9 @@ var unloadedState = {
     modalMember: undefined,
     requestedAsUser: undefined,
     modalIsInEditMode: false,
-    isSaving: false
+    isSaving: false,
+    isAskingForRemoveRsvpConfirmation: false,
+    rsvpRemovedModalIsOpen: false
 };
 // ----------------
 // REDUCER - For a given state and action, returns the new state. To support time travel, this must not mutate the old state.
@@ -186,6 +252,18 @@ exports.reducer = function (state, incomingAction) {
             return __assign(__assign({}, state), { isSaving: true, modalIsOpen: false, modalIsInEditMode: false });
         case 'NEW_MEMBER_ADDED':
             return __assign(__assign({}, state), { isSaving: false, modalIsOpen: false, modalIsInEditMode: false });
+        case 'ASK_FOR_REMOVE_RSVP_CONFIRMATION':
+            return __assign(__assign({}, state), { isAskingForRemoveRsvpConfirmation: true });
+        case 'REMOVING_RSVP':
+            return __assign(__assign({}, state), { isAskingForRemoveRsvpConfirmation: false, isSaving: true });
+        case 'RSVP_REMOVED':
+            return __assign(__assign({}, state), { isLoading: true, isSaving: false, isAskingForRemoveRsvpConfirmation: false, rsvpRemovedModalIsOpen: true });
+        case 'TOGGLE_RSVP_REMOVED_MODAL':
+            return __assign(__assign({}, state), { modalIsOpen: false, modalMember: undefined, modalIsInEditMode: false, rsvpRemovedModalIsOpen: false });
+        case 'TOGGLE_REMOVE_RSVP_MODAL_ACTION':
+            return __assign(__assign({}, state), { isAskingForRemoveRsvpConfirmation: false });
+        case 'TOGGLE_MEMBER_MODAL_ACTION':
+            return __assign(__assign({}, state), { isAskingForRemoveRsvpConfirmation: false });
         default:
             return state;
     }
