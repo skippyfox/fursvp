@@ -82,7 +82,9 @@ var EventDetail = /** @class */ (function (_super) {
         _this.askForRemoveRsvpConfirmation = _this.askForRemoveRsvpConfirmation.bind(_this);
         _this.openNewMemberModal = _this.openNewMemberModal.bind(_this);
         _this.addNewMember = _this.addNewMember.bind(_this);
+        _this.editExistingMember = _this.editExistingMember.bind(_this);
         _this.toggleRsvpRemovedModal = _this.toggleRsvpRemovedModal.bind(_this);
+        _this.cancelEditMember = _this.cancelEditMember.bind(_this);
         return _this;
     }
     // This method is called when the component is first added to the document
@@ -189,42 +191,42 @@ var EventDetail = /** @class */ (function (_super) {
                     React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.toggleModal, disabled: this.props.isSaving }, "Cancel"))));
     };
     EventDetail.prototype.renderEditMemberModalContent = function (event, member, responses) {
+        var _this = this;
         if (member === undefined) {
             return this.renderAddNewMemberModalContent(event);
         }
-        return React.createElement(reactstrap_1.Form, null,
-            React.createElement(reactstrap_1.ModalHeader, { toggle: this.toggleModal },
-                "Edit RSVP for ",
-                this.props.fursvpEvent ? this.props.fursvpEvent.name : ""),
-            React.createElement(reactstrap_1.ModalBody, null,
-                React.createElement(reactstrap_1.FormGroup, null,
-                    React.createElement(reactstrap_1.Label, { for: "editMemberName" }, "Name"),
-                    React.createElement(reactstrap_1.Input, { id: "editMemberName", required: true, value: member.name })),
-                React.createElement(reactstrap_1.FormGroup, null,
-                    React.createElement(reactstrap_1.Label, { for: "editMemberEmail" }, "Email"),
-                    React.createElement(reactstrap_1.Input, { type: "email", id: "editMemberEmail", required: true, value: member.emailAddress !== null ? member.emailAddress : "" })),
-                this.joinResponsesToPrompts(responses, event.form).sort(function (x) { return x.prompt.sortOrder; }).map(function (promptWithResponse) {
-                    return React.createElement(reactstrap_1.FormGroup, { key: promptWithResponse.prompt.id, check: promptWithResponse.prompt.behavior == 'Checkboxes' },
-                        React.createElement(reactstrap_1.Label, { for: "editPrompt" + promptWithResponse.prompt.id }, promptWithResponse.prompt.prompt),
-                        promptWithResponse.prompt.behavior == 'Text'
-                            ? React.createElement(reactstrap_1.Input, { id: "editPrompt" + promptWithResponse.prompt.id, required: promptWithResponse.prompt.required, value: promptWithResponse.responses !== undefined ? promptWithResponse.responses.responses[0] : "" })
-                            : React.createElement(React.Fragment, null),
-                        promptWithResponse.prompt.behavior == 'Checkboxes'
-                            ? React.createElement(reactstrap_1.Label, { check: true, id: "editPrompt" + promptWithResponse.prompt.id }, promptWithResponse.prompt.options.map(function (option) { return React.createElement(React.Fragment, null,
-                                React.createElement(reactstrap_1.Input, { key: option, type: "checkbox", checked: promptWithResponse.responses !== undefined && promptWithResponse.responses.responses.indexOf(option) > -1 }),
-                                ' ',
-                                option); }))
-                            : React.createElement(React.Fragment, null),
-                        promptWithResponse.prompt.behavior == 'Dropdown'
-                            ? React.createElement(reactstrap_1.Input, { type: "select", id: "editPrompt" + promptWithResponse.prompt.id, required: promptWithResponse.prompt.required }, promptWithResponse.prompt.options.map(function (option) { return React.createElement("option", { key: option, selected: promptWithResponse.responses !== undefined && promptWithResponse.responses.responses[0] == option }, option); }))
-                            : React.createElement(React.Fragment, null));
-                })),
-            React.createElement(reactstrap_1.ModalFooter, null,
-                React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.toggleModal, disabled: this.props.isSaving }, "Save Changes"),
-                ' ',
-                React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.toggleModal, disabled: this.props.isSaving }, "Cancel"),
-                ' ',
-                React.createElement(reactstrap_1.Button, { outline: true, color: "danger", onClick: this.askForRemoveRsvpConfirmation, disabled: this.props.isSaving }, "Remove RSVP")));
+        return React.createElement(formik_1.Formik, { initialValues: this.getExistingMemberInitialValues(event.form, member), onSubmit: function (values, _a) {
+                var setSubmitting = _a.setSubmitting;
+                _this.editExistingMember(member.id, values);
+            } },
+            React.createElement(formik_1.Form, { translate: undefined },
+                React.createElement(reactstrap_1.ModalHeader, { toggle: this.toggleModal },
+                    "Edit RSVP for ",
+                    this.props.fursvpEvent ? this.props.fursvpEvent.name : ""),
+                React.createElement(reactstrap_1.ModalBody, null,
+                    React.createElement(reactstrap_1.FormGroup, null,
+                        React.createElement(RsvpTextInput, { id: "editMemberName", label: "Name", required: true })),
+                    React.createElement(reactstrap_1.FormGroup, null,
+                        React.createElement(RsvpTextInput, { id: "editMemberEmail", label: "Email", required: true })),
+                    event.form.sort(function (x) { return x.sortOrder; }).map(function (prompt) {
+                        return React.createElement(reactstrap_1.FormGroup, { key: prompt.id, check: prompt.behavior == 'Checkboxes' },
+                            prompt.behavior == 'Text'
+                                ?
+                                    React.createElement(RsvpTextInput, { id: "editPrompt" + prompt.id, label: prompt.prompt, required: prompt.required })
+                                : React.createElement(React.Fragment, null),
+                            prompt.behavior == 'Checkboxes'
+                                ? React.createElement(RsvpCheckboxes, { id: "editPrompt" + prompt.id, options: prompt.options })
+                                : React.createElement(React.Fragment, null),
+                            prompt.behavior == 'Dropdown'
+                                ? React.createElement(RsvpDropdown, { label: prompt.prompt, id: "editPrompt" + prompt.id, required: prompt.required }, prompt.options.map(function (option) { return React.createElement("option", { key: option }, option); }))
+                                : React.createElement(React.Fragment, null));
+                    })),
+                React.createElement(reactstrap_1.ModalFooter, null,
+                    React.createElement(reactstrap_1.Button, { type: "submit", color: "primary", disabled: this.props.isSaving }, "Save Changes"),
+                    ' ',
+                    React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.cancelEditMember, disabled: this.props.isSaving }, "Cancel"),
+                    ' ',
+                    React.createElement(reactstrap_1.Button, { outline: true, color: "danger", onClick: this.askForRemoveRsvpConfirmation, disabled: this.props.isSaving }, "Remove RSVP"))));
     };
     EventDetail.prototype.render = function () {
         var _this = this;
@@ -291,6 +293,35 @@ var EventDetail = /** @class */ (function (_super) {
             return React.createElement(react_router_1.Redirect, { to: "/" });
         }
     };
+    EventDetail.prototype.getExistingMemberInitialValues = function (prompts, member) {
+        var result = {
+            editMemberName: member.name,
+            editMemberEmail: member.emailAddress
+        };
+        var promptsWithResponses = this.joinResponsesToPrompts(member.responses, prompts);
+        for (var _i = 0, promptsWithResponses_1 = promptsWithResponses; _i < promptsWithResponses_1.length; _i++) {
+            var item = promptsWithResponses_1[_i];
+            if (item.prompt.behavior == "Checkboxes") {
+                for (var _a = 0, _b = item.prompt.options; _a < _b.length; _a++) {
+                    var option = _b[_a];
+                    result["editPrompt" + item.prompt.id + option] = false;
+                    if (item.responses !== undefined) {
+                        for (var _c = 0, _d = item.responses.responses; _c < _d.length; _c++) {
+                            var response = _d[_c];
+                            if (response == option) {
+                                result["editPrompt" + item.prompt.id + option] = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                result["editPrompt" + item.prompt.id] = item.responses !== undefined && item.responses.responses.length > 0 ? item.responses.responses[0] : "";
+            }
+        }
+        return result;
+    };
     EventDetail.prototype.joinResponsesToPrompts = function (responses, prompts) {
         var result = [];
         for (var _i = 0, prompts_1 = prompts; _i < prompts_1.length; _i++) {
@@ -336,6 +367,9 @@ var EventDetail = /** @class */ (function (_super) {
     EventDetail.prototype.addNewMember = function (values) {
         this.props.addNewMember(values);
     };
+    EventDetail.prototype.editExistingMember = function (memberId, values) {
+        this.props.editExistingMember(memberId, values);
+    };
     EventDetail.prototype.toggleModal = function () {
         if (this.props.modalIsOpen && this.props.modalMember !== undefined) {
             this.props.history.push('/event/' + this.props.id);
@@ -347,6 +381,9 @@ var EventDetail = /** @class */ (function (_super) {
         else {
             this.props.toggleModal();
         }
+    };
+    EventDetail.prototype.cancelEditMember = function () {
+        this.props.cancelEditMember();
     };
     EventDetail.prototype.toggleRemoveRsvpModal = function () {
         this.props.toggleRemoveRsvpModal();

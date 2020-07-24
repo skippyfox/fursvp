@@ -90,12 +90,16 @@ interface ToggleRemoveRsvpModalAction {
     type: 'TOGGLE_REMOVE_RSVP_MODAL_ACTION';
 }
 
+interface CancelEditMemberAction {
+    type: 'CANCEL_EDIT_MEMBER';
+}
+
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
 type KnownAction = RequestFursvpEventAction | ReceiveFursvpEventAction | ToggleModalAction | OpenModalAction | FursvpEventNotFoundAction
     | UserLoggedOutAction | UserLoggedInAction | OpenLoginModalAction
     | OpenNewMemberModalAction | OpenEditExistingMemberModalAction
-    | SavingMemberAction | NewMemberAddedAction | MemberEditedAction
+    | SavingMemberAction | NewMemberAddedAction | MemberEditedAction | CancelEditMemberAction
     | AskForRemoveRsvpAction | RemovingRsvpAction | RsvpRemovedAction | ToggleRemoveRsvpModalAction | ToggleRsvpRemovedModalAction;
 
 const getMemberById = (event: FursvpEvent, memberId: string | undefined): Member | undefined => {
@@ -190,6 +194,10 @@ export const actionCreators = {
     toggleRsvpRemovedModal: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
         dispatch({ type: 'TOGGLE_RSVP_REMOVED_MODAL' });
     },
+
+    cancelEditMember: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        dispatch({ type: 'CANCEL_EDIT_MEMBER' });
+    },
     
     askForRemoveRsvpConfirmation: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
         dispatch({ type: 'ASK_FOR_REMOVE_RSVP_CONFIRMATION' });
@@ -274,6 +282,81 @@ export const actionCreators = {
         dispatch({ type: 'OPEN_EDIT_EXISTING_MEMBER_MODAL' });
     },
 
+    editExistingMember: (memberId : string, values: FormikValues): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        var state = getState();
+        if (state.targetEvent === undefined) {
+            return;
+        }
+
+        var authToken = getStoredAuthToken();
+        if (authToken === undefined) {
+            return;
+        }
+
+        dispatch({ type: 'SAVING_MEMBER' });
+
+        var eventForm = state.targetEvent.fursvpEvent ? state.targetEvent.fursvpEvent.form : undefined;
+        
+        const editRequestOptions: RequestInit = {
+            method: 'PUT',
+            credentials: "include",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + authToken
+            },
+            body: JSON.stringify({
+                "isOrganizer": false, // TODO
+                "isAttending": true, // TODO
+                "emailAddress": values["editMemberEmail"],
+                "name": values["editMemberName"],
+                "formResponses": collectFormResponses(values, eventForm, "editPrompt")
+            })
+        };
+
+        var eventId = state.targetEvent.id !== undefined ? state.targetEvent.id : "";
+
+        fetch(`api/event/${eventId}/member/${memberId}`, editRequestOptions)
+            .then(response => {
+                if (response.ok) {
+                    dispatch({ type: 'MEMBER_EDITED' });
+                }
+                else {
+                    // Handle error
+                }
+            })
+            .then(() => {
+                var userEmail = getStoredVerifiedEmail();
+                dispatch({ type: 'REQUEST_FURSVP_EVENT', id: eventId, requestedAsUser: userEmail });
+
+                var getRequestOptions: RequestInit = {
+                    method: 'GET',
+                    credentials: "include",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + authToken
+                    }
+                };
+
+                return fetch(`api/event/${eventId}`, getRequestOptions);
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error();
+                }
+
+                return response.json() as Promise<FursvpEvent>;
+            })
+            .then(data => {
+                if (data === undefined) {
+                    throw new Error();
+                }
+                dispatch({ type: 'RECEIVE_FURSVP_EVENT', fursvpEvent: data, id: eventId, member: undefined });
+            })
+            .catch(err => {
+                // Handle error
+            });
+    },
+
     addNewMember: (values : FormikValues): AppThunkAction<KnownAction> => (dispatch, getState) => {
         var state = getState();
         if (state.targetEvent === undefined) {
@@ -290,7 +373,7 @@ export const actionCreators = {
             body: JSON.stringify({
                 "emailAddress": values["newMemberEmail"],
                 "name": values["newMemberName"],
-                "formResponses": collectNewFormResponses(values, eventForm)
+                "formResponses": collectFormResponses(values, eventForm, "newPrompt")
             })
         };
 
@@ -340,7 +423,7 @@ export const actionCreators = {
     }
 };
 
-function collectNewFormResponses(values : FormikValues, eventForm : FormPrompt[] | undefined): FormResponses[] {
+function collectFormResponses(values : FormikValues, eventForm : FormPrompt[] | undefined, keyPrefix : string): FormResponses[] {
     if (eventForm === undefined) {
         return [];
     }
@@ -352,7 +435,7 @@ function collectNewFormResponses(values : FormikValues, eventForm : FormPrompt[]
     for (var prompt of eventForm) {
         var responses : string[] = [];
 
-        var key = "newPrompt" + prompt.id;
+        var key = keyPrefix + prompt.id;
 
         if (prompt.behavior == "Checkboxes") {
             for (var option in prompt.options) {
@@ -453,8 +536,8 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
         case 'MEMBER_EDITED':
             return {
                 ...state,
-                isSaving: true,
-                modalIsOpen: false,
+                isLoading: true,
+                isSaving: false,
                 modalIsInEditMode: false
             };
         case 'NEW_MEMBER_ADDED':
@@ -500,6 +583,11 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
             return {
                 ...state,
                 isAskingForRemoveRsvpConfirmation: false
+            };
+        case 'CANCEL_EDIT_MEMBER':
+            return {
+                ...state,
+                modalIsInEditMode: false
             };
         default:
             return state;

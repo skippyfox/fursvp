@@ -245,8 +245,8 @@ namespace Fursvp.Api.Controllers
             EventService.AddMember(@event, member);
             await EventRepositoryWrite.Update(@event).ConfigureAwait(false);
 
-            _ = Task.Run(() =>
-              {
+            try
+            {
                 // TODO: Get hardcoded strings into config
                 Emailer?.Send(new Email
                   {
@@ -256,7 +256,11 @@ namespace Fursvp.Api.Controllers
                       PlainTextContent = @$"{newMember.Name}: We've got you on the list! View the event details or review and change your response at Fursvp.com.",
                       HtmlContent = @$"{HttpUtility.HtmlEncode(newMember.Name)}: We've got you on the list! View the event details or review and change your response at <a href=""https://www.fursvp.com"">FURsvp.com</a>.",
                   });
-              });
+            }
+            catch
+            {
+                //
+            }
 
             return CreatedAtAction(nameof(GetEvent), new { id = @event.Id }, Mapper.MapResponse(@event));
         }

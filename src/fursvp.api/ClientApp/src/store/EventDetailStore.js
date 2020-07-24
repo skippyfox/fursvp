@@ -90,6 +90,9 @@ exports.actionCreators = {
     toggleRsvpRemovedModal: function () { return function (dispatch, getState) {
         dispatch({ type: 'TOGGLE_RSVP_REMOVED_MODAL' });
     }; },
+    cancelEditMember: function () { return function (dispatch, getState) {
+        dispatch({ type: 'CANCEL_EDIT_MEMBER' });
+    }; },
     askForRemoveRsvpConfirmation: function () { return function (dispatch, getState) {
         dispatch({ type: 'ASK_FOR_REMOVE_RSVP_CONFIRMATION' });
     }; },
@@ -160,6 +163,71 @@ exports.actionCreators = {
     openEditExistingMemberModal: function () { return function (dispatch, getState) {
         dispatch({ type: 'OPEN_EDIT_EXISTING_MEMBER_MODAL' });
     }; },
+    editExistingMember: function (memberId, values) { return function (dispatch, getState) {
+        var state = getState();
+        if (state.targetEvent === undefined) {
+            return;
+        }
+        var authToken = UserStore_1.getStoredAuthToken();
+        if (authToken === undefined) {
+            return;
+        }
+        dispatch({ type: 'SAVING_MEMBER' });
+        var eventForm = state.targetEvent.fursvpEvent ? state.targetEvent.fursvpEvent.form : undefined;
+        var editRequestOptions = {
+            method: 'PUT',
+            credentials: "include",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + authToken
+            },
+            body: JSON.stringify({
+                "isOrganizer": false,
+                "isAttending": true,
+                "emailAddress": values["editMemberEmail"],
+                "name": values["editMemberName"],
+                "formResponses": collectFormResponses(values, eventForm, "editPrompt")
+            })
+        };
+        var eventId = state.targetEvent.id !== undefined ? state.targetEvent.id : "";
+        fetch("api/event/" + eventId + "/member/" + memberId, editRequestOptions)
+            .then(function (response) {
+            if (response.ok) {
+                dispatch({ type: 'MEMBER_EDITED' });
+            }
+            else {
+                // Handle error
+            }
+        })
+            .then(function () {
+            var userEmail = UserStore_1.getStoredVerifiedEmail();
+            dispatch({ type: 'REQUEST_FURSVP_EVENT', id: eventId, requestedAsUser: userEmail });
+            var getRequestOptions = {
+                method: 'GET',
+                credentials: "include",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + authToken
+                }
+            };
+            return fetch("api/event/" + eventId, getRequestOptions);
+        })
+            .then(function (response) {
+            if (!response.ok) {
+                throw new Error();
+            }
+            return response.json();
+        })
+            .then(function (data) {
+            if (data === undefined) {
+                throw new Error();
+            }
+            dispatch({ type: 'RECEIVE_FURSVP_EVENT', fursvpEvent: data, id: eventId, member: undefined });
+        })
+            .catch(function (err) {
+            // Handle error
+        });
+    }; },
     addNewMember: function (values) { return function (dispatch, getState) {
         var state = getState();
         if (state.targetEvent === undefined) {
@@ -173,7 +241,7 @@ exports.actionCreators = {
             body: JSON.stringify({
                 "emailAddress": values["newMemberEmail"],
                 "name": values["newMemberName"],
-                "formResponses": collectNewFormResponses(values, eventForm)
+                "formResponses": collectFormResponses(values, eventForm, "newPrompt")
             })
         };
         var eventId = state.targetEvent.id !== undefined ? state.targetEvent.id : "";
@@ -217,7 +285,7 @@ exports.actionCreators = {
         });
     }; }
 };
-function collectNewFormResponses(values, eventForm) {
+function collectFormResponses(values, eventForm, keyPrefix) {
     if (eventForm === undefined) {
         return [];
     }
@@ -226,7 +294,7 @@ function collectNewFormResponses(values, eventForm) {
     for (var _i = 0, eventForm_1 = eventForm; _i < eventForm_1.length; _i++) {
         var prompt = eventForm_1[_i];
         var responses = [];
-        var key = "newPrompt" + prompt.id;
+        var key = keyPrefix + prompt.id;
         if (prompt.behavior == "Checkboxes") {
             for (var option in prompt.options) {
                 if (values[key + option] && values[key + option] === true) {
@@ -279,7 +347,7 @@ exports.reducer = function (state, incomingAction) {
         case 'SAVING_MEMBER':
             return __assign(__assign({}, state), { isSaving: true });
         case 'MEMBER_EDITED':
-            return __assign(__assign({}, state), { isSaving: true, modalIsOpen: false, modalIsInEditMode: false });
+            return __assign(__assign({}, state), { isLoading: true, isSaving: false, modalIsInEditMode: false });
         case 'NEW_MEMBER_ADDED':
             return __assign(__assign({}, state), { isSaving: false, modalIsOpen: false, modalIsInEditMode: false });
         case 'ASK_FOR_REMOVE_RSVP_CONFIRMATION':
@@ -294,6 +362,8 @@ exports.reducer = function (state, incomingAction) {
             return __assign(__assign({}, state), { isAskingForRemoveRsvpConfirmation: false });
         case 'TOGGLE_MEMBER_MODAL_ACTION':
             return __assign(__assign({}, state), { isAskingForRemoveRsvpConfirmation: false });
+        case 'CANCEL_EDIT_MEMBER':
+            return __assign(__assign({}, state), { modalIsInEditMode: false });
         default:
             return state;
     }
