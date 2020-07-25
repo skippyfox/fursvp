@@ -42,7 +42,7 @@ namespace Fursvp.Helpers
         /// <param name="sourceTimeZoneId">The local time zone from which to convert to utc time.</param>
         /// <param name="utcDateTime">The utc datetime result, or the local datetime if conversion was unsuccessful.</param>
         /// <returns>A value indicating whether the conversion was successful.</returns>
-        public static bool TryToUtc(this DateTime localDateTime, string sourceTimeZoneId, out DateTime utcDateTime)
+        public static bool TryConvertToUtc(this DateTime localDateTime, string sourceTimeZoneId, out DateTime utcDateTime)
         {
             try
             {

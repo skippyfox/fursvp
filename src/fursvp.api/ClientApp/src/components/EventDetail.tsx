@@ -36,11 +36,12 @@ const RsvpDropdown = (props: { children: JSX.Element[], label: string, id: strin
     );
 };
 
-const RsvpCheckboxes = (props: { options: string[], id: string }) => {
+const RsvpCheckboxes = (props: { options: string[], label: string, id: string }) => {
     const [field, meta] = useField({ id: props.id, name: props.id });
     return (
         <Label check id={props.id}>
-            {props.options.map(option => <><Input id={props.id + option} key={option} type="checkbox" />{' '}{option}</>)}
+            <Container>{props.label}</Container>
+            {props.options.map(option => <Container><Input id={props.id + option} key={option} type="checkbox" />{' '}{option}</Container>)}
         </Label>
     );
 };
@@ -197,11 +198,12 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                                 <RsvpTextInput id={"newPrompt" + prompt.id} label={prompt.prompt} required={prompt.required} />
                                 : <></>}
                             {prompt.behavior == 'Checkboxes'
-                                ? <RsvpCheckboxes id={"newPrompt" + prompt.id} options={prompt.options} />
+                                ? <RsvpCheckboxes id={"newPrompt" + prompt.id} label={prompt.prompt} options={prompt.options} />
                                 : <></>}
                             {prompt.behavior == 'Dropdown'
                                 ? <RsvpDropdown label={prompt.prompt} id={"newPrompt" + prompt.id} required={prompt.required}>
-                                    {prompt.options.map(option => <option key={option}>{option}</option>)}
+                                    <option key="" value="">Select one...</option>
+                                    <>{prompt.options.map(option => <option key={option}>{option}</option>)}</>
                                 </RsvpDropdown>
                                 : <></>}
                         </FormGroup>
@@ -241,11 +243,12 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                                 <RsvpTextInput id={"editPrompt" + prompt.id} label={prompt.prompt} required={prompt.required} />
                                 : <></>}
                             {prompt.behavior == 'Checkboxes'
-                                ? <RsvpCheckboxes id={"editPrompt" + prompt.id} options={prompt.options} />
+                                ? <RsvpCheckboxes id={"editPrompt" + prompt.id} label={prompt.prompt} options={prompt.options} />
                                 : <></>}
                             {prompt.behavior == 'Dropdown'
                                 ? <RsvpDropdown label={prompt.prompt} id={"editPrompt" + prompt.id} required={prompt.required}>
-                                    {prompt.options.map(option => <option key={option}>{option}</option>)}
+                                    <option key="" value="">Select one...</option>
+                                    <>{prompt.options.map(option => <option key={option}>{option}</option>)}</>
                                 </RsvpDropdown>
                                 : <></>}
                         </FormGroup>

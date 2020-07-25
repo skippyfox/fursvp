@@ -61,9 +61,9 @@ namespace Fursvp.Data.Firestore
                     SortOrder = r.TryGetValue("SortOrder", out object sortOrder) ? Convert.ToInt32((long)sortOrder) : 0,
                 };
 
-                if (r["Options"] is List<string> options)
+                if (r["Options"] is List<object> options)
                 {
-                    foreach (var option in options)
+                    foreach (var option in options.Cast<string>())
                     {
                         form.Options.Add(option);
                     }
@@ -92,9 +92,9 @@ namespace Fursvp.Data.Firestore
                         PromptId = Guid.Parse((string)r["PromptId"])
                     };
 
-                    if (m["Responses"] is List<string> responses)
+                    if (r["Responses"] is List<object> responses)
                     {
-                        foreach (var response in responses)
+                        foreach (var response in responses.Cast<string>())
                         {
                             formResponses.Responses.Add(response);
                         }

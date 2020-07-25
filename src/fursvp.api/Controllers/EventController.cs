@@ -149,7 +149,7 @@ namespace Fursvp.Api.Controllers
 
             if (request.RsvpClosesAtLocal.HasValue)
             {
-                request.RsvpClosesAtLocal.Value.TryToUtc(request.TimeZoneId, out var rsvpClosesAtUtc);
+                request.RsvpClosesAtLocal.Value.TryConvertToUtc(request.TimeZoneId, out var rsvpClosesAtUtc);
                 @event.RsvpClosesAtUtc = rsvpClosesAtUtc;
             }
             else
@@ -157,10 +157,10 @@ namespace Fursvp.Api.Controllers
                 @event.RsvpClosesAtUtc = null;
             }
             
-            request.StartsAtLocal.TryToUtc(request.TimeZoneId, out var startsAtUtc);
+            request.StartsAtLocal.TryConvertToUtc(request.TimeZoneId, out var startsAtUtc);
             @event.StartsAtUtc = startsAtUtc;
             
-            request.EndsAtLocal.TryToUtc(request.TimeZoneId, out var endsAtUtc);
+            request.EndsAtLocal.TryConvertToUtc(request.TimeZoneId, out var endsAtUtc);
             @event.EndsAtUtc = endsAtUtc;
 
             await EventRepositoryWrite.Update(@event).ConfigureAwait(false);

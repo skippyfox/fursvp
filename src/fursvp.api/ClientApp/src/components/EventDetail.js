@@ -48,10 +48,12 @@ var RsvpDropdown = function (props) {
 };
 var RsvpCheckboxes = function (props) {
     var _a = formik_1.useField({ id: props.id, name: props.id }), field = _a[0], meta = _a[1];
-    return (React.createElement(reactstrap_1.Label, { check: true, id: props.id }, props.options.map(function (option) { return React.createElement(React.Fragment, null,
-        React.createElement(reactstrap_1.Input, { id: props.id + option, key: option, type: "checkbox" }),
-        ' ',
-        option); })));
+    return (React.createElement(reactstrap_1.Label, { check: true, id: props.id },
+        React.createElement(reactstrap_1.Container, null, props.label),
+        props.options.map(function (option) { return React.createElement(reactstrap_1.Container, null,
+            React.createElement(reactstrap_1.Input, { id: props.id + option, key: option, type: "checkbox" }),
+            ' ',
+            option); })));
 };
 var getNewMemberInitialValues = function (form) {
     var result = {
@@ -179,10 +181,12 @@ var EventDetail = /** @class */ (function (_super) {
                                     React.createElement(RsvpTextInput, { id: "newPrompt" + prompt.id, label: prompt.prompt, required: prompt.required })
                                 : React.createElement(React.Fragment, null),
                             prompt.behavior == 'Checkboxes'
-                                ? React.createElement(RsvpCheckboxes, { id: "newPrompt" + prompt.id, options: prompt.options })
+                                ? React.createElement(RsvpCheckboxes, { id: "newPrompt" + prompt.id, label: prompt.prompt, options: prompt.options })
                                 : React.createElement(React.Fragment, null),
                             prompt.behavior == 'Dropdown'
-                                ? React.createElement(RsvpDropdown, { label: prompt.prompt, id: "newPrompt" + prompt.id, required: prompt.required }, prompt.options.map(function (option) { return React.createElement("option", { key: option }, option); }))
+                                ? React.createElement(RsvpDropdown, { label: prompt.prompt, id: "newPrompt" + prompt.id, required: prompt.required },
+                                    React.createElement("option", { key: "", value: "" }, "Select one..."),
+                                    React.createElement(React.Fragment, null, prompt.options.map(function (option) { return React.createElement("option", { key: option }, option); })))
                                 : React.createElement(React.Fragment, null));
                     })),
                 React.createElement(reactstrap_1.ModalFooter, null,
@@ -215,10 +219,12 @@ var EventDetail = /** @class */ (function (_super) {
                                     React.createElement(RsvpTextInput, { id: "editPrompt" + prompt.id, label: prompt.prompt, required: prompt.required })
                                 : React.createElement(React.Fragment, null),
                             prompt.behavior == 'Checkboxes'
-                                ? React.createElement(RsvpCheckboxes, { id: "editPrompt" + prompt.id, options: prompt.options })
+                                ? React.createElement(RsvpCheckboxes, { id: "editPrompt" + prompt.id, label: prompt.prompt, options: prompt.options })
                                 : React.createElement(React.Fragment, null),
                             prompt.behavior == 'Dropdown'
-                                ? React.createElement(RsvpDropdown, { label: prompt.prompt, id: "editPrompt" + prompt.id, required: prompt.required }, prompt.options.map(function (option) { return React.createElement("option", { key: option }, option); }))
+                                ? React.createElement(RsvpDropdown, { label: prompt.prompt, id: "editPrompt" + prompt.id, required: prompt.required },
+                                    React.createElement("option", { key: "", value: "" }, "Select one..."),
+                                    React.createElement(React.Fragment, null, prompt.options.map(function (option) { return React.createElement("option", { key: option }, option); })))
                                 : React.createElement(React.Fragment, null));
                     })),
                 React.createElement(reactstrap_1.ModalFooter, null,

@@ -37,7 +37,7 @@ namespace Fursvp.Domain.Forms
         /// <summary>
         /// Gets or sets the collection of text choices.
         /// </summary>
-        public ICollection<string> Options { get; } = new Collection<string>();
+        public ICollection<string> Options { get; set;  } = new Collection<string>();
 
         /// <summary>
         /// Gets or sets the sort order of the prompt.
