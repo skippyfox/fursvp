@@ -1,5 +1,7 @@
 ﻿import { Action, Reducer } from 'redux';
 import { AppThunkAction } from '.';
+import { RequestFursvpEventAction, ReceiveFursvpEventAction } from './EventDetailStore';
+import { FursvpEvent } from './FursvpEvents'
 
 // -----------------
 // STATE - This defines the type of data maintained in the Redux store.
@@ -64,7 +66,8 @@ interface OpenUserInfoModalAction {
 type KnownAction = OpenLoginModalAction | ToggleLoginModalAction
     | VerificationEmailIsSendingAction | VerificationEmailWasSentAction | VerificationEmailDidNotSendAction
     | VerificationCodeIsSendingAction | UserLoggedInAction | VerificationCodeWasUnsuccessfulAction
-    | UserLoggedOutAction | OpenUserInfoModalAction;
+    | UserLoggedOutAction | OpenUserInfoModalAction
+    | RequestFursvpEventAction | ReceiveFursvpEventAction;
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -128,8 +131,41 @@ export const actionCreators = {
             })
             .then(token => {
                 dispatch({ type: 'USER_LOGGED_IN_ACTION', emailAddress });
+
                 localStorage.setItem("verifiedEmail", emailAddress);
                 localStorage.setItem("token", token);
+
+                var state = getState();
+                if (state.targetEvent && state.targetEvent.id) {
+                    dispatch({ type: 'REQUEST_FURSVP_EVENT', id: state.targetEvent.id, requestedAsUser: emailAddress });
+
+                    var getRequestOptions: RequestInit = {
+                        method: 'GET',
+                        credentials: "include",
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        }
+                    };
+
+                    return fetch(`api/event/${state.targetEvent.id}`, getRequestOptions)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error();
+                            }
+
+                            return response.json() as Promise<FursvpEvent>;
+                        })
+                        .then(data => {
+                            if (data === undefined) {
+                                throw new Error();
+                            }
+
+                            if (state.targetEvent && state.targetEvent.id) {
+                                dispatch({ type: 'RECEIVE_FURSVP_EVENT', fursvpEvent: data, id: state.targetEvent.id, member: undefined });
+                            }
+                        });
+                }
             })
             .catch(error => {
                 dispatch({ type: 'VERIFICATION_CODE_WAS_UNSUCCESSFUL_ACTION' })

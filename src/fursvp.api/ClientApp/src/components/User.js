@@ -28,7 +28,7 @@ var User = /** @class */ (function (_super) {
     }
     User.prototype.render = function () {
         return (React.createElement(React.Fragment, null,
-            this.props.verifiedEmail == undefined
+            this.props.verifiedEmail === undefined
                 ? React.createElement(reactstrap_1.NavLink, { tag: react_router_dom_1.Link, onClick: this.props.openLoginModal, className: "text-dark", to: "#" }, "Log In")
                 : React.createElement(reactstrap_1.NavLink, { tag: react_router_dom_1.Link, onClick: this.props.openUserInfoModal, className: "text-dark", to: "#" }, "Account"),
             React.createElement(reactstrap_1.Modal, { isOpen: this.props.loginModalIsOpen, toggle: this.props.toggleModal },

@@ -18,19 +18,20 @@ export interface EventDetailState {
     isSaving: boolean;
     isAskingForRemoveRsvpConfirmation: boolean;
     rsvpRemovedModalIsOpen: boolean;
+    actingMember: Member | undefined;
 }
 
 // -----------------
 // ACTIONS - These are serializable (hence replayable) descriptions of state transitions.
 // They do not themselves have any side-effects; they just describe something that is going to happen.
 
-interface RequestFursvpEventAction {
+export interface RequestFursvpEventAction {
     type: 'REQUEST_FURSVP_EVENT';
     id: string;
     requestedAsUser: string | undefined;
 }
 
-interface ReceiveFursvpEventAction {
+export interface ReceiveFursvpEventAction {
     type: 'RECEIVE_FURSVP_EVENT';
     fursvpEvent: FursvpEvent;
     id: string;
@@ -129,7 +130,7 @@ export const actionCreators = {
 
             var userEmail = getStoredVerifiedEmail();
 
-            if (eventId !== appState.targetEvent.id || appState.targetEvent.requestedAsUser != userEmail) {
+            if (eventId !== appState.targetEvent.id || appState.targetEvent.requestedAsUser !== userEmail) {
 
                 var authToken = getStoredAuthToken();
 
@@ -282,7 +283,7 @@ export const actionCreators = {
         dispatch({ type: 'OPEN_EDIT_EXISTING_MEMBER_MODAL' });
     },
 
-    editExistingMember: (memberId : string, values: FormikValues): AppThunkAction<KnownAction> => (dispatch, getState) => {
+    editExistingMember: (member : Member, values: FormikValues): AppThunkAction<KnownAction> => (dispatch, getState) => {
         var state = getState();
         if (state.targetEvent === undefined) {
             return;
@@ -305,17 +306,17 @@ export const actionCreators = {
                 'Authorization': 'Bearer ' + authToken
             },
             body: JSON.stringify({
-                "isOrganizer": false, // TODO
-                "isAttending": true, // TODO
-                "emailAddress": values["editMemberEmail"],
-                "name": values["editMemberName"],
+                "emailAddress": values.editMemberEmail,
+                "name": values.editMemberName,
+                "isOrganizer": values.editMemberIsOrganizer,
+                "isAttending": values.editMemberIsAttending || (!values.editMemberIsOrganizer && !member.isAuthor),
                 "formResponses": collectFormResponses(values, eventForm, "editPrompt")
             })
         };
 
         var eventId = state.targetEvent.id !== undefined ? state.targetEvent.id : "";
 
-        fetch(`api/event/${eventId}/member/${memberId}`, editRequestOptions)
+        fetch(`api/event/${eventId}/member/${member.id}`, editRequestOptions)
             .then(response => {
                 if (response.ok) {
                     dispatch({ type: 'MEMBER_EDITED' });
@@ -371,8 +372,10 @@ export const actionCreators = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                "emailAddress": values["newMemberEmail"],
-                "name": values["newMemberName"],
+                "emailAddress": values.newMemberEmail,
+                "name": values.newMemberName,
+                "isOrganizer": values.isOrganizer,
+                "isAttending": values.isAttending || !values.isOrganizer,
                 "formResponses": collectFormResponses(values, eventForm, "newPrompt")
             })
         };
@@ -434,17 +437,22 @@ function collectFormResponses(values : FormikValues, eventForm : FormPrompt[] | 
 
     for (var prompt of eventForm) {
         var responses : string[] = [];
-
         var key = keyPrefix + prompt.id;
 
-        if (prompt.behavior == "Checkboxes") {
-            for (var option in prompt.options) {
-                if (values[key + option] && values[key + option] === true) {
-                    responses.push(option);
+        if (prompt.behavior === "Checkboxes") {
+            if (prompt.options.length === 1) {
+                // Formik records a single checkbox as a boolean
+                if (values[key] && values[key] === true) {
+                    responses.push(prompt.options[0]);
                 }
+            }
+            else {
+                // Formik records checkbox groups as a string array.
+                responses = values[key];
             }
         }
         else if (values[key]) {
+            // Formik records input text and dropdown selections as strings.
             responses.push(values[key]);
         }
 
@@ -452,6 +460,20 @@ function collectFormResponses(values : FormikValues, eventForm : FormPrompt[] | 
     }
 
     return result;
+}
+
+function getActingMember(memberList : Member[], emailAddress : string | undefined): Member | undefined {
+    if (!emailAddress) {
+        return undefined;
+    }
+
+    for (var member of memberList) {
+        if (member.emailAddress === emailAddress) {
+            return member;
+        }
+    }
+
+    return undefined;
 }
 
 const unloadedState: EventDetailState = {
@@ -463,7 +485,8 @@ const unloadedState: EventDetailState = {
     modalIsInEditMode: false,
     isSaving: false,
     isAskingForRemoveRsvpConfirmation: false,
-    rsvpRemovedModalIsOpen: false
+    rsvpRemovedModalIsOpen: false,
+    actingMember: undefined
 };
 
 // ----------------
@@ -489,13 +512,15 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
                 isLoading: false,
                 id: action.id,
                 modalIsOpen: state.modalIsOpen || action.member !== undefined,
-                modalMember: action.member !== undefined ? action.member : state.modalMember
+                modalMember: action.member !== undefined ? action.member : state.modalMember,
+                actingMember: getActingMember(action.fursvpEvent.members, state.requestedAsUser)
             };
         case 'TOGGLE_MEMBER_MODAL_ACTION':
             return {
                 ...state,
                 modalIsOpen: !state.modalIsOpen,
-                modalIsInEditMode: false
+                modalIsInEditMode: false,
+                isAskingForRemoveRsvpConfirmation: false
             };
         case 'OPEN_MEMBER_MODAL_ACTION':
             return {
@@ -508,12 +533,20 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
                 ...state,
                 isLoading: false
             }
+        case 'USER_LOGGED_IN_ACTION': {
+            return {
+                ...state,
+                isLoading: true,
+                actingMember: state.fursvpEvent ? getActingMember(state.fursvpEvent.members, action.emailAddress) : undefined
+            }
+        }
         case 'USER_LOGGED_OUT_ACTION':
             return {
                 ...state,
                 modalMember: undefined,
                 fursvpEvent: undefined,
-                isLoading: true
+                isLoading: true,
+                actingMember: undefined
             }
         case 'OPEN_NEW_MEMBER_MODAL':
             return {
@@ -579,11 +612,6 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
                 ...state,
                 isAskingForRemoveRsvpConfirmation: false
             }
-        case 'TOGGLE_MEMBER_MODAL_ACTION':
-            return {
-                ...state,
-                isAskingForRemoveRsvpConfirmation: false
-            };
         case 'CANCEL_EDIT_MEMBER':
             return {
                 ...state,

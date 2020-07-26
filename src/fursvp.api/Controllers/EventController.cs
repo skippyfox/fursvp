@@ -232,7 +232,8 @@ namespace Fursvp.Api.Controllers
 
             var member = new Member
             {
-                IsAttending = true,
+                IsAttending = newMember.IsAttending,
+                IsOrganizer = newMember.IsOrganizer,
                 EmailAddress = newMember.EmailAddress,
                 Name = newMember.Name,
             };

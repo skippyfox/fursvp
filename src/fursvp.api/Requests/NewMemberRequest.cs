@@ -15,6 +15,18 @@ namespace Fursvp.Api.Requests
     public class NewMemberRequest
     {
         /// <summary>
+        /// Gets or sets a value indicating whether an event member is attending the event.
+        /// </summary>
+        [Required]
+        public bool IsAttending { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether an event member is an organizer.
+        /// </summary>
+        [Required]
+        public bool IsOrganizer { get; set; }
+
+        /// <summary>
         /// Gets or sets the Email Address for the new Member.
         /// </summary>
         [Required]

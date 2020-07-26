@@ -65,6 +65,33 @@ exports.actionCreators = {
             dispatch({ type: 'USER_LOGGED_IN_ACTION', emailAddress: emailAddress });
             localStorage.setItem("verifiedEmail", emailAddress);
             localStorage.setItem("token", token);
+            var state = getState();
+            if (state.targetEvent && state.targetEvent.id) {
+                dispatch({ type: 'REQUEST_FURSVP_EVENT', id: state.targetEvent.id, requestedAsUser: emailAddress });
+                var getRequestOptions = {
+                    method: 'GET',
+                    credentials: "include",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    }
+                };
+                return fetch("api/event/" + state.targetEvent.id, getRequestOptions)
+                    .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error();
+                    }
+                    return response.json();
+                })
+                    .then(function (data) {
+                    if (data === undefined) {
+                        throw new Error();
+                    }
+                    if (state.targetEvent && state.targetEvent.id) {
+                        dispatch({ type: 'RECEIVE_FURSVP_EVENT', fursvpEvent: data, id: state.targetEvent.id, member: undefined });
+                    }
+                });
+            }
         })
             .catch(function (error) {
             dispatch({ type: 'VERIFICATION_CODE_WAS_UNSUCCESSFUL_ACTION' });

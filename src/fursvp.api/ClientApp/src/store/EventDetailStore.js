@@ -33,7 +33,7 @@ exports.actionCreators = {
         var appState = getState();
         if (appState && appState.targetEvent) {
             var userEmail = UserStore_1.getStoredVerifiedEmail();
-            if (eventId !== appState.targetEvent.id || appState.targetEvent.requestedAsUser != userEmail) {
+            if (eventId !== appState.targetEvent.id || appState.targetEvent.requestedAsUser !== userEmail) {
                 var authToken = UserStore_1.getStoredAuthToken();
                 var requestOptions = undefined;
                 if (authToken !== undefined) {
@@ -163,7 +163,7 @@ exports.actionCreators = {
     openEditExistingMemberModal: function () { return function (dispatch, getState) {
         dispatch({ type: 'OPEN_EDIT_EXISTING_MEMBER_MODAL' });
     }; },
-    editExistingMember: function (memberId, values) { return function (dispatch, getState) {
+    editExistingMember: function (member, values) { return function (dispatch, getState) {
         var state = getState();
         if (state.targetEvent === undefined) {
             return;
@@ -182,15 +182,15 @@ exports.actionCreators = {
                 'Authorization': 'Bearer ' + authToken
             },
             body: JSON.stringify({
-                "isOrganizer": false,
-                "isAttending": true,
-                "emailAddress": values["editMemberEmail"],
-                "name": values["editMemberName"],
+                "emailAddress": values.editMemberEmail,
+                "name": values.editMemberName,
+                "isOrganizer": values.editMemberIsOrganizer,
+                "isAttending": values.editMemberIsAttending || (!values.editMemberIsOrganizer && !member.isAuthor),
                 "formResponses": collectFormResponses(values, eventForm, "editPrompt")
             })
         };
         var eventId = state.targetEvent.id !== undefined ? state.targetEvent.id : "";
-        fetch("api/event/" + eventId + "/member/" + memberId, editRequestOptions)
+        fetch("api/event/" + eventId + "/member/" + member.id, editRequestOptions)
             .then(function (response) {
             if (response.ok) {
                 dispatch({ type: 'MEMBER_EDITED' });
@@ -239,8 +239,10 @@ exports.actionCreators = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                "emailAddress": values["newMemberEmail"],
-                "name": values["newMemberName"],
+                "emailAddress": values.newMemberEmail,
+                "name": values.newMemberName,
+                "isOrganizer": values.isOrganizer,
+                "isAttending": values.isAttending || !values.isOrganizer,
                 "formResponses": collectFormResponses(values, eventForm, "newPrompt")
             })
         };
@@ -295,19 +297,37 @@ function collectFormResponses(values, eventForm, keyPrefix) {
         var prompt = eventForm_1[_i];
         var responses = [];
         var key = keyPrefix + prompt.id;
-        if (prompt.behavior == "Checkboxes") {
-            for (var option in prompt.options) {
-                if (values[key + option] && values[key + option] === true) {
-                    responses.push(option);
+        if (prompt.behavior === "Checkboxes") {
+            if (prompt.options.length === 1) {
+                // Formik records a single checkbox as a boolean
+                if (values[key] && values[key] === true) {
+                    responses.push(prompt.options[0]);
                 }
+            }
+            else {
+                // Formik records checkbox groups as a string array.
+                responses = values[key];
             }
         }
         else if (values[key]) {
+            // Formik records input text and dropdown selections as strings.
             responses.push(values[key]);
         }
         result.push({ promptId: prompt.id, responses: responses });
     }
     return result;
+}
+function getActingMember(memberList, emailAddress) {
+    if (!emailAddress) {
+        return undefined;
+    }
+    for (var _i = 0, memberList_1 = memberList; _i < memberList_1.length; _i++) {
+        var member = memberList_1[_i];
+        if (member.emailAddress === emailAddress) {
+            return member;
+        }
+    }
+    return undefined;
 }
 var unloadedState = {
     fursvpEvent: undefined,
@@ -318,7 +338,8 @@ var unloadedState = {
     modalIsInEditMode: false,
     isSaving: false,
     isAskingForRemoveRsvpConfirmation: false,
-    rsvpRemovedModalIsOpen: false
+    rsvpRemovedModalIsOpen: false,
+    actingMember: undefined
 };
 // ----------------
 // REDUCER - For a given state and action, returns the new state. To support time travel, this must not mutate the old state.
@@ -331,15 +352,18 @@ exports.reducer = function (state, incomingAction) {
         case 'REQUEST_FURSVP_EVENT':
             return __assign(__assign({}, state), { isLoading: true, id: action.id, requestedAsUser: action.requestedAsUser });
         case 'RECEIVE_FURSVP_EVENT':
-            return __assign(__assign({}, state), { fursvpEvent: action.fursvpEvent, isLoading: false, id: action.id, modalIsOpen: state.modalIsOpen || action.member !== undefined, modalMember: action.member !== undefined ? action.member : state.modalMember });
+            return __assign(__assign({}, state), { fursvpEvent: action.fursvpEvent, isLoading: false, id: action.id, modalIsOpen: state.modalIsOpen || action.member !== undefined, modalMember: action.member !== undefined ? action.member : state.modalMember, actingMember: getActingMember(action.fursvpEvent.members, state.requestedAsUser) });
         case 'TOGGLE_MEMBER_MODAL_ACTION':
-            return __assign(__assign({}, state), { modalIsOpen: !state.modalIsOpen, modalIsInEditMode: false });
+            return __assign(__assign({}, state), { modalIsOpen: !state.modalIsOpen, modalIsInEditMode: false, isAskingForRemoveRsvpConfirmation: false });
         case 'OPEN_MEMBER_MODAL_ACTION':
             return __assign(__assign({}, state), { modalIsOpen: true, modalMember: action.member });
         case 'FURSVP_EVENT_NOT_FOUND':
             return __assign(__assign({}, state), { isLoading: false });
+        case 'USER_LOGGED_IN_ACTION': {
+            return __assign(__assign({}, state), { isLoading: true, actingMember: state.fursvpEvent ? getActingMember(state.fursvpEvent.members, action.emailAddress) : undefined });
+        }
         case 'USER_LOGGED_OUT_ACTION':
-            return __assign(__assign({}, state), { modalMember: undefined, fursvpEvent: undefined, isLoading: true });
+            return __assign(__assign({}, state), { modalMember: undefined, fursvpEvent: undefined, isLoading: true, actingMember: undefined });
         case 'OPEN_NEW_MEMBER_MODAL':
             return __assign(__assign({}, state), { modalIsOpen: true, modalMember: undefined, modalIsInEditMode: true });
         case 'OPEN_EDIT_EXISTING_MEMBER_MODAL':
@@ -359,8 +383,6 @@ exports.reducer = function (state, incomingAction) {
         case 'TOGGLE_RSVP_REMOVED_MODAL':
             return __assign(__assign({}, state), { modalIsOpen: false, modalMember: undefined, modalIsInEditMode: false, rsvpRemovedModalIsOpen: false });
         case 'TOGGLE_REMOVE_RSVP_MODAL_ACTION':
-            return __assign(__assign({}, state), { isAskingForRemoveRsvpConfirmation: false });
-        case 'TOGGLE_MEMBER_MODAL_ACTION':
             return __assign(__assign({}, state), { isAskingForRemoveRsvpConfirmation: false });
         case 'CANCEL_EDIT_MEMBER':
             return __assign(__assign({}, state), { modalIsInEditMode: false });

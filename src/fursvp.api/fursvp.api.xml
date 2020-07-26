@@ -275,6 +275,16 @@
             The request model representing a new Member for an Event.
             </summary>
         </member>
+        <member name="P:Fursvp.Api.Requests.NewMemberRequest.IsAttending">
+            <summary>
+            Gets or sets a value indicating whether an event member is attending the event.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Requests.NewMemberRequest.IsOrganizer">
+            <summary>
+            Gets or sets a value indicating whether an event member is an organizer.
+            </summary>
+        </member>
         <member name="P:Fursvp.Api.Requests.NewMemberRequest.EmailAddress">
             <summary>
             Gets or sets the Email Address for the new Member.

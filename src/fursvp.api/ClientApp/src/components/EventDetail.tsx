@@ -36,29 +36,59 @@ const RsvpDropdown = (props: { children: JSX.Element[], label: string, id: strin
     );
 };
 
-const RsvpCheckboxes = (props: { options: string[], label: string, id: string }) => {
+const RsvpCheckbox = (props: { label: string, id: string }) => {
     const [field, meta] = useField({ id: props.id, name: props.id });
     return (
-        <Label check id={props.id}>
-            <Container>{props.label}</Container>
-            {props.options.map(option => <Container><Input id={props.id + option} key={option} type="checkbox" />{' '}{option}</Container>)}
-        </Label>
+        <Container>
+            <Label>
+                <Input type="checkbox" {...field} id={props.id} name={props.id} checked={meta.value} />
+                {props.label}
+            </Label>
+            {meta.touched && meta.error ? (
+                <div className="error">{meta.error}</div>
+            ) : null}
+        </Container>
+    );
+};
+
+const RsvpCheckboxGroup = (props: { options: string[], label: string, id: string }) => {    
+    return (
+        <>
+            <Label>{props.label}</Label>
+            {props.options.map(option => {
+                const [field, meta] = useField({ id: props.id, name: props.id, value: option, type: "checkbox" });
+                return <>
+                    <Container key={props.id + option}><Input type="checkbox" name={props.id} value={option} {...field} />{' '}{option}</Container>
+                    {meta.touched && meta.error ? (
+                        <div className="error">{meta.error}</div>
+                    ) : null}
+                </>;
+            })}
+        </>
     );
 };
 
 const getNewMemberInitialValues = (form: FursvpEventsStore.FormPrompt[]) => {
     var result : any = {
         newMemberName: "",
-        newMemberEmail: ""
+        newMemberEmail: "",
+        newMemberIsAttending: true,
+        newMemberIsOrganizer: false
     };
 
     for (let prompt of form) {
-        if (prompt.behavior == "Checkboxes") {
-            for (let option of prompt.options) {
-                result["newPrompt" + prompt.id + option] = "";
+        if (prompt.behavior === "Checkboxes") {
+            if (prompt.options.length === 1) {
+                // Formik records a single checkbox as a boolean.
+                result["newPrompt" + prompt.id] = false;
+            }
+            else {
+                // Formik records a checkbox group as an array of strings.
+                result["newPrompt" + prompt.id] = [];
             }
         }
         else {
+            // Formik records a text input or dropdown selection as a string.
             result["newPrompt" + prompt.id] = "";
         }
     }
@@ -97,48 +127,91 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
         this.ensureDataFetched();
     }
 
-    private canEditMember(userEmail:string | undefined): boolean {
+    private canEditMember(): boolean {
+        // TODO: These are business rules that belong in the domain layer. The results can be passed down in the Response object
 
+        // No member to edit
         if (this.props.modalMember === undefined) {
             return false;
         }
 
-        if (userEmail === undefined) {
+        // User not logged in
+        if (this.props.actingMember === undefined) {
             return false;
         }
 
-        if (this.props.modalMember.emailAddress == userEmail) {
+        // User logged in and editing user's own entry
+        if (this.props.modalMember.emailAddress === this.props.actingMember.emailAddress) {
             return true;
         }
 
-        var author = this.getAuthor();
+        // User is event author
+        if (this.props.actingMember.isAuthor) {
+            return true;
+        }
 
-        if (author !== undefined && author.emailAddress == userEmail) {
+        // User is an event organizer, and member is not an author or organizer
+        if (this.props.actingMember.isOrganizer && !this.props.modalMember.isAuthor && !this.props.modalMember.isOrganizer) {
             return true;
         }
 
         return false;
     }
 
-    private getAuthor(): Member | undefined {
-        if (this.props.fursvpEvent === undefined) {
-            return undefined;
+    private canSetOrganizer(): boolean {
+        // TODO: These are business rules that belong in the domain layer. The results can be passed down in the Response object
+
+        // User is event author
+        if (this.props.actingMember !== undefined && this.props.actingMember.isAuthor) {
+            return true;
         }
 
-        for (var member of this.props.fursvpEvent.members) {
-            if (member.isAuthor) {
-                return member;
-            }
+        return false;
+    }
+
+    private canSetAttending(isOrganizerChecked : boolean): boolean {
+        // TODO: These are business rules that belong in the domain layer. The results can be passed down in the Response object
+        
+        // User not logged in
+        if (this.props.actingMember === undefined) {
+            return false;
         }
 
-        return undefined;
+        // An author can choose whether an organizer is attending
+        if (this.props.actingMember.isAuthor && isOrganizerChecked) {            
+            return true;
+        }
+
+        // An author or organizer can choose not to be attending
+        if (this.userIsEditingOwnEntry() && (this.props.actingMember.isAuthor || this.props.actingMember.isOrganizer)) {            
+            return true;
+        }
+
+        return false;
+    }
+
+    private userIsEditingOwnEntry() {
+        // New member
+        if (this.props.modalMember === undefined) {
+            return false;
+        }
+
+        // User not logged in
+        if (this.props.actingMember === undefined) {
+            return false;
+        }
+
+        return this.props.actingMember.emailAddress === this.props.modalMember.emailAddress;
+    }
+
+    private canWithdrawRsvpWhenEditing(): boolean {
+        return this.props.modalMember !== undefined && !this.props.modalMember.isAuthor;
     }
 
     private renderViewOnlyModalContent(
         event: FursvpEventsStore.FursvpEvent,
         member: Member | undefined,
-        responses: FursvpEventsStore.FormResponses[],
-        userEmail: string | undefined)
+        responses: FursvpEventsStore.FormResponses[])
         : React.ReactNode {
 
         if (member === undefined) {
@@ -171,95 +244,114 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                 </ListGroup>
             </ModalBody>
             <ModalFooter>
-                {userEmail === undefined
-                    ? <Button color="primary" onClick={this.props.openLoginModal}>Log In To Edit</Button>
-                    : <Button color="primary" onClick={this.props.openEditExistingMemberModal} disabled={!this.canEditMember(userEmail)}>Edit</Button>
-                }
+                {this.renderEditMemberButton()}
                 {' '}<Button color="secondary" onClick={this.toggleModal}>Close</Button>
             </ModalFooter>
         </>;
     }
 
+    private renderEditMemberButton() {
+        if (this.props.actingMember === undefined) {
+            return <Button color="primary" onClick={this.props.openLoginModal}>Log In To Edit</Button>;
+        }
+
+        if (this.canEditMember()) {
+            return <Button color="primary" onClick={this.props.openEditExistingMemberModal}>Edit</Button>;
+        }
+
+        return <></>;
+    }
+
     private renderAddNewMemberModalContent(event: FursvpEventsStore.FursvpEvent): React.ReactNode {
-        return <Formik initialValues={getNewMemberInitialValues(event.form)} onSubmit={(values, { setSubmitting }) => { this.addNewMember(values); }}>
-            <FormikForm translate={undefined}>
-                <ModalHeader toggle={this.toggleModal}>RSVP for {this.props.fursvpEvent ? this.props.fursvpEvent.name : ""}</ModalHeader>
-                <ModalBody>
-                    <FormGroup>
-                        <RsvpTextInput id="newMemberName" label="Name" required />
-                    </FormGroup>
-                    <FormGroup>
-                        <RsvpTextInput id="newMemberEmail" label="Email" required />
-                    </FormGroup>
-                    {event.form.sort(x => x.sortOrder).map(prompt =>
-                        <FormGroup key={prompt.id} check={prompt.behavior == 'Checkboxes'}>
-                            {prompt.behavior == 'Text'
-                                ?
-                                <RsvpTextInput id={"newPrompt" + prompt.id} label={prompt.prompt} required={prompt.required} />
-                                : <></>}
-                            {prompt.behavior == 'Checkboxes'
-                                ? <RsvpCheckboxes id={"newPrompt" + prompt.id} label={prompt.prompt} options={prompt.options} />
-                                : <></>}
-                            {prompt.behavior == 'Dropdown'
-                                ? <RsvpDropdown label={prompt.prompt} id={"newPrompt" + prompt.id} required={prompt.required}>
-                                    <option key="" value="">Select one...</option>
-                                    <>{prompt.options.map(option => <option key={option}>{option}</option>)}</>
-                                </RsvpDropdown>
-                                : <></>}
-                        </FormGroup>
-                    )}
-                </ModalBody>
-                <ModalFooter>
-                    <Button type="submit" color="primary" disabled={this.props.isSaving}>Add RSVP</Button>
-                    {' '}<Button color="secondary" onClick={this.toggleModal} disabled={this.props.isSaving}>Cancel</Button>
-                </ModalFooter>
-            </FormikForm>
+        return <Formik initialValues={getNewMemberInitialValues(event.form)} onSubmit={(values) => { this.addNewMember(values); }}>
+            {formik => (
+                <FormikForm translate={undefined}>
+                    <ModalHeader toggle={this.toggleModal}>RSVP for {this.props.fursvpEvent ? this.props.fursvpEvent.name : ""}</ModalHeader>
+                    <ModalBody>
+                        <FormGroup><RsvpTextInput id="newMemberName" label="Name" required /></FormGroup>
+                        <FormGroup><RsvpTextInput id="newMemberEmail" label="Email" required /></FormGroup>
+                        {this.canSetOrganizer()
+                            ? <FormGroup><RsvpCheckbox id="newMemberIsOrganizer" label="Is Organizer" /></FormGroup>
+                            : <></>}
+                        {this.canSetAttending(formik.values.newMemberIsOrganizer)
+                            ? <FormGroup><RsvpCheckbox id="newMemberIsAttending" label="Is Attending" /></FormGroup>
+                            : <></>}
+                        {event.form.sort(x => x.sortOrder).map(prompt =>
+                            <FormGroup key={prompt.id}>
+                                {prompt.behavior === 'Text'
+                                    ?
+                                    <RsvpTextInput id={"newPrompt" + prompt.id} label={prompt.prompt} required={prompt.required} />
+                                    : <></>}
+                                {prompt.behavior === 'Checkboxes'
+                                    ? <RsvpCheckboxGroup id={"newPrompt" + prompt.id} label={prompt.prompt} options={prompt.options} />
+                                    : <></>}
+                                {prompt.behavior === 'Dropdown'
+                                    ? <RsvpDropdown label={prompt.prompt} id={"newPrompt" + prompt.id} required={prompt.required}>
+                                        <option key="" value="">Select one...</option>
+                                        <>{prompt.options.map(option => <option key={option}>{option}</option>)}</>
+                                    </RsvpDropdown>
+                                    : <></>}
+                            </FormGroup>
+                        )}
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button type="submit" color="primary" disabled={this.props.isSaving}>Add RSVP</Button>
+                        {' '}<Button color="secondary" onClick={this.toggleModal} disabled={this.props.isSaving}>Cancel</Button>
+                    </ModalFooter>
+                </FormikForm>
+            )}
         </Formik>;
     }
 
     private renderEditMemberModalContent(
         event: FursvpEventsStore.FursvpEvent,
-        member: Member | undefined,
-        responses: FursvpEventsStore.FormResponses[],
+        member: Member | undefined
     ) {
         if (member === undefined) {
             return this.renderAddNewMemberModalContent(event);
         }
 
-        return <Formik initialValues={this.getExistingMemberInitialValues(event.form, member)} onSubmit={(values, { setSubmitting }) => { this.editExistingMember(member.id, values); }}>
-            <FormikForm translate={undefined}>
-                <ModalHeader toggle={this.toggleModal}>Edit RSVP for {this.props.fursvpEvent ? this.props.fursvpEvent.name : ""}</ModalHeader>
-                <ModalBody>
-                    <FormGroup>
-                        <RsvpTextInput id="editMemberName" label="Name" required />
-                    </FormGroup>
-                    <FormGroup>
-                        <RsvpTextInput id="editMemberEmail" label="Email" required />
-                    </FormGroup>
-                    {event.form.sort(x => x.sortOrder).map(prompt =>
-                        <FormGroup key={prompt.id} check={prompt.behavior == 'Checkboxes'}>
-                            {prompt.behavior == 'Text'
-                                ?
-                                <RsvpTextInput id={"editPrompt" + prompt.id} label={prompt.prompt} required={prompt.required} />
-                                : <></>}
-                            {prompt.behavior == 'Checkboxes'
-                                ? <RsvpCheckboxes id={"editPrompt" + prompt.id} label={prompt.prompt} options={prompt.options} />
-                                : <></>}
-                            {prompt.behavior == 'Dropdown'
-                                ? <RsvpDropdown label={prompt.prompt} id={"editPrompt" + prompt.id} required={prompt.required}>
-                                    <option key="" value="">Select one...</option>
-                                    <>{prompt.options.map(option => <option key={option}>{option}</option>)}</>
-                                </RsvpDropdown>
-                                : <></>}
-                        </FormGroup>
-                    )}
-                </ModalBody>
-                <ModalFooter>
-                    <Button type="submit" color="primary" disabled={this.props.isSaving}>Save Changes</Button>
-                    {' '}<Button color="secondary" onClick={this.cancelEditMember} disabled={this.props.isSaving}>Cancel</Button>
-                    {' '}<Button outline color="danger" onClick={this.askForRemoveRsvpConfirmation} disabled={this.props.isSaving}>Remove RSVP</Button>
-                </ModalFooter>
-            </FormikForm>
+        return <Formik initialValues={this.getExistingMemberInitialValues(event.form, member)} onSubmit={(values) => { this.editExistingMember(member, values); }}>
+            {formik => (
+                <FormikForm translate={undefined}>
+                    <ModalHeader toggle={this.toggleModal}>Edit RSVP for {this.props.fursvpEvent ? this.props.fursvpEvent.name : ""}</ModalHeader>
+                    <ModalBody>
+                        <FormGroup><RsvpTextInput id="editMemberName" label="Name" required /></FormGroup>
+                        <FormGroup><RsvpTextInput id="editMemberEmail" label="Email" required /></FormGroup>
+                        {this.canSetOrganizer()
+                            ? <FormGroup><RsvpCheckbox id="editMemberIsOrganizer" label="Is Organizer" /></FormGroup>
+                            : <></>}
+                        {this.canSetAttending(formik.values.editMemberIsOrganizer)
+                            ? <FormGroup><RsvpCheckbox id="editMemberIsAttending" label="Is Attending" /></FormGroup>
+                            : <></>}
+
+                        {event.form.sort(x => x.sortOrder).map(prompt =>
+                            <FormGroup key={prompt.id}>
+                                {prompt.behavior === 'Text'
+                                    ?
+                                    <RsvpTextInput id={"editPrompt" + prompt.id} label={prompt.prompt} required={prompt.required} />
+                                    : <></>}
+                                {prompt.behavior === 'Checkboxes'
+                                    ? <RsvpCheckboxGroup id={"editPrompt" + prompt.id} label={prompt.prompt} options={prompt.options} />
+                                    : <></>}
+                                {prompt.behavior === 'Dropdown'
+                                    ? <RsvpDropdown label={prompt.prompt} id={"editPrompt" + prompt.id} required={prompt.required}>
+                                        <option key="" value="">Select one...</option>
+                                        <>{prompt.options.map(option => <option key={option}>{option}</option>)}</>
+                                    </RsvpDropdown>
+                                    : <></>}
+                            </FormGroup>
+                        )}
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button type="submit" color="primary" disabled={this.props.isSaving}>Save Changes</Button>
+                        {' '}<Button color="secondary" onClick={this.cancelEditMember} disabled={this.props.isSaving}>Cancel</Button>
+                        {this.canWithdrawRsvpWhenEditing()
+                            ? <>{' '}<Button outline color="danger" onClick={this.askForRemoveRsvpConfirmation} disabled={this.props.isSaving}>Remove RSVP</Button></>
+                            : <></>}
+                    </ModalFooter>
+                </FormikForm>
+            )}
         </Formik>;
     }
 
@@ -268,7 +360,6 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
             var event = this.props.fursvpEvent;
             var member = this.props.modalMember;
             var responses: FursvpEventsStore.FormResponses[] = this.props.modalMember !== undefined ? this.props.modalMember.responses : [];
-            var userEmail = getStoredVerifiedEmail();
 
             let padlock = <></>;
             if (!event.isPublished) {
@@ -310,8 +401,8 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                     </Container>
                     <Modal isOpen={this.props.modalIsOpen} toggle={this.toggleModal}>
                         {this.props.modalIsInEditMode
-                            ? this.renderEditMemberModalContent(event, member, responses)
-                            : this.renderViewOnlyModalContent(event, member, responses, userEmail)
+                            ? this.renderEditMemberModalContent(event, member)
+                            : this.renderViewOnlyModalContent(event, member, responses)
                         }
                     </Modal>
                     <Modal isOpen={this.props.isAskingForRemoveRsvpConfirmation} toggle={this.toggleRemoveRsvpModal}>
@@ -348,27 +439,26 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
     private getExistingMemberInitialValues(prompts: FursvpEventsStore.FormPrompt[], member: FursvpEventsStore.Member) {
         var result: any = {
             editMemberName: member.name,
-            editMemberEmail: member.emailAddress
+            editMemberEmail: member.emailAddress,
+            editMemberIsAttending: member.isAttending,
+            editMemberIsOrganizer: member.isOrganizer
         };
 
         var promptsWithResponses = this.joinResponsesToPrompts(member.responses, prompts);
 
         for (let item of promptsWithResponses) {
-            if (item.prompt.behavior == "Checkboxes") {
-                for (let option of item.prompt.options) {
-                    result["editPrompt" + item.prompt.id + option] = false;
-
-                    if (item.responses !== undefined) {
-                        for (let response of item.responses.responses) {
-                            if (response == option) {
-                                result["editPrompt" + item.prompt.id + option] = true;
-                                break;
-                            }
-                        }
-                    }
+            if (item.prompt.behavior === "Checkboxes") {
+                if (item.prompt.options.length === 1) {
+                    // Formik records a single checkbox as a boolean.
+                    result["editPrompt" + item.prompt.id] = item.responses !== undefined && item.responses.responses.length === 1 && item.responses.responses[0] === item.prompt.options[0];
+                }
+                else {
+                    // Formik records a checkbox group as an array of strings.
+                    result["editPrompt" + item.prompt.id] = item.responses ? item.responses.responses : [];
                 }
             }
             else {
+                // Formik stores textboxes and dropdown selections as a string.
                 result["editPrompt" + item.prompt.id] = item.responses !== undefined && item.responses.responses.length > 0 ? item.responses.responses[0] : "";
             }
         }
@@ -384,7 +474,7 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
             var responsesForPrompt: FursvpEventsStore.FormResponses | undefined = undefined;
 
             for (let response of responses) {
-                if (response.promptId == prompt.id) {
+                if (response.promptId === prompt.id) {
                     responsesForPrompt = response;
                     break;
                 }
@@ -405,8 +495,12 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
     private memberTypeEmoji(member: FursvpEventsStore.Member): JSX.Element {
         var id = "member_" + member.id;
 
+        var suffix = member.isAttending
+            ? ""
+            : " (not attending)";
+
         if (member.isOrganizer) {
-            return this.toolTip("⭐", "Organizer", id);
+            return this.toolTip("⭐", "Organizer" + suffix, id);
         }
 
         if (member.isAttending) {
@@ -415,7 +509,7 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
         }
 
         if (member.isAuthor) {
-            return this.toolTip("⭐", "Author", id);
+            return this.toolTip("⭐", "Author" + suffix, id);
         }
 
         return <></>;
@@ -434,8 +528,8 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
         this.props.addNewMember(values);
     }
 
-    private editExistingMember(memberId : string, values: FormikValues) {
-        this.props.editExistingMember(memberId, values);
+    private editExistingMember(member : Member, values: FormikValues) {
+        this.props.editExistingMember(member, values);
     }
 
     private toggleModal() {
