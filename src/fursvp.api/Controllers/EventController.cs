@@ -16,6 +16,7 @@ namespace Fursvp.Api.Controllers
     using Fursvp.Communication;
     using Fursvp.Data;
     using Fursvp.Domain;
+    using Fursvp.Domain.Authorization;
     using Fursvp.Helpers;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
@@ -35,7 +36,7 @@ namespace Fursvp.Api.Controllers
         /// <param name="eventRepositoryWrite">The instance of <see cref="IRepositoryWrite{Event}"/> used for Event persistence write operations.</param>
         /// <param name="eventRepositoryRead">The instance of <see cref="IRepositoryRead{Event}"/> used for Event persistence read operations.</param>
         /// <param name="emailer">The emailer what sends the emails.</param>
-        public EventController(ILogger<EventController> logger, IEventService eventService, IRepositoryWrite<Event> eventRepositoryWrite, IRepositoryRead<Event> eventRepositoryRead, IEmailer emailer, IMapper mapper)
+        public EventController(ILogger<EventController> logger, IEventService eventService, IRepositoryWrite<Event> eventRepositoryWrite, IRepositoryRead<Event> eventRepositoryRead, IEmailer emailer, IMapper mapper, IUserAccessor userAccessor, IProvideDateTime dateTimeProvider)
         {
             Logger = logger;
             EventRepositoryWrite = eventRepositoryWrite;
@@ -43,6 +44,8 @@ namespace Fursvp.Api.Controllers
             EventService = eventService;
             Emailer = emailer;
             Mapper = mapper;
+            UserAccessor = userAccessor;
+            DateTimeProvider = dateTimeProvider;
         }
 
         private IMapper Mapper { get; }
@@ -57,18 +60,24 @@ namespace Fursvp.Api.Controllers
 
         private IEmailer Emailer { get; }
 
+        private IUserAccessor UserAccessor { get; }
+
+        private IProvideDateTime DateTimeProvider { get; }
+
         /// <summary>
         /// Retrieves details for all Events.
         /// </summary>
         /// <returns>A list of objects representing each Event.</returns>
         [HttpGet]
-        public async Task<List<EventResponse>> GetEvents()
+        public async Task<List<EventResponse>> GetUpcomingEvents()
         {
             var allEvents = await EventRepositoryRead.GetAll().ConfigureAwait(false);
 
-            // TODO: Only get events that are not over yet
-
-            return allEvents.Select(Mapper.MapResponse).ToList();
+            return allEvents
+                .Where(x => !x.IsPublished || x.EndsAtUtc > DateTimeProvider.Now)
+                .OrderBy(x => x.StartsAtUtc)
+                .Select(x => Mapper.MapResponse(x, DateTimeProvider))
+                .ToList();
         }
 
         /// <summary>
@@ -87,7 +96,7 @@ namespace Fursvp.Api.Controllers
                 return NotFound("Event not found with id " + id);
             }
 
-            return Ok(Mapper.MapResponse(@event));
+            return Ok(Mapper.MapResponse(@event, DateTimeProvider));
         }
 
         /// <summary>
@@ -98,14 +107,21 @@ namespace Fursvp.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateEvent([FromBody] NewEventRequest newEvent)
         {
+            var user = UserAccessor.User;
+
+            if (user == null)
+            {
+                return Unauthorized("Your email address must be verified before creating an event.");
+            }
+
             if (newEvent == null)
             {
                 throw new ArgumentNullException(nameof(newEvent));
             }
 
-            var @event = EventService.CreateNewEvent(newEvent.AuthorEmailAddress, newEvent.AuthorName);
+            var @event = EventService.CreateNewEvent(user.EmailAddress, newEvent.AuthorName);
             await EventRepositoryWrite.Insert(@event).ConfigureAwait(false);
-            return CreatedAtAction(nameof(GetEvent), new { id = @event.Id }, Mapper.MapResponse(@event));
+            return CreatedAtAction(nameof(GetEvent), new { id = @event.Id }, Mapper.MapResponse(@event, DateTimeProvider));
         }
 
         /// <summary>
@@ -164,7 +180,7 @@ namespace Fursvp.Api.Controllers
             @event.EndsAtUtc = endsAtUtc;
 
             await EventRepositoryWrite.Update(@event).ConfigureAwait(false);
-            return Ok(Mapper.MapResponse(@event));
+            return Ok(Mapper.MapResponse(@event, DateTimeProvider));
         }
 
         /// <summary>
@@ -185,7 +201,7 @@ namespace Fursvp.Api.Controllers
             @event.IsPublished = true;
 
             await EventRepositoryWrite.Update(@event).ConfigureAwait(false);
-            return Ok(Mapper.MapResponse(@event));
+            return Ok(Mapper.MapResponse(@event, DateTimeProvider));
         }
 
         /// <summary>
@@ -206,7 +222,7 @@ namespace Fursvp.Api.Controllers
             @event.IsPublished = true;
 
             await EventRepositoryWrite.Update(@event).ConfigureAwait(false);
-            return Ok(Mapper.MapResponse(@event));
+            return Ok(Mapper.MapResponse(@event, DateTimeProvider));
         }
 
         /// <summary>
@@ -263,7 +279,7 @@ namespace Fursvp.Api.Controllers
                 //
             }
 
-            return CreatedAtAction(nameof(GetEvent), new { id = @event.Id }, Mapper.MapResponse(@event));
+            return CreatedAtAction(nameof(GetEvent), new { id = @event.Id }, Mapper.MapResponse(@event, DateTimeProvider));
         }
 
         /// <summary>
@@ -306,7 +322,7 @@ namespace Fursvp.Api.Controllers
             }
 
             await EventRepositoryWrite.Update(@event).ConfigureAwait(false);
-            return Ok(Mapper.MapResponse(@event));
+            return Ok(Mapper.MapResponse(@event, DateTimeProvider));
         }
 
         /// <summary>

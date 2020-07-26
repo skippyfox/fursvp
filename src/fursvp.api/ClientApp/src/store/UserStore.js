@@ -65,10 +65,9 @@ exports.actionCreators = {
             dispatch({ type: 'USER_LOGGED_IN_ACTION', emailAddress: emailAddress });
             localStorage.setItem("verifiedEmail", emailAddress);
             localStorage.setItem("token", token);
-            var state = getState();
-            if (state.targetEvent && state.targetEvent.id) {
-                dispatch({ type: 'REQUEST_FURSVP_EVENT', id: state.targetEvent.id, requestedAsUser: emailAddress });
-                var getRequestOptions = {
+            {
+                dispatch({ type: 'REQUEST_FURSVP_EVENTS', requestedAsUser: emailAddress });
+                var getRequestAllEventsOptions = {
                     method: 'GET',
                     credentials: "include",
                     headers: {
@@ -76,7 +75,24 @@ exports.actionCreators = {
                         'Authorization': 'Bearer ' + token
                     }
                 };
-                return fetch("api/event/" + state.targetEvent.id, getRequestOptions)
+                fetch("api/event", getRequestAllEventsOptions)
+                    .then(function (response) { return response.json(); })
+                    .then(function (data) {
+                    dispatch({ type: 'RECEIVE_FURSVP_EVENTS', events: data });
+                });
+            }
+            var state = getState();
+            if (state.targetEvent && state.targetEvent.id) {
+                dispatch({ type: 'REQUEST_FURSVP_EVENT', id: state.targetEvent.id, requestedAsUser: emailAddress });
+                var getRequestEventOptions = {
+                    method: 'GET',
+                    credentials: "include",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    }
+                };
+                return fetch("api/event/" + state.targetEvent.id, getRequestEventOptions)
                     .then(function (response) {
                     if (!response.ok) {
                         throw new Error();

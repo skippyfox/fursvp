@@ -92,6 +92,11 @@ namespace Fursvp.Api.Responses
         public DateTime? RsvpClosesAtLocal { get; set; }
 
         /// <summary>
+        /// Gets or sets the number of milliseconds between UtcNow and RsvpClosesAtUtc. Positive if 
+        /// </summary>
+        public double? RsvpClosesInMs { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether an Event is publicly visible.
         /// </summary>
         public bool IsPublished { get; set; }

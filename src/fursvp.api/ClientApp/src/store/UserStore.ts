@@ -1,7 +1,7 @@
 ﻿import { Action, Reducer } from 'redux';
 import { AppThunkAction } from '.';
 import { RequestFursvpEventAction, ReceiveFursvpEventAction } from './EventDetailStore';
-import { FursvpEvent } from './FursvpEvents'
+import { FursvpEvent, RequestFursvpEventsAction, ReceiveFursvpEventsAction } from './FursvpEvents'
 
 // -----------------
 // STATE - This defines the type of data maintained in the Redux store.
@@ -67,7 +67,8 @@ type KnownAction = OpenLoginModalAction | ToggleLoginModalAction
     | VerificationEmailIsSendingAction | VerificationEmailWasSentAction | VerificationEmailDidNotSendAction
     | VerificationCodeIsSendingAction | UserLoggedInAction | VerificationCodeWasUnsuccessfulAction
     | UserLoggedOutAction | OpenUserInfoModalAction
-    | RequestFursvpEventAction | ReceiveFursvpEventAction;
+    | RequestFursvpEventAction | ReceiveFursvpEventAction
+    | RequestFursvpEventsAction | ReceiveFursvpEventsAction;
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -135,11 +136,10 @@ export const actionCreators = {
                 localStorage.setItem("verifiedEmail", emailAddress);
                 localStorage.setItem("token", token);
 
-                var state = getState();
-                if (state.targetEvent && state.targetEvent.id) {
-                    dispatch({ type: 'REQUEST_FURSVP_EVENT', id: state.targetEvent.id, requestedAsUser: emailAddress });
+                {
+                    dispatch({ type: 'REQUEST_FURSVP_EVENTS', requestedAsUser: emailAddress });
 
-                    var getRequestOptions: RequestInit = {
+                    var getRequestAllEventsOptions: RequestInit = {
                         method: 'GET',
                         credentials: "include",
                         headers: {
@@ -148,7 +148,27 @@ export const actionCreators = {
                         }
                     };
 
-                    return fetch(`api/event/${state.targetEvent.id}`, getRequestOptions)
+                    fetch(`api/event`, getRequestAllEventsOptions)
+                        .then(response => response.json() as Promise<FursvpEvent[]>)
+                        .then(data => {
+                            dispatch({ type: 'RECEIVE_FURSVP_EVENTS', events: data });
+                        });
+                }
+
+                var state = getState();
+                if (state.targetEvent && state.targetEvent.id) {
+                    dispatch({ type: 'REQUEST_FURSVP_EVENT', id: state.targetEvent.id, requestedAsUser: emailAddress });
+
+                    var getRequestEventOptions: RequestInit = {
+                        method: 'GET',
+                        credentials: "include",
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        }
+                    };
+
+                    return fetch(`api/event/${state.targetEvent.id}`, getRequestEventOptions)
                         .then(response => {
                             if (!response.ok) {
                                 throw new Error();

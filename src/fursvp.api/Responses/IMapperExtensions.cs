@@ -8,14 +8,21 @@ namespace Fursvp.Api.Responses
 {
     public static class IMapperExtensions
     {
-        public static EventResponse MapResponse(this IMapper mapper, Event source)
+        public static EventResponse MapResponse(this IMapper mapper, Event source, IProvideDateTime dateTimeProvider)
         {
             if (mapper == null)
             {
                 throw new ArgumentNullException(nameof(mapper));
             }
 
+            if (dateTimeProvider == null)
+            {
+                throw new ArgumentNullException(nameof(dateTimeProvider));
+            }
+
             var result = mapper.Map<Event, EventResponse>(source);
+
+            result.RsvpClosesInMs = (result.RsvpClosesAtUtc - dateTimeProvider.Now)?.TotalMilliseconds;
 
             if (result != null)
             {

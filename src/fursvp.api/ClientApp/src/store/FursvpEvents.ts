@@ -1,6 +1,6 @@
 ﻿import { Action, Reducer } from 'redux';
 import { AppThunkAction } from '.';
-import { getStoredVerifiedEmail, getStoredAuthToken, UserLoggedInAction, UserLoggedOutAction, OpenLoginModalAction } from './UserStore';
+import { getStoredVerifiedEmail, getStoredAuthToken, UserLoggedOutAction } from './UserStore';
 
 // -----------------
 // STATE - This defines the type of data maintained in the Redux store.
@@ -28,6 +28,7 @@ export interface FursvpEvent {
     rsvpOpen: boolean;
     rsvpClosesAtUtc: string | null;
     rsvpClosesAtLocal: string | null;
+    rsvpClosesInMs: number | null;
     isPublished: boolean;
 }
 
@@ -61,20 +62,19 @@ export interface FormResponses {
 // ACTIONS - These are serializable (hence replayable) descriptions of state transitions.
 // They do not themselves have any side-effects; they just describe something that is going to happen.
 
-interface RequestFursvpEventsAction {
+export interface RequestFursvpEventsAction {
     type: 'REQUEST_FURSVP_EVENTS';
     requestedAsUser: string | undefined;
 }
 
-interface ReceiveFursvpEventsAction {
+export interface ReceiveFursvpEventsAction {
     type: 'RECEIVE_FURSVP_EVENTS';
     events: FursvpEvent[];
 }
 
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
-type KnownAction = RequestFursvpEventsAction | ReceiveFursvpEventsAction
-    | UserLoggedOutAction | UserLoggedInAction | OpenLoginModalAction;
+type KnownAction = RequestFursvpEventsAction | ReceiveFursvpEventsAction | UserLoggedOutAction;
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.

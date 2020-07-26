@@ -65,7 +65,7 @@
             Manages Events.
             </summary>
         </member>
-        <member name="M:Fursvp.Api.Controllers.EventController.#ctor(Microsoft.Extensions.Logging.ILogger{Fursvp.Api.Controllers.EventController},Fursvp.Domain.IEventService,Fursvp.Data.IRepositoryWrite{Fursvp.Domain.Event},Fursvp.Data.IRepositoryRead{Fursvp.Domain.Event},Fursvp.Communication.IEmailer,AutoMapper.IMapper)">
+        <member name="M:Fursvp.Api.Controllers.EventController.#ctor(Microsoft.Extensions.Logging.ILogger{Fursvp.Api.Controllers.EventController},Fursvp.Domain.IEventService,Fursvp.Data.IRepositoryWrite{Fursvp.Domain.Event},Fursvp.Data.IRepositoryRead{Fursvp.Domain.Event},Fursvp.Communication.IEmailer,AutoMapper.IMapper,Fursvp.Domain.Authorization.IUserAccessor,Fursvp.Domain.IProvideDateTime)">
             <summary>
             Initializes a new instance of the <see cref="T:Fursvp.Api.Controllers.EventController"/> class.
             </summary>
@@ -75,7 +75,7 @@
             <param name="eventRepositoryRead">The instance of <see cref="T:Fursvp.Data.IRepositoryRead`1"/> used for Event persistence read operations.</param>
             <param name="emailer">The emailer what sends the emails.</param>
         </member>
-        <member name="M:Fursvp.Api.Controllers.EventController.GetEvents">
+        <member name="M:Fursvp.Api.Controllers.EventController.GetUpcomingEvents">
             <summary>
             Retrieves details for all Events.
             </summary>
@@ -258,11 +258,6 @@
         <member name="T:Fursvp.Api.Requests.NewEventRequest">
             <summary>
             The request model representing a new Member for an Event.
-            </summary>
-        </member>
-        <member name="P:Fursvp.Api.Requests.NewEventRequest.AuthorEmailAddress">
-            <summary>
-            Gets or sets the Email Address for the author.
             </summary>
         </member>
         <member name="P:Fursvp.Api.Requests.NewEventRequest.AuthorName">
@@ -488,6 +483,11 @@
         <member name="P:Fursvp.Api.Responses.EventResponse.RsvpClosesAtLocal">
             <summary>
             Gets or sets the event-local date and time at which RSVPs for the Event are scheduled to close.
+            </summary>
+        </member>
+        <member name="P:Fursvp.Api.Responses.EventResponse.RsvpClosesInMs">
+            <summary>
+            Gets or sets the number of milliseconds between UtcNow and RsvpClosesAtUtc. Positive if 
             </summary>
         </member>
         <member name="P:Fursvp.Api.Responses.EventResponse.IsPublished">

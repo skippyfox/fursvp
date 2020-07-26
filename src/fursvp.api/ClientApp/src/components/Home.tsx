@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { ApplicationState } from '../store';
 import * as FursvpEventsStore from '../store/FursvpEvents';
-import { Link } from 'react-router-dom';
 import DateTime from './DateTime';
 
 // At runtime, Redux will merge together...
@@ -52,8 +51,6 @@ class Home extends React.PureComponent<FursvpEventProps> {
             </ListGroup>
         );
     }
-
-    ///event/${event.id}
 
     private showEvent(event: FursvpEventsStore.FursvpEvent) {
         this.props.history.push('/event/' + event.id);

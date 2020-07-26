@@ -57,13 +57,11 @@ var RsvpCheckboxGroup = function (props) {
     return (React.createElement(React.Fragment, null,
         React.createElement(reactstrap_1.Label, null, props.label),
         props.options.map(function (option) {
-            var _a = formik_1.useField({ id: props.id, name: props.id, value: option, type: "checkbox" }), field = _a[0], meta = _a[1];
-            return React.createElement(React.Fragment, null,
-                React.createElement(reactstrap_1.Container, { key: props.id + option },
-                    React.createElement(reactstrap_1.Input, __assign({ type: "checkbox", name: props.id, value: option }, field)),
-                    ' ',
-                    option),
-                meta.touched && meta.error ? (React.createElement("div", { className: "error" }, meta.error)) : null);
+            var field = formik_1.useField({ id: props.id, name: props.id, value: option, type: "checkbox" })[0];
+            return React.createElement(reactstrap_1.Container, { key: props.id + option },
+                React.createElement(reactstrap_1.Input, __assign({ type: "checkbox", name: props.id, value: option }, field)),
+                ' ',
+                option);
         })));
 };
 var getNewMemberInitialValues = function (form) {
@@ -304,12 +302,22 @@ var EventDetail = /** @class */ (function (_super) {
                         React.createElement(reactstrap_1.Button, { outline: true, color: "danger", onClick: _this.askForRemoveRsvpConfirmation, disabled: _this.props.isSaving }, "Remove RSVP"))
                     : React.createElement(React.Fragment, null)))); });
     };
+    EventDetail.prototype.rsvpsAreClosed = function (event) {
+        if (!event.rsvpOpen) {
+            return true;
+        }
+        if (event.rsvpClosesInMs !== null && event.rsvpClosesInMs <= 0) {
+            return true;
+        }
+        return false;
+    };
     EventDetail.prototype.render = function () {
         var _this = this;
         if (this.props.fursvpEvent !== undefined) {
             var event = this.props.fursvpEvent;
             var member = this.props.modalMember;
             var responses = this.props.modalMember !== undefined ? this.props.modalMember.responses : [];
+            var rsvpsAreClosed = this.rsvpsAreClosed(event);
             var padlock = React.createElement(React.Fragment, null);
             if (!event.isPublished) {
                 padlock = React.createElement(React.Fragment, null,
@@ -335,7 +343,17 @@ var EventDetail = /** @class */ (function (_super) {
                 React.createElement(reactstrap_1.Container, null, event.otherDetails),
                 React.createElement(reactstrap_1.Container, null,
                     React.createElement(reactstrap_1.ListGroup, null,
-                        React.createElement(reactstrap_1.ListGroupItem, { active: true, tag: "button", action: true, onClick: this.openNewMemberModal }, "Add an RSVP"),
+                        React.createElement(reactstrap_1.ListGroupItem, { active: true, tag: "button", action: true, onClick: this.openNewMemberModal, disabled: rsvpsAreClosed }, rsvpsAreClosed ?
+                            React.createElement(React.Fragment, null, "RSVPs are not open at this time.")
+                            : React.createElement(React.Fragment, null,
+                                "Add an RSVP",
+                                event.rsvpClosesAtLocal != null
+                                    ? React.createElement(React.Fragment, null,
+                                        React.createElement("br", null),
+                                        React.createElement("small", null,
+                                            "RSVPs are open until ",
+                                            React.createElement(DateTime_1.default, { date: event.rsvpClosesAtLocal, timeZoneOffset: event.timeZoneOffset, id: "eventDetailRsvpsCloseAt" })))
+                                    : React.createElement(React.Fragment, null))),
                         event.members.map(function (member) {
                             return React.createElement(reactstrap_1.ListGroupItem, { key: member.id, tag: "button", action: true, onClick: _this.showMember.bind(_this, member) },
                                 _this.memberTypeEmoji(member),

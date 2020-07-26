@@ -352,16 +352,13 @@ exports.reducer = function (state, incomingAction) {
         case 'REQUEST_FURSVP_EVENT':
             return __assign(__assign({}, state), { isLoading: true, id: action.id, requestedAsUser: action.requestedAsUser });
         case 'RECEIVE_FURSVP_EVENT':
-            return __assign(__assign({}, state), { fursvpEvent: action.fursvpEvent, isLoading: false, id: action.id, modalIsOpen: state.modalIsOpen || action.member !== undefined, modalMember: action.member !== undefined ? action.member : state.modalMember, actingMember: getActingMember(action.fursvpEvent.members, state.requestedAsUser) });
+            return __assign(__assign({}, state), { fursvpEvent: __assign(__assign({}, action.fursvpEvent), { members: action.fursvpEvent.members.sort(function (m) { return new Date(m.rsvpedAtUtc).getTime(); }).reverse() }), isLoading: false, id: action.id, modalIsOpen: state.modalIsOpen || action.member !== undefined, modalMember: action.member !== undefined ? action.member : state.modalMember, actingMember: getActingMember(action.fursvpEvent.members, state.requestedAsUser) });
         case 'TOGGLE_MEMBER_MODAL_ACTION':
             return __assign(__assign({}, state), { modalIsOpen: !state.modalIsOpen, modalIsInEditMode: false, isAskingForRemoveRsvpConfirmation: false });
         case 'OPEN_MEMBER_MODAL_ACTION':
             return __assign(__assign({}, state), { modalIsOpen: true, modalMember: action.member });
         case 'FURSVP_EVENT_NOT_FOUND':
             return __assign(__assign({}, state), { isLoading: false });
-        case 'USER_LOGGED_IN_ACTION': {
-            return __assign(__assign({}, state), { isLoading: true, actingMember: state.fursvpEvent ? getActingMember(state.fursvpEvent.members, action.emailAddress) : undefined });
-        }
         case 'USER_LOGGED_OUT_ACTION':
             return __assign(__assign({}, state), { modalMember: undefined, fursvpEvent: undefined, isLoading: true, actingMember: undefined });
         case 'OPEN_NEW_MEMBER_MODAL':

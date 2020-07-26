@@ -1,7 +1,7 @@
 ﻿import { Action, Reducer } from 'redux';
 import { AppThunkAction } from '.';
 import { FursvpEvent, Member, FormPrompt, FormResponses } from './FursvpEvents';
-import { getStoredVerifiedEmail, getStoredAuthToken, UserLoggedInAction, UserLoggedOutAction, OpenLoginModalAction } from './UserStore';
+import { getStoredVerifiedEmail, getStoredAuthToken, UserLoggedOutAction, OpenLoginModalAction } from './UserStore';
 import { FormikValues } from 'formik';
 
 // -----------------
@@ -98,7 +98,7 @@ interface CancelEditMemberAction {
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
 type KnownAction = RequestFursvpEventAction | ReceiveFursvpEventAction | ToggleModalAction | OpenModalAction | FursvpEventNotFoundAction
-    | UserLoggedOutAction | UserLoggedInAction | OpenLoginModalAction
+    | UserLoggedOutAction | OpenLoginModalAction
     | OpenNewMemberModalAction | OpenEditExistingMemberModalAction
     | SavingMemberAction | NewMemberAddedAction | MemberEditedAction | CancelEditMemberAction
     | AskForRemoveRsvpAction | RemovingRsvpAction | RsvpRemovedAction | ToggleRemoveRsvpModalAction | ToggleRsvpRemovedModalAction;
@@ -508,7 +508,10 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
         case 'RECEIVE_FURSVP_EVENT':
             return {
                 ...state,
-                fursvpEvent: action.fursvpEvent,
+                fursvpEvent: {
+                    ...action.fursvpEvent,
+                    members: action.fursvpEvent.members.sort(m => new Date(m.rsvpedAtUtc).getTime()).reverse()
+                },
                 isLoading: false,
                 id: action.id,
                 modalIsOpen: state.modalIsOpen || action.member !== undefined,
@@ -533,13 +536,6 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
                 ...state,
                 isLoading: false
             }
-        case 'USER_LOGGED_IN_ACTION': {
-            return {
-                ...state,
-                isLoading: true,
-                actingMember: state.fursvpEvent ? getActingMember(state.fursvpEvent.members, action.emailAddress) : undefined
-            }
-        }
         case 'USER_LOGGED_OUT_ACTION':
             return {
                 ...state,

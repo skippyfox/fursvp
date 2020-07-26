@@ -56,13 +56,8 @@ const RsvpCheckboxGroup = (props: { options: string[], label: string, id: string
         <>
             <Label>{props.label}</Label>
             {props.options.map(option => {
-                const [field, meta] = useField({ id: props.id, name: props.id, value: option, type: "checkbox" });
-                return <>
-                    <Container key={props.id + option}><Input type="checkbox" name={props.id} value={option} {...field} />{' '}{option}</Container>
-                    {meta.touched && meta.error ? (
-                        <div className="error">{meta.error}</div>
-                    ) : null}
-                </>;
+                const [field] = useField({ id: props.id, name: props.id, value: option, type: "checkbox" });
+                return <Container key={props.id + option}><Input type="checkbox" name={props.id} value={option} {...field} />{' '}{option}</Container>;
             })}
         </>
     );
@@ -355,11 +350,25 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
         </Formik>;
     }
 
+    private rsvpsAreClosed(event: FursvpEventsStore.FursvpEvent): boolean {
+        if (!event.rsvpOpen) {
+            return true;
+        }
+
+        if (event.rsvpClosesInMs !== null && event.rsvpClosesInMs <= 0) {
+            return true;
+        }
+
+        return false;
+    }
+
     public render() {
         if (this.props.fursvpEvent !== undefined) {
             var event = this.props.fursvpEvent;
             var member = this.props.modalMember;
             var responses: FursvpEventsStore.FormResponses[] = this.props.modalMember !== undefined ? this.props.modalMember.responses : [];
+
+            var rsvpsAreClosed = this.rsvpsAreClosed(event);
 
             let padlock = <></>;
             if (!event.isPublished) {
@@ -388,8 +397,15 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                     </Container>
                     <Container>
                         <ListGroup>
-                            <ListGroupItem active tag="button" action onClick={this.openNewMemberModal}>
-                                Add an RSVP
+                            <ListGroupItem active tag="button" action onClick={this.openNewMemberModal} disabled={rsvpsAreClosed}>
+                                {rsvpsAreClosed ?
+                                    <>RSVPs are not open at this time.</>
+                                    : <>
+                                        Add an RSVP
+                                        {event.rsvpClosesAtLocal != null
+                                            ? <><br /><small>RSVPs are open until <DateTime date={event.rsvpClosesAtLocal} timeZoneOffset={event.timeZoneOffset} id="eventDetailRsvpsCloseAt" /></small></>
+                                            : <></>}
+                                      </>}                        
                             </ListGroupItem>
                             {event.members.map((member: FursvpEventsStore.Member) =>
                                 <ListGroupItem key={member.id} tag="button" action onClick={this.showMember.bind(this, member)}>

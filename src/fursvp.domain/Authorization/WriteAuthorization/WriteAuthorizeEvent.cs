@@ -48,6 +48,15 @@ namespace Fursvp.Domain.Authorization.WriteAuthorization
                 Assert.That(actingMember?.IsAuthor == true, "An event can be deleted only by its author.");
             }
 
+            if (oldState == null)
+            {
+                // New event
+                foreach (var memberState in newState.Members)
+                {
+                    WriteAuthorizeMember.WriteAuthorize(null, null, memberState, newState, actingMember);
+                }
+            }
+
             if (oldState != null && newState != null)
             {
                 foreach (var memberState in oldState.Members.FullJoin(newState.Members, m => m.Id, m => m.Id, (old, @new) => new { old, @new }))

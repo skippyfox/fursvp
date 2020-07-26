@@ -13,13 +13,6 @@ namespace Fursvp.Api.Requests
     public class NewEventRequest
     {
         /// <summary>
-        /// Gets or sets the Email Address for the author.
-        /// </summary>
-        [Required]
-        [EmailAddress]
-        public string AuthorEmailAddress { get; set; }
-
-        /// <summary>
         /// Gets or sets the display name for the author.
         /// </summary>
         [Required]
