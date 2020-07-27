@@ -30,6 +30,7 @@ var react_redux_1 = require("react-redux");
 var react_router_1 = require("react-router");
 var EventDetailStore = require("../store/EventDetailStore");
 var DateTime_1 = require("./DateTime");
+var UserStore_1 = require("../store/UserStore");
 var formik_1 = require("formik");
 var RsvpTextInput = function (props) {
     var _a = formik_1.useField({ id: props.id, required: props.required, name: props.id }), field = _a[0], meta = _a[1];
@@ -119,7 +120,7 @@ var EventDetail = /** @class */ (function (_super) {
         if (this.props.modalMember === undefined) {
             return false;
         }
-        // User not logged in
+        // User not logged in as someone in this list
         if (this.props.actingMember === undefined) {
             return false;
         }
@@ -147,7 +148,7 @@ var EventDetail = /** @class */ (function (_super) {
     };
     EventDetail.prototype.canSetAttending = function (isOrganizerChecked) {
         // TODO: These are business rules that belong in the domain layer. The results can be passed down in the Response object
-        // User not logged in
+        // User not logged in as someone in this list
         if (this.props.actingMember === undefined) {
             return false;
         }
@@ -166,7 +167,7 @@ var EventDetail = /** @class */ (function (_super) {
         if (this.props.modalMember === undefined) {
             return false;
         }
-        // User not logged in
+        // User not logged in as someone in this list
         if (this.props.actingMember === undefined) {
             return false;
         }
@@ -208,7 +209,8 @@ var EventDetail = /** @class */ (function (_super) {
                 React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.toggleModal }, "Close")));
     };
     EventDetail.prototype.renderEditMemberButton = function () {
-        if (this.props.actingMember === undefined) {
+        // User is not logged in
+        if (UserStore_1.getStoredVerifiedEmail() === undefined) {
             return React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.props.openLoginModal }, "Log In To Edit");
         }
         if (this.canEditMember()) {
@@ -321,8 +323,8 @@ var EventDetail = /** @class */ (function (_super) {
             var padlock = React.createElement(React.Fragment, null);
             if (!event.isPublished) {
                 padlock = React.createElement(React.Fragment, null,
-                    React.createElement("span", { id: "privateEventIndicator", role: "img", "aria-label": "private" }, "\uD83D\uDD12"),
-                    React.createElement(reactstrap_1.UncontrolledTooltip, { target: "privateEventIndicator" }, "Private Event"));
+                    React.createElement("span", { id: "privateEventIndicator", role: "img", "aria-label": "This event is visible only to you." }, "\uD83D\uDD12"),
+                    React.createElement(reactstrap_1.UncontrolledTooltip, { target: "privateEventIndicator" }, "This event is visible only to you."));
             }
             return (React.createElement(React.Fragment, null,
                 React.createElement("h1", { id: "tabelLabel" },

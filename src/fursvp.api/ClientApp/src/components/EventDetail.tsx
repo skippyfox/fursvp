@@ -130,7 +130,7 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
             return false;
         }
 
-        // User not logged in
+        // User not logged in as someone in this list
         if (this.props.actingMember === undefined) {
             return false;
         }
@@ -167,7 +167,7 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
     private canSetAttending(isOrganizerChecked : boolean): boolean {
         // TODO: These are business rules that belong in the domain layer. The results can be passed down in the Response object
         
-        // User not logged in
+        // User not logged in as someone in this list
         if (this.props.actingMember === undefined) {
             return false;
         }
@@ -191,7 +191,7 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
             return false;
         }
 
-        // User not logged in
+        // User not logged in as someone in this list
         if (this.props.actingMember === undefined) {
             return false;
         }
@@ -246,7 +246,9 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
     }
 
     private renderEditMemberButton() {
-        if (this.props.actingMember === undefined) {
+
+        // User is not logged in
+        if (getStoredVerifiedEmail() === undefined) {
             return <Button color="primary" onClick={this.props.openLoginModal}>Log In To Edit</Button>;
         }
 
@@ -373,8 +375,8 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
             let padlock = <></>;
             if (!event.isPublished) {
                 padlock = <>
-                    <span id="privateEventIndicator" role="img" aria-label="private">🔒</span>
-                    <UncontrolledTooltip target="privateEventIndicator">Private Event</UncontrolledTooltip>
+                    <span id="privateEventIndicator" role="img" aria-label="This event is visible only to you.">🔒</span>
+                    <UncontrolledTooltip target="privateEventIndicator">This event is visible only to you.</UncontrolledTooltip>
                 </>
             }
 
