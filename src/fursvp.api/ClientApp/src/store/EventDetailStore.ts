@@ -1,6 +1,6 @@
 ﻿import { Action, Reducer } from 'redux';
 import { AppThunkAction } from '.';
-import { FursvpEvent, Member, FormPrompt, FormResponses } from './FursvpEvents';
+import { FursvpEvent, Member, FormPrompt, FormResponses, NewEventCreatedAction } from './FursvpEvents';
 import { getStoredVerifiedEmail, getStoredAuthToken, UserLoggedOutAction, OpenLoginModalAction } from './UserStore';
 import { FormikValues } from 'formik';
 
@@ -101,7 +101,8 @@ type KnownAction = RequestFursvpEventAction | ReceiveFursvpEventAction | ToggleM
     | UserLoggedOutAction | OpenLoginModalAction
     | OpenNewMemberModalAction | OpenEditExistingMemberModalAction
     | SavingMemberAction | NewMemberAddedAction | MemberEditedAction | CancelEditMemberAction
-    | AskForRemoveRsvpAction | RemovingRsvpAction | RsvpRemovedAction | ToggleRemoveRsvpModalAction | ToggleRsvpRemovedModalAction;
+    | AskForRemoveRsvpAction | RemovingRsvpAction | RsvpRemovedAction | ToggleRemoveRsvpModalAction | ToggleRsvpRemovedModalAction
+    | NewEventCreatedAction;
 
 const getMemberById = (event: FursvpEvent, memberId: string | undefined): Member | undefined => {
     if (memberId === undefined) {
@@ -613,6 +614,17 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
                 ...state,
                 modalIsInEditMode: false
             };
+        case 'NEW_EVENT_CREATED':
+            return {
+                ...state,
+                fursvpEvent: action.event,
+                isLoading: false,
+                id: action.event.id,
+                modalIsOpen: false,
+                modalMember: undefined,
+                requestedAsUser: action.requestedAsUser,
+                actingMember: getActingMember(action.event.members, action.requestedAsUser)
+            }
         default:
             return state;
     }

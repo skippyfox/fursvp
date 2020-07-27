@@ -383,6 +383,8 @@ exports.reducer = function (state, incomingAction) {
             return __assign(__assign({}, state), { isAskingForRemoveRsvpConfirmation: false });
         case 'CANCEL_EDIT_MEMBER':
             return __assign(__assign({}, state), { modalIsInEditMode: false });
+        case 'NEW_EVENT_CREATED':
+            return __assign(__assign({}, state), { fursvpEvent: action.event, isLoading: false, id: action.event.id, modalIsOpen: false, modalMember: undefined, requestedAsUser: action.requestedAsUser, actingMember: getActingMember(action.event.members, action.requestedAsUser) });
         default:
             return state;
     }

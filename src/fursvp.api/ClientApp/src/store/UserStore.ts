@@ -207,6 +207,14 @@ export const actionCreators = {
         };
 
         fetch("api/auth/logout", requestOptions);
+
+        dispatch({ type: 'REQUEST_FURSVP_EVENTS', requestedAsUser: undefined });
+        
+        fetch(`api/event`)
+            .then(response => response.json() as Promise<FursvpEvent[]>)
+            .then(data => {
+                dispatch({ type: 'RECEIVE_FURSVP_EVENTS', events: data });
+            });
     }
 };
 

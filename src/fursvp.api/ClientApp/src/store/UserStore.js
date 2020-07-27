@@ -126,6 +126,12 @@ exports.actionCreators = {
             }
         };
         fetch("api/auth/logout", requestOptions);
+        dispatch({ type: 'REQUEST_FURSVP_EVENTS', requestedAsUser: undefined });
+        fetch("api/event")
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
+            dispatch({ type: 'RECEIVE_FURSVP_EVENTS', events: data });
+        });
     }; }
 };
 function getStoredAuthToken() {

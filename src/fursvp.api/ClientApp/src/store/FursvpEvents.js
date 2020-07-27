@@ -40,6 +40,43 @@ exports.actionCreators = {
             });
             dispatch({ type: 'REQUEST_FURSVP_EVENTS', requestedAsUser: userEmail });
         }
+    }; },
+    addEventButtonClicked: function () { return function (dispatch, getState) {
+        dispatch({ type: 'OPEN_CREATE_NEW_EVENT_MODAL' });
+    }; },
+    toggleCreateNewEventModal: function () { return function (dispatch, getState) {
+        dispatch({ type: 'TOGGLE_CREATE_NEW_EVENT_MODAL' });
+    }; },
+    openLoginModal: function () { return function (dispatch, getState) {
+        dispatch({ type: 'OPEN_LOGIN_MODAL_ACTION' });
+    }; },
+    createNewEvent: function (values, actionOnSuccess) { return function (dispatch, getState) {
+        var authToken = UserStore_1.getStoredAuthToken();
+        var userEmail = UserStore_1.getStoredVerifiedEmail();
+        if (authToken === undefined || userEmail === undefined) {
+            return;
+        }
+        var userEmailString = userEmail;
+        dispatch({ type: 'SUBMITTING_NEW_EVENT' });
+        var requestOptions = {
+            method: 'POST',
+            credentials: "include",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + authToken
+            },
+            body: JSON.stringify({
+                "authorName": values.authorName
+            })
+        };
+        fetch("api/event", requestOptions)
+            .then(function (response) { return response.json(); })
+            .then(function (event) {
+            dispatch({ type: 'NEW_EVENT_CREATED', event: event, requestedAsUser: userEmailString });
+            if (actionOnSuccess) {
+                actionOnSuccess(event);
+            }
+        });
     }; }
 };
 // ----------------
@@ -47,7 +84,9 @@ exports.actionCreators = {
 var unloadedState = {
     events: [],
     isLoading: false,
-    requestedAsUser: undefined
+    requestedAsUser: undefined,
+    isCreateNewEventModalOpen: false,
+    isSubmitting: false
 };
 exports.reducer = function (state, incomingAction) {
     if (state === undefined) {
@@ -61,6 +100,14 @@ exports.reducer = function (state, incomingAction) {
             return __assign(__assign({}, state), { events: action.events, isLoading: false });
         case 'USER_LOGGED_OUT_ACTION':
             return __assign(__assign({}, state), { events: [], isLoading: true });
+        case 'OPEN_CREATE_NEW_EVENT_MODAL':
+            return __assign(__assign({}, state), { isCreateNewEventModalOpen: true });
+        case 'TOGGLE_CREATE_NEW_EVENT_MODAL':
+            return __assign(__assign({}, state), { isCreateNewEventModalOpen: false });
+        case 'SUBMITTING_NEW_EVENT':
+            return __assign(__assign({}, state), { isSubmitting: true });
+        case 'NEW_EVENT_CREATED':
+            return __assign(__assign({}, state), { isSubmitting: false });
         default:
             return state;
     }

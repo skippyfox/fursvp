@@ -1,10 +1,12 @@
 ﻿import * as React from 'react';
-import { Badge, ListGroup, ListGroupItem, ListGroupItemHeading, ListGroupItemText, UncontrolledTooltip } from 'reactstrap';
+import { Badge, ListGroup, ListGroupItem, ListGroupItemHeading, ListGroupItemText, UncontrolledTooltip, Modal, ModalHeader, ModalFooter, ModalBody, Button, FormGroup, Label, Input } from 'reactstrap';
 import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { ApplicationState } from '../store';
 import * as FursvpEventsStore from '../store/FursvpEvents';
 import DateTime from './DateTime';
+import { Formik, Form as FormikForm, useField, FormikValues } from 'formik';
+import { getStoredVerifiedEmail } from '../store/UserStore';
 
 // At runtime, Redux will merge together...
 type FursvpEventProps =
@@ -25,6 +27,7 @@ class Home extends React.PureComponent<FursvpEventProps> {
                 <h1 id="tabelLabel">Upcoming Events</h1>
                 <br />
                 {this.listEvents()}
+                {this.createNewEventModal()}
             </React.Fragment>
         );
     }
@@ -33,10 +36,33 @@ class Home extends React.PureComponent<FursvpEventProps> {
         this.props.requestFursvpEvents();
     }
 
+    private createNewEventModal() {
+        return (
+            <Formik initialValues={{authorName: ""}} onSubmit={(values) => { this.createNewEvent.bind(this, values); }}>
+                <Modal isOpen={this.props.isCreateNewEventModalOpen} toggle={this.toggleCreateNewEventModal.bind(this)}>
+                    <FormikForm translate={undefined}>
+                        <ModalHeader>Create New Event</ModalHeader>
+                        <ModalBody>
+                            <Label id="authorNameLabel" htmlFor="authorName">Your Name</Label>
+                            <UncontrolledTooltip target="authorNameLabel">This is your display name as the author of this event.</UncontrolledTooltip>
+                            <Input id="authorName" required name="authorName" />
+                        </ModalBody>
+                        <ModalFooter>
+                            {getStoredVerifiedEmail() === undefined
+                                ? <Button color="primary" onClick={this.props.openLoginModal}>Log In To Create New Event</Button>
+                                : <Button color="primary" type="submit" disabled={this.props.isSubmitting}>Create New Event</Button>}
+                            {' '}<Button color="secondary" onClick={this.toggleCreateNewEventModal.bind(this)} disabled={this.props.isSubmitting}>Cancel</Button>
+                        </ModalFooter>
+                    </FormikForm>
+                </Modal>
+            </Formik>
+        );
+    }
+
     private listEvents() {
         return (
             <ListGroup>
-                <ListGroupItem active tag="button" action>
+                <ListGroupItem active tag="button" action onClick={this.addEventButtonClicked.bind(this)}>
                     Add an event
                 </ListGroupItem>
                 {this.props.events.map((event: FursvpEventsStore.FursvpEvent) => {
@@ -64,6 +90,18 @@ class Home extends React.PureComponent<FursvpEventProps> {
 
     private showEvent(event: FursvpEventsStore.FursvpEvent) {
         this.props.history.push('/event/' + event.id);
+    }
+
+    private toggleCreateNewEventModal() {
+        this.props.toggleCreateNewEventModal();
+    }
+
+    private addEventButtonClicked() {
+        this.props.addEventButtonClicked();
+    }
+
+    private createNewEvent(values : any) {
+        this.props.createNewEvent(values, this.showEvent);
     }
 }
 

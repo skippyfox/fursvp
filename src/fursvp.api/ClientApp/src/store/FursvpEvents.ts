@@ -1,6 +1,7 @@
 ﻿import { Action, Reducer } from 'redux';
 import { AppThunkAction } from '.';
-import { getStoredVerifiedEmail, getStoredAuthToken, UserLoggedOutAction } from './UserStore';
+import { getStoredVerifiedEmail, getStoredAuthToken, UserLoggedOutAction, OpenLoginModalAction } from './UserStore';
+import { ReceiveFursvpEventAction } from './EventDetailStore';
 
 // -----------------
 // STATE - This defines the type of data maintained in the Redux store.
@@ -9,6 +10,8 @@ export interface FursvpEventsState {
     isLoading: boolean;
     events: FursvpEvent[];
     requestedAsUser: string | undefined;
+    isCreateNewEventModalOpen: boolean;
+    isSubmitting: boolean;
 }
 
 export interface FursvpEvent {
@@ -72,9 +75,29 @@ export interface ReceiveFursvpEventsAction {
     events: FursvpEvent[];
 }
 
+interface ToggleCreateNewEventModalAction {
+    type: 'TOGGLE_CREATE_NEW_EVENT_MODAL';
+}
+
+interface OpenCreateNewEventModalAction {
+    type: 'OPEN_CREATE_NEW_EVENT_MODAL';
+}
+
+export interface NewEventCreatedAction {
+    type: 'NEW_EVENT_CREATED',
+    event: FursvpEvent,
+    requestedAsUser: string
+}
+
+interface SubmittingNewEventAction {
+    type: 'SUBMITTING_NEW_EVENT'
+}
+
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
-type KnownAction = RequestFursvpEventsAction | ReceiveFursvpEventsAction | UserLoggedOutAction;
+type KnownAction = RequestFursvpEventsAction | ReceiveFursvpEventsAction | UserLoggedOutAction
+    | ToggleCreateNewEventModalAction | OpenCreateNewEventModalAction | OpenLoginModalAction
+    | ReceiveFursvpEventAction | SubmittingNewEventAction | NewEventCreatedAction;
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -110,6 +133,53 @@ export const actionCreators = {
 
             dispatch({ type: 'REQUEST_FURSVP_EVENTS', requestedAsUser: userEmail });
         }
+    },
+
+    addEventButtonClicked: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        dispatch({ type: 'OPEN_CREATE_NEW_EVENT_MODAL' });
+    },
+
+    toggleCreateNewEventModal: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        dispatch({ type: 'TOGGLE_CREATE_NEW_EVENT_MODAL' });
+    },
+
+    openLoginModal: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        dispatch({ type: 'OPEN_LOGIN_MODAL_ACTION' });
+    },
+
+    createNewEvent: (values: any, actionOnSuccess: (event: FursvpEvent) => void): AppThunkAction<KnownAction> => (dispatch, getState) => {
+
+        var authToken = getStoredAuthToken();
+        var userEmail = getStoredVerifiedEmail();
+        if (authToken === undefined || userEmail === undefined) {
+            return;
+        }
+
+        var userEmailString: string = userEmail;
+
+        dispatch({ type: 'SUBMITTING_NEW_EVENT' });
+
+        var requestOptions : RequestInit = {
+            method: 'POST',
+            credentials: "include",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + authToken
+            },
+            body: JSON.stringify({
+                "authorName": values.authorName
+            })
+        };
+
+        fetch(`api/event`, requestOptions)
+            .then(response => response.json() as Promise<FursvpEvent>)
+            .then(event => {
+                dispatch({ type: 'NEW_EVENT_CREATED', event, requestedAsUser: userEmailString });
+
+                if (actionOnSuccess) {
+                    actionOnSuccess(event);
+                }
+            });
     }
 };
 
@@ -119,7 +189,9 @@ export const actionCreators = {
 const unloadedState: FursvpEventsState = {
     events: [],
     isLoading: false,
-    requestedAsUser: undefined
+    requestedAsUser: undefined,
+    isCreateNewEventModalOpen: false,
+    isSubmitting: false
 };
 
 export const reducer: Reducer<FursvpEventsState> = (state: FursvpEventsState | undefined, incomingAction: Action): FursvpEventsState => {
@@ -146,6 +218,26 @@ export const reducer: Reducer<FursvpEventsState> = (state: FursvpEventsState | u
                 ...state,
                 events: [],
                 isLoading: true
+            };
+        case 'OPEN_CREATE_NEW_EVENT_MODAL':
+            return {
+                ...state,
+                isCreateNewEventModalOpen: true
+            };
+        case 'TOGGLE_CREATE_NEW_EVENT_MODAL':
+            return {
+                ...state,
+                isCreateNewEventModalOpen: false
+            };
+        case 'SUBMITTING_NEW_EVENT':
+            return {
+                ...state,
+                isSubmitting: true
+            }
+        case 'NEW_EVENT_CREATED':
+            return {
+                ...state,
+                isSubmitting: false
             }
         default:
             return state;
