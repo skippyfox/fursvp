@@ -16,6 +16,12 @@ type FursvpEventProps =
 
 
 class Home extends React.PureComponent<FursvpEventProps> {
+    constructor(props: FursvpEventProps) {
+        super(props);
+
+        this.createNewEvent = this.createNewEvent.bind(this);
+    }
+
     // This method is called when the component is first added to the document
     public componentDidMount() {
         this.ensureDataFetched();
@@ -38,24 +44,26 @@ class Home extends React.PureComponent<FursvpEventProps> {
 
     private createNewEventModal() {
         return (
-            <Formik initialValues={{authorName: ""}} onSubmit={(values) => { this.createNewEvent.bind(this, values); }}>
-                <Modal isOpen={this.props.isCreateNewEventModalOpen} toggle={this.toggleCreateNewEventModal.bind(this)}>
-                    <FormikForm translate={undefined}>
-                        <ModalHeader>Create New Event</ModalHeader>
-                        <ModalBody>
-                            <Label id="authorNameLabel" htmlFor="authorName">Your Name</Label>
-                            <UncontrolledTooltip target="authorNameLabel">This is your display name as the author of this event.</UncontrolledTooltip>
-                            <Input id="authorName" required name="authorName" />
-                        </ModalBody>
-                        <ModalFooter>
-                            {getStoredVerifiedEmail() === undefined
-                                ? <Button color="primary" onClick={this.props.openLoginModal}>Log In To Create New Event</Button>
-                                : <Button color="primary" type="submit" disabled={this.props.isSubmitting}>Create New Event</Button>}
-                            {' '}<Button color="secondary" onClick={this.toggleCreateNewEventModal.bind(this)} disabled={this.props.isSubmitting}>Cancel</Button>
-                        </ModalFooter>
-                    </FormikForm>
-                </Modal>
-            </Formik>
+            <Modal isOpen={this.props.isCreateNewEventModalOpen} toggle={this.toggleCreateNewEventModal.bind(this)}>
+                <Formik initialValues={{ authorName: "" }} onSubmit={values => this.createNewEvent(values)}>
+                    {formik => (
+                        <FormikForm translate={undefined}>
+                            <ModalHeader>Create New Event</ModalHeader>
+                            <ModalBody>
+                                <Label id="authorNameLabel" htmlFor="authorName">Your Name</Label>
+                                <UncontrolledTooltip target="authorNameLabel">This is your display name as the author of this event.</UncontrolledTooltip>
+                                <Input {...formik.getFieldProps('authorName')} id="authorName" required name="authorName" />
+                            </ModalBody>
+                            <ModalFooter>
+                                {getStoredVerifiedEmail() === undefined
+                                    ? <Button color="primary" onClick={this.props.openLoginModal}>Log In To Create New Event</Button>
+                                    : <Button color="primary" type="submit" disabled={this.props.isSubmitting}>Create New Event</Button>}
+                                {' '}<Button color="secondary" onClick={this.toggleCreateNewEventModal.bind(this)} disabled={this.props.isSubmitting}>Cancel</Button>
+                            </ModalFooter>
+                        </FormikForm>
+                    )}
+                </Formik>
+             </Modal>
         );
     }
 
@@ -100,8 +108,8 @@ class Home extends React.PureComponent<FursvpEventProps> {
         this.props.addEventButtonClicked();
     }
 
-    private createNewEvent(values : any) {
-        this.props.createNewEvent(values, this.showEvent);
+    private createNewEvent(values: any) {
+        this.props.createNewEvent(values, this.props.history);
     }
 }
 

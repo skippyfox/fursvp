@@ -2,6 +2,7 @@
 import { AppThunkAction } from '.';
 import { getStoredVerifiedEmail, getStoredAuthToken, UserLoggedOutAction, OpenLoginModalAction } from './UserStore';
 import { ReceiveFursvpEventAction } from './EventDetailStore';
+import { History } from 'history';
 
 // -----------------
 // STATE - This defines the type of data maintained in the Redux store.
@@ -147,7 +148,7 @@ export const actionCreators = {
         dispatch({ type: 'OPEN_LOGIN_MODAL_ACTION' });
     },
 
-    createNewEvent: (values: any, actionOnSuccess: (event: FursvpEvent) => void): AppThunkAction<KnownAction> => (dispatch, getState) => {
+    createNewEvent: (values: any, history: History<any>): AppThunkAction<KnownAction> => (dispatch, getState) => {
 
         var authToken = getStoredAuthToken();
         var userEmail = getStoredVerifiedEmail();
@@ -176,8 +177,8 @@ export const actionCreators = {
             .then(event => {
                 dispatch({ type: 'NEW_EVENT_CREATED', event, requestedAsUser: userEmailString });
 
-                if (actionOnSuccess) {
-                    actionOnSuccess(event);
+                if (history) {
+                    history.push('/event/' + event.id);
                 }
             });
     }
@@ -237,7 +238,8 @@ export const reducer: Reducer<FursvpEventsState> = (state: FursvpEventsState | u
         case 'NEW_EVENT_CREATED':
             return {
                 ...state,
-                isSubmitting: false
+                isSubmitting: false,
+                events: [action.event, ...state.events]
             }
         default:
             return state;

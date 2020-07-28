@@ -10,6 +10,13 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var UserStore_1 = require("./UserStore");
 // ----------------
@@ -50,7 +57,7 @@ exports.actionCreators = {
     openLoginModal: function () { return function (dispatch, getState) {
         dispatch({ type: 'OPEN_LOGIN_MODAL_ACTION' });
     }; },
-    createNewEvent: function (values, actionOnSuccess) { return function (dispatch, getState) {
+    createNewEvent: function (values, history) { return function (dispatch, getState) {
         var authToken = UserStore_1.getStoredAuthToken();
         var userEmail = UserStore_1.getStoredVerifiedEmail();
         if (authToken === undefined || userEmail === undefined) {
@@ -73,8 +80,8 @@ exports.actionCreators = {
             .then(function (response) { return response.json(); })
             .then(function (event) {
             dispatch({ type: 'NEW_EVENT_CREATED', event: event, requestedAsUser: userEmailString });
-            if (actionOnSuccess) {
-                actionOnSuccess(event);
+            if (history) {
+                history.push('/event/' + event.id);
             }
         });
     }; }
@@ -107,7 +114,7 @@ exports.reducer = function (state, incomingAction) {
         case 'SUBMITTING_NEW_EVENT':
             return __assign(__assign({}, state), { isSubmitting: true });
         case 'NEW_EVENT_CREATED':
-            return __assign(__assign({}, state), { isSubmitting: false });
+            return __assign(__assign({}, state), { isSubmitting: false, events: __spreadArrays([action.event], state.events) });
         default:
             return state;
     }
