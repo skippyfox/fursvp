@@ -240,8 +240,8 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                             ? <ListGroupItem key={promptWithResponse.prompt.id}>
                                 <ListGroupItemText>
                                     {promptWithResponse.prompt.prompt}
-                                    <ul>{promptWithResponse.responses.responses.map(individualResponse => <li key={individualResponse}>{individualResponse}</li>)}</ul>
                                 </ListGroupItemText>
+                                <ul>{promptWithResponse.responses.responses.map(individualResponse => <li key={individualResponse}>{individualResponse}</li>)}</ul>
                             </ListGroupItem>
                             : <></>;
                         }
@@ -489,6 +489,21 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                                 </TabPane>
                             </TabContent>
                         </ModalBody>
+                        <ModalFooter>
+                            <TabContent activeTab={this.props.editEventModalActiveTab}>
+                                <TabPane tabId="editEventDetailsTab">
+                                    <Button color="primary" onClick={this.setEditEventModalActiveTab.bind(this, 'editEventFormTab')}>Next</Button>
+                                </TabPane>
+                                <TabPane tabId="editEventFormTab">
+                                    <Button color="secondary" onClick={this.setEditEventModalActiveTab.bind(this, 'editEventDetailsTab')}>Back</Button>
+                                    {' '}<Button color="primary" onClick={this.setEditEventModalActiveTab.bind(this, 'editEventPublishTab')}>Next</Button>
+                                </TabPane>
+                                <TabPane tabId="editEventPublishTab">
+                                    <Button color="secondary" onClick={this.setEditEventModalActiveTab.bind(this, 'editEventFormTab')}>Back</Button>
+                                    {' '}<Button color="primary" onClick={this.toggleEditEventModal}>Save</Button>
+                                </TabPane>
+                            </TabContent>
+                        </ModalFooter>
                     </Modal>
                     <Modal isOpen={this.props.isAskingForRemoveRsvpConfirmation} toggle={this.toggleRemoveRsvpModal}>
                         <ModalHeader>Remove RSVP?</ModalHeader>

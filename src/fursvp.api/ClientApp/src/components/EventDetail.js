@@ -199,9 +199,8 @@ var EventDetail = /** @class */ (function (_super) {
                     this.joinResponsesToPrompts(responses, event.form).sort(function (x) { return x.prompt.sortOrder; }).map(function (promptWithResponse) {
                         return promptWithResponse.responses !== undefined
                             ? React.createElement(reactstrap_1.ListGroupItem, { key: promptWithResponse.prompt.id },
-                                React.createElement(reactstrap_1.ListGroupItemText, null,
-                                    promptWithResponse.prompt.prompt,
-                                    React.createElement("ul", null, promptWithResponse.responses.responses.map(function (individualResponse) { return React.createElement("li", { key: individualResponse }, individualResponse); }))))
+                                React.createElement(reactstrap_1.ListGroupItemText, null, promptWithResponse.prompt.prompt),
+                                React.createElement("ul", null, promptWithResponse.responses.responses.map(function (individualResponse) { return React.createElement("li", { key: individualResponse }, individualResponse); })))
                             : React.createElement(React.Fragment, null);
                     }),
                     React.createElement(reactstrap_1.ListGroupItem, null,
@@ -401,7 +400,19 @@ var EventDetail = /** @class */ (function (_super) {
                         React.createElement(reactstrap_1.TabContent, { activeTab: this.props.editEventModalActiveTab },
                             React.createElement(reactstrap_1.TabPane, { tabId: "editEventDetailsTab" }, "Details"),
                             React.createElement(reactstrap_1.TabPane, { tabId: "editEventFormTab" }, "RSVP Form"),
-                            React.createElement(reactstrap_1.TabPane, { tabId: "editEventPublishTab" }, "Publish")))),
+                            React.createElement(reactstrap_1.TabPane, { tabId: "editEventPublishTab" }, "Publish"))),
+                    React.createElement(reactstrap_1.ModalFooter, null,
+                        React.createElement(reactstrap_1.TabContent, { activeTab: this.props.editEventModalActiveTab },
+                            React.createElement(reactstrap_1.TabPane, { tabId: "editEventDetailsTab" },
+                                React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.setEditEventModalActiveTab.bind(this, 'editEventFormTab') }, "Next")),
+                            React.createElement(reactstrap_1.TabPane, { tabId: "editEventFormTab" },
+                                React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.setEditEventModalActiveTab.bind(this, 'editEventDetailsTab') }, "Back"),
+                                ' ',
+                                React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.setEditEventModalActiveTab.bind(this, 'editEventPublishTab') }, "Next")),
+                            React.createElement(reactstrap_1.TabPane, { tabId: "editEventPublishTab" },
+                                React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.setEditEventModalActiveTab.bind(this, 'editEventFormTab') }, "Back"),
+                                ' ',
+                                React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.toggleEditEventModal }, "Save"))))),
                 React.createElement(reactstrap_1.Modal, { isOpen: this.props.isAskingForRemoveRsvpConfirmation, toggle: this.toggleRemoveRsvpModal },
                     React.createElement(reactstrap_1.ModalHeader, null, "Remove RSVP?"),
                     React.createElement(reactstrap_1.ModalBody, null,
