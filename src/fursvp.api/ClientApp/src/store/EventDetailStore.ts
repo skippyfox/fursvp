@@ -3,6 +3,7 @@ import { AppThunkAction } from '.';
 import { FursvpEvent, Member, FormPrompt, FormResponses, NewEventCreatedAction } from './FursvpEvents';
 import { getStoredVerifiedEmail, getStoredAuthToken, UserLoggedOutAction, OpenLoginModalAction } from './UserStore';
 import { FormikValues } from 'formik';
+import { History } from 'history';
 
 // -----------------
 // STATE - This defines the type of data maintained in the Redux store.
@@ -11,14 +12,16 @@ export interface EventDetailState {
     isLoading: boolean;
     id?: string;
     fursvpEvent: FursvpEvent | undefined;
-    modalIsOpen: boolean;
+    memberModalIsOpen: boolean;
+    editEventModalIsOpen: boolean;
     modalMember: Member | undefined;
     requestedAsUser: string | undefined;
-    modalIsInEditMode: boolean;
+    modalIsInEditMemberMode: boolean;
     isSaving: boolean;
     isAskingForRemoveRsvpConfirmation: boolean;
     rsvpRemovedModalIsOpen: boolean;
     actingMember: Member | undefined;
+    editEventModalActiveTab: string;
 }
 
 // -----------------
@@ -42,7 +45,7 @@ interface ToggleModalAction {
     type: 'TOGGLE_MEMBER_MODAL_ACTION';
 }
 
-interface OpenModalAction {
+interface OpenMemberModalAction {
     type: 'OPEN_MEMBER_MODAL_ACTION';
     member: Member | undefined;
 }
@@ -95,14 +98,27 @@ interface CancelEditMemberAction {
     type: 'CANCEL_EDIT_MEMBER';
 }
 
+interface OpenEditEventModalAction {
+    type: 'OPEN_EDIT_EVENT_MODAL';
+}
+
+interface ToggleEditEventModalAction {
+    type: 'TOGGLE_EDIT_EVENT_MODAL';
+}
+
+interface SetEditEventModalActiveTabAction {
+    type: 'SET_EDIT_EVENT_MODAL_ACTIVE_TAB';
+    tabId: string;
+}
+
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
-type KnownAction = RequestFursvpEventAction | ReceiveFursvpEventAction | ToggleModalAction | OpenModalAction | FursvpEventNotFoundAction
+type KnownAction = RequestFursvpEventAction | ReceiveFursvpEventAction | ToggleModalAction | OpenMemberModalAction | FursvpEventNotFoundAction
     | UserLoggedOutAction | OpenLoginModalAction
     | OpenNewMemberModalAction | OpenEditExistingMemberModalAction
     | SavingMemberAction | NewMemberAddedAction | MemberEditedAction | CancelEditMemberAction
     | AskForRemoveRsvpAction | RemovingRsvpAction | RsvpRemovedAction | ToggleRemoveRsvpModalAction | ToggleRsvpRemovedModalAction
-    | NewEventCreatedAction;
+    | NewEventCreatedAction | OpenEditEventModalAction | ToggleEditEventModalAction | SetEditEventModalActiveTabAction;
 
 const getMemberById = (event: FursvpEvent, memberId: string | undefined): Member | undefined => {
     if (memberId === undefined) {
@@ -124,7 +140,7 @@ const getMemberById = (event: FursvpEvent, memberId: string | undefined): Member
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
 // They don't directly mutate state, but they can have external side-effects (such as loading data).
 export const actionCreators = {
-    requestFursvpEvent: (eventId: string, memberId: string | undefined): AppThunkAction<KnownAction> => (dispatch, getState) => {
+    requestFursvpEvent: (eventId: string, memberId: string | undefined, editingEvent: boolean, history: History<any>): AppThunkAction<KnownAction> => (dispatch, getState) => {
         // Only load data if it's something we don't already have (and are not already loading)
         const appState = getState();
         if (appState && appState.targetEvent) {
@@ -160,6 +176,15 @@ export const actionCreators = {
                             throw new Error();
                         }
                         dispatch({ type: 'RECEIVE_FURSVP_EVENT', fursvpEvent: data, id: eventId, member: getMemberById(data, memberId) });
+                        if (editingEvent) {
+                            var actingMember = getActingMember(data.members, getStoredVerifiedEmail());
+                            if (actingMember !== undefined && (actingMember.isOrganizer || actingMember.isAuthor)) {
+                                dispatch({ type: 'OPEN_EDIT_EVENT_MODAL' });
+                            }
+                            else {
+                                history.push(`/event/${eventId}`);
+                            }
+                        }
                     })
                     .catch(err => {
                         dispatch({ type: 'FURSVP_EVENT_NOT_FOUND' });
@@ -178,7 +203,7 @@ export const actionCreators = {
                     dispatch({ type: 'OPEN_MEMBER_MODAL_ACTION', member: undefined })
                 }
             }
-            else if (appState.targetEvent.modalIsOpen && !appState.targetEvent.modalIsInEditMode) {
+            else if (appState.targetEvent.memberModalIsOpen && !appState.targetEvent.modalIsInEditMemberMode) {
                 //Same event is not yet loaded or member is not specified, and modal is open for some reason
                 dispatch({ type: 'TOGGLE_MEMBER_MODAL_ACTION' });
             }
@@ -272,8 +297,16 @@ export const actionCreators = {
         dispatch({ type: 'OPEN_LOGIN_MODAL_ACTION' });
     },
 
-    openModal: (member: Member): AppThunkAction<KnownAction> => (dispatch, getState) => {
+    openMemberModal: (member: Member): AppThunkAction<KnownAction> => (dispatch, getState) => {
         dispatch({ type: 'OPEN_MEMBER_MODAL_ACTION', member: member });
+    },
+
+    openEditEventModal: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        dispatch({ type: 'OPEN_EDIT_EVENT_MODAL' });
+    },
+
+    toggleEditEventModal: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        dispatch({ type: 'TOGGLE_EDIT_EVENT_MODAL' });
     },
 
     openNewMemberModal: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
@@ -283,6 +316,10 @@ export const actionCreators = {
     openEditExistingMemberModal: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
         dispatch({ type: 'OPEN_EDIT_EXISTING_MEMBER_MODAL' });
     },
+
+    setEditEventModalActiveTab: (tabId: string): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        dispatch({ type: 'SET_EDIT_EVENT_MODAL_ACTIVE_TAB', tabId });
+    }, 
 
     editExistingMember: (member : Member, values: FormikValues): AppThunkAction<KnownAction> => (dispatch, getState) => {
         var state = getState();
@@ -480,14 +517,16 @@ function getActingMember(memberList : Member[], emailAddress : string | undefine
 const unloadedState: EventDetailState = {
     fursvpEvent: undefined,
     isLoading: true,
-    modalIsOpen: false,
+    memberModalIsOpen: false,
     modalMember: undefined,
     requestedAsUser: undefined,
-    modalIsInEditMode: false,
+    modalIsInEditMemberMode: false,
     isSaving: false,
     isAskingForRemoveRsvpConfirmation: false,
     rsvpRemovedModalIsOpen: false,
-    actingMember: undefined
+    actingMember: undefined,
+    editEventModalIsOpen: false,
+    editEventModalActiveTab: 'editEventDetailsTab'
 };
 
 // ----------------
@@ -515,21 +554,21 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
                 },
                 isLoading: false,
                 id: action.id,
-                modalIsOpen: state.modalIsOpen || action.member !== undefined,
+                memberModalIsOpen: state.memberModalIsOpen || action.member !== undefined,
                 modalMember: action.member !== undefined ? action.member : state.modalMember,
                 actingMember: getActingMember(action.fursvpEvent.members, state.requestedAsUser)
             };
         case 'TOGGLE_MEMBER_MODAL_ACTION':
             return {
                 ...state,
-                modalIsOpen: !state.modalIsOpen,
-                modalIsInEditMode: false,
+                memberModalIsOpen: !state.memberModalIsOpen,
+                modalIsInEditMemberMode: false,
                 isAskingForRemoveRsvpConfirmation: false
             };
         case 'OPEN_MEMBER_MODAL_ACTION':
             return {
                 ...state,
-                modalIsOpen: true,
+                memberModalIsOpen: true,
                 modalMember: action.member
             };
         case 'FURSVP_EVENT_NOT_FOUND':
@@ -548,15 +587,15 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
         case 'OPEN_NEW_MEMBER_MODAL':
             return {
                 ...state,
-                modalIsOpen: true,
+                memberModalIsOpen: true,
                 modalMember: undefined,
-                modalIsInEditMode: true
+                modalIsInEditMemberMode: true
             };
         case 'OPEN_EDIT_EXISTING_MEMBER_MODAL':
             return {
                 ...state,
-                modalIsOpen: true,
-                modalIsInEditMode: true
+                memberModalIsOpen: true,
+                modalIsInEditMemberMode: true
             };
         case 'SAVING_MEMBER':
             return {
@@ -568,14 +607,14 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
                 ...state,
                 isLoading: true,
                 isSaving: false,
-                modalIsInEditMode: false
+                modalIsInEditMemberMode: false
             };
         case 'NEW_MEMBER_ADDED':
             return {
                 ...state,
                 isSaving: false,
-                modalIsOpen: false,
-                modalIsInEditMode: false
+                memberModalIsOpen: false,
+                modalIsInEditMemberMode: false
             };
         case 'ASK_FOR_REMOVE_RSVP_CONFIRMATION':
             return {
@@ -599,9 +638,9 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
         case 'TOGGLE_RSVP_REMOVED_MODAL':
             return {
                 ...state,
-                modalIsOpen: false,
+                memberModalIsOpen: false,
                 modalMember: undefined,
-                modalIsInEditMode: false,
+                modalIsInEditMemberMode: false,
                 rsvpRemovedModalIsOpen: false
             }
         case 'TOGGLE_REMOVE_RSVP_MODAL_ACTION':
@@ -612,7 +651,7 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
         case 'CANCEL_EDIT_MEMBER':
             return {
                 ...state,
-                modalIsInEditMode: false
+                modalIsInEditMemberMode: false
             };
         case 'NEW_EVENT_CREATED':
             return {
@@ -620,10 +659,26 @@ export const reducer: Reducer<EventDetailState> = (state: EventDetailState | und
                 fursvpEvent: action.event,
                 isLoading: false,
                 id: action.event.id,
-                modalIsOpen: false,
+                memberModalIsOpen: false,
                 modalMember: undefined,
                 requestedAsUser: action.requestedAsUser,
                 actingMember: getActingMember(action.event.members, action.requestedAsUser)
+            }
+        case 'OPEN_EDIT_EVENT_MODAL':
+            return {
+                ...state,
+                editEventModalIsOpen: true,
+                editEventModalActiveTab: 'editEventDetailsTab'
+            }
+        case 'TOGGLE_EDIT_EVENT_MODAL':
+            return {
+                ...state,
+                editEventModalIsOpen: false
+            }
+        case 'SET_EDIT_EVENT_MODAL_ACTIVE_TAB':
+            return {
+                ...state,
+                editEventModalActiveTab: action.tabId
             }
         default:
             return state;

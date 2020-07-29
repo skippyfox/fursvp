@@ -104,6 +104,9 @@ var EventDetail = /** @class */ (function (_super) {
         _this.editExistingMember = _this.editExistingMember.bind(_this);
         _this.toggleRsvpRemovedModal = _this.toggleRsvpRemovedModal.bind(_this);
         _this.cancelEditMember = _this.cancelEditMember.bind(_this);
+        _this.openEditEventModal = _this.openEditEventModal.bind(_this);
+        _this.toggleEditEventModal = _this.toggleEditEventModal.bind(_this);
+        _this.setEditEventModalActiveTab = _this.setEditEventModalActiveTab.bind(_this);
         return _this;
     }
     // This method is called when the component is first added to the document
@@ -196,8 +199,9 @@ var EventDetail = /** @class */ (function (_super) {
                     this.joinResponsesToPrompts(responses, event.form).sort(function (x) { return x.prompt.sortOrder; }).map(function (promptWithResponse) {
                         return promptWithResponse.responses !== undefined
                             ? React.createElement(reactstrap_1.ListGroupItem, { key: promptWithResponse.prompt.id },
-                                React.createElement(reactstrap_1.ListGroupItemHeading, null, promptWithResponse.prompt.prompt),
-                                promptWithResponse.responses.responses.map(function (individualResponse) { return React.createElement(reactstrap_1.ListGroupItemText, { key: individualResponse }, individualResponse); }))
+                                React.createElement(reactstrap_1.ListGroupItemText, null,
+                                    promptWithResponse.prompt.prompt,
+                                    React.createElement("ul", null, promptWithResponse.responses.responses.map(function (individualResponse) { return React.createElement("li", { key: individualResponse }, individualResponse); }))))
                             : React.createElement(React.Fragment, null);
                     }),
                     React.createElement(reactstrap_1.ListGroupItem, null,
@@ -313,6 +317,31 @@ var EventDetail = /** @class */ (function (_super) {
         }
         return false;
     };
+    EventDetail.prototype.canAddRsvpWhenClosed = function (member) {
+        if (member === undefined) {
+            return false;
+        }
+        return member.isAuthor || member.isOrganizer;
+    };
+    EventDetail.prototype.renderAddRsvpButtonContent = function (event, rsvpsAreClosed, canAddRsvpWhenClosed) {
+        if (rsvpsAreClosed && !canAddRsvpWhenClosed) {
+            return React.createElement(React.Fragment, null, "RSVPs are not open at this time.");
+        }
+        return (React.createElement(React.Fragment, null,
+            "Add an RSVP",
+            !rsvpsAreClosed && event.rsvpClosesAtLocal != null
+                ? React.createElement(React.Fragment, null,
+                    React.createElement("br", null),
+                    React.createElement("small", null,
+                        "RSVPs are open until ",
+                        React.createElement(DateTime_1.default, { date: event.rsvpClosesAtLocal, timeZoneOffset: event.timeZoneOffset, id: "eventDetailRsvpsCloseAt" })))
+                : React.createElement(React.Fragment, null),
+            rsvpsAreClosed && canAddRsvpWhenClosed
+                ? React.createElement(React.Fragment, null,
+                    React.createElement("br", null),
+                    React.createElement("small", null, "RSVPs are open only to organizers as this time"))
+                : React.createElement(React.Fragment, null)));
+    };
     EventDetail.prototype.render = function () {
         var _this = this;
         if (this.props.fursvpEvent !== undefined) {
@@ -320,6 +349,7 @@ var EventDetail = /** @class */ (function (_super) {
             var member = this.props.modalMember;
             var responses = this.props.modalMember !== undefined ? this.props.modalMember.responses : [];
             var rsvpsAreClosed = this.rsvpsAreClosed(event);
+            var canAddRsvpWhenClosed = this.canAddRsvpWhenClosed(this.props.actingMember);
             var padlock = React.createElement(React.Fragment, null);
             if (!event.isPublished) {
                 padlock = React.createElement(React.Fragment, null,
@@ -329,7 +359,12 @@ var EventDetail = /** @class */ (function (_super) {
             return (React.createElement(React.Fragment, null,
                 React.createElement("h1", { id: "tabelLabel" },
                     event.name,
-                    padlock),
+                    padlock,
+                    this.props.actingMember !== undefined && (this.props.actingMember.isAuthor || this.props.actingMember.isOrganizer)
+                        ? React.createElement(React.Fragment, null,
+                            ' ',
+                            React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.openEditEventModal }, "Edit"))
+                        : React.createElement(React.Fragment, null)),
                 React.createElement(reactstrap_1.Container, null,
                     React.createElement("span", { className: "text-muted" }, "Starts"),
                     " ",
@@ -345,25 +380,28 @@ var EventDetail = /** @class */ (function (_super) {
                 React.createElement(reactstrap_1.Container, null, event.otherDetails),
                 React.createElement(reactstrap_1.Container, null,
                     React.createElement(reactstrap_1.ListGroup, null,
-                        React.createElement(reactstrap_1.ListGroupItem, { active: true, tag: "button", action: true, onClick: this.openNewMemberModal, disabled: rsvpsAreClosed }, rsvpsAreClosed ?
-                            React.createElement(React.Fragment, null, "RSVPs are not open at this time.")
-                            : React.createElement(React.Fragment, null,
-                                "Add an RSVP",
-                                event.rsvpClosesAtLocal != null
-                                    ? React.createElement(React.Fragment, null,
-                                        React.createElement("br", null),
-                                        React.createElement("small", null,
-                                            "RSVPs are open until ",
-                                            React.createElement(DateTime_1.default, { date: event.rsvpClosesAtLocal, timeZoneOffset: event.timeZoneOffset, id: "eventDetailRsvpsCloseAt" })))
-                                    : React.createElement(React.Fragment, null))),
+                        React.createElement(reactstrap_1.ListGroupItem, { active: true, tag: "button", action: true, onClick: this.openNewMemberModal, disabled: rsvpsAreClosed && !canAddRsvpWhenClosed }, this.renderAddRsvpButtonContent(event, rsvpsAreClosed, canAddRsvpWhenClosed)),
                         event.members.map(function (member) {
                             return React.createElement(reactstrap_1.ListGroupItem, { key: member.id, tag: "button", action: true, onClick: _this.showMember.bind(_this, member) },
                                 _this.memberTypeEmoji(member),
                                 member.name);
                         }))),
-                React.createElement(reactstrap_1.Modal, { isOpen: this.props.modalIsOpen, toggle: this.toggleModal }, this.props.modalIsInEditMode
+                React.createElement(reactstrap_1.Modal, { isOpen: this.props.memberModalIsOpen, toggle: this.toggleModal }, this.props.modalIsInEditMemberMode
                     ? this.renderEditMemberModalContent(event, member)
                     : this.renderViewOnlyModalContent(event, member, responses)),
+                React.createElement(reactstrap_1.Modal, { isOpen: this.props.editEventModalIsOpen, toggle: this.toggleEditEventModal },
+                    React.createElement(reactstrap_1.ModalBody, null,
+                        React.createElement(reactstrap_1.Nav, { tabs: true },
+                            React.createElement(reactstrap_1.NavItem, null,
+                                React.createElement(reactstrap_1.NavLink, { className: this.props.editEventModalActiveTab == 'editEventDetailsTab' ? "active" : "", onClick: this.setEditEventModalActiveTab.bind(this, 'editEventDetailsTab') }, "Details")),
+                            React.createElement(reactstrap_1.NavItem, null,
+                                React.createElement(reactstrap_1.NavLink, { className: this.props.editEventModalActiveTab == 'editEventFormTab' ? "active" : "", onClick: this.setEditEventModalActiveTab.bind(this, 'editEventFormTab') }, "RSVP Form")),
+                            React.createElement(reactstrap_1.NavItem, null,
+                                React.createElement(reactstrap_1.NavLink, { className: this.props.editEventModalActiveTab == 'editEventPublishTab' ? "active" : "", onClick: this.setEditEventModalActiveTab.bind(this, 'editEventPublishTab') }, "Publish"))),
+                        React.createElement(reactstrap_1.TabContent, { activeTab: this.props.editEventModalActiveTab },
+                            React.createElement(reactstrap_1.TabPane, { tabId: "editEventDetailsTab" }, "Details"),
+                            React.createElement(reactstrap_1.TabPane, { tabId: "editEventFormTab" }, "RSVP Form"),
+                            React.createElement(reactstrap_1.TabPane, { tabId: "editEventPublishTab" }, "Publish")))),
                 React.createElement(reactstrap_1.Modal, { isOpen: this.props.isAskingForRemoveRsvpConfirmation, toggle: this.toggleRemoveRsvpModal },
                     React.createElement(reactstrap_1.ModalHeader, null, "Remove RSVP?"),
                     React.createElement(reactstrap_1.ModalBody, null,
@@ -455,7 +493,15 @@ var EventDetail = /** @class */ (function (_super) {
     };
     EventDetail.prototype.showMember = function (member) {
         this.props.history.push('/event/' + this.props.id + '/member/' + member.id);
-        this.props.openModal(member);
+        this.props.openMemberModal(member);
+    };
+    EventDetail.prototype.openEditEventModal = function () {
+        this.props.history.push("/event/" + this.props.id + "/edit");
+        this.props.openEditEventModal();
+    };
+    EventDetail.prototype.toggleEditEventModal = function () {
+        this.props.history.push("/event/" + this.props.id);
+        this.props.toggleEditEventModal();
     };
     EventDetail.prototype.openNewMemberModal = function () {
         this.props.openNewMemberModal();
@@ -467,7 +513,7 @@ var EventDetail = /** @class */ (function (_super) {
         this.props.editExistingMember(member, values);
     };
     EventDetail.prototype.toggleModal = function () {
-        if (this.props.modalIsOpen && this.props.modalMember !== undefined) {
+        if (this.props.memberModalIsOpen && this.props.modalMember !== undefined) {
             this.props.history.push('/event/' + this.props.id);
             this.props.toggleModal();
         }
@@ -495,7 +541,10 @@ var EventDetail = /** @class */ (function (_super) {
         this.props.askForRemoveRsvpConfirmation();
     };
     EventDetail.prototype.ensureDataFetched = function () {
-        this.props.requestFursvpEvent(this.props.match.params.eventId, this.props.match.params.memberId);
+        this.props.requestFursvpEvent(this.props.match.params.eventId, this.props.match.params.memberId, this.props.match.path.search("edit") !== -1, this.props.history);
+    };
+    EventDetail.prototype.setEditEventModalActiveTab = function (tabId) {
+        this.props.setEditEventModalActiveTab(tabId);
     };
     return EventDetail;
 }(React.PureComponent));

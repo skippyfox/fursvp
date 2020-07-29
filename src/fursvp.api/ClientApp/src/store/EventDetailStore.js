@@ -28,7 +28,7 @@ var getMemberById = function (event, memberId) {
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
 // They don't directly mutate state, but they can have external side-effects (such as loading data).
 exports.actionCreators = {
-    requestFursvpEvent: function (eventId, memberId) { return function (dispatch, getState) {
+    requestFursvpEvent: function (eventId, memberId, editingEvent, history) { return function (dispatch, getState) {
         // Only load data if it's something we don't already have (and are not already loading)
         var appState = getState();
         if (appState && appState.targetEvent) {
@@ -58,6 +58,15 @@ exports.actionCreators = {
                         throw new Error();
                     }
                     dispatch({ type: 'RECEIVE_FURSVP_EVENT', fursvpEvent: data, id: eventId, member: getMemberById(data, memberId) });
+                    if (editingEvent) {
+                        var actingMember = getActingMember(data.members, UserStore_1.getStoredVerifiedEmail());
+                        if (actingMember !== undefined && (actingMember.isOrganizer || actingMember.isAuthor)) {
+                            dispatch({ type: 'OPEN_EDIT_EVENT_MODAL' });
+                        }
+                        else {
+                            history.push("/event/" + eventId);
+                        }
+                    }
                 })
                     .catch(function (err) {
                     dispatch({ type: 'FURSVP_EVENT_NOT_FOUND' });
@@ -75,7 +84,7 @@ exports.actionCreators = {
                     dispatch({ type: 'OPEN_MEMBER_MODAL_ACTION', member: undefined });
                 }
             }
-            else if (appState.targetEvent.modalIsOpen && !appState.targetEvent.modalIsInEditMode) {
+            else if (appState.targetEvent.memberModalIsOpen && !appState.targetEvent.modalIsInEditMemberMode) {
                 //Same event is not yet loaded or member is not specified, and modal is open for some reason
                 dispatch({ type: 'TOGGLE_MEMBER_MODAL_ACTION' });
             }
@@ -154,14 +163,23 @@ exports.actionCreators = {
     openLoginModal: function () { return function (dispatch, getState) {
         dispatch({ type: 'OPEN_LOGIN_MODAL_ACTION' });
     }; },
-    openModal: function (member) { return function (dispatch, getState) {
+    openMemberModal: function (member) { return function (dispatch, getState) {
         dispatch({ type: 'OPEN_MEMBER_MODAL_ACTION', member: member });
+    }; },
+    openEditEventModal: function () { return function (dispatch, getState) {
+        dispatch({ type: 'OPEN_EDIT_EVENT_MODAL' });
+    }; },
+    toggleEditEventModal: function () { return function (dispatch, getState) {
+        dispatch({ type: 'TOGGLE_EDIT_EVENT_MODAL' });
     }; },
     openNewMemberModal: function () { return function (dispatch, getState) {
         dispatch({ type: 'OPEN_NEW_MEMBER_MODAL' });
     }; },
     openEditExistingMemberModal: function () { return function (dispatch, getState) {
         dispatch({ type: 'OPEN_EDIT_EXISTING_MEMBER_MODAL' });
+    }; },
+    setEditEventModalActiveTab: function (tabId) { return function (dispatch, getState) {
+        dispatch({ type: 'SET_EDIT_EVENT_MODAL_ACTIVE_TAB', tabId: tabId });
     }; },
     editExistingMember: function (member, values) { return function (dispatch, getState) {
         var state = getState();
@@ -332,14 +350,16 @@ function getActingMember(memberList, emailAddress) {
 var unloadedState = {
     fursvpEvent: undefined,
     isLoading: true,
-    modalIsOpen: false,
+    memberModalIsOpen: false,
     modalMember: undefined,
     requestedAsUser: undefined,
-    modalIsInEditMode: false,
+    modalIsInEditMemberMode: false,
     isSaving: false,
     isAskingForRemoveRsvpConfirmation: false,
     rsvpRemovedModalIsOpen: false,
-    actingMember: undefined
+    actingMember: undefined,
+    editEventModalIsOpen: false,
+    editEventModalActiveTab: 'editEventDetailsTab'
 };
 // ----------------
 // REDUCER - For a given state and action, returns the new state. To support time travel, this must not mutate the old state.
@@ -352,25 +372,25 @@ exports.reducer = function (state, incomingAction) {
         case 'REQUEST_FURSVP_EVENT':
             return __assign(__assign({}, state), { isLoading: true, id: action.id, requestedAsUser: action.requestedAsUser });
         case 'RECEIVE_FURSVP_EVENT':
-            return __assign(__assign({}, state), { fursvpEvent: __assign(__assign({}, action.fursvpEvent), { members: action.fursvpEvent.members.sort(function (m) { return new Date(m.rsvpedAtUtc).getTime(); }).reverse() }), isLoading: false, id: action.id, modalIsOpen: state.modalIsOpen || action.member !== undefined, modalMember: action.member !== undefined ? action.member : state.modalMember, actingMember: getActingMember(action.fursvpEvent.members, state.requestedAsUser) });
+            return __assign(__assign({}, state), { fursvpEvent: __assign(__assign({}, action.fursvpEvent), { members: action.fursvpEvent.members.sort(function (m) { return new Date(m.rsvpedAtUtc).getTime(); }).reverse() }), isLoading: false, id: action.id, memberModalIsOpen: state.memberModalIsOpen || action.member !== undefined, modalMember: action.member !== undefined ? action.member : state.modalMember, actingMember: getActingMember(action.fursvpEvent.members, state.requestedAsUser) });
         case 'TOGGLE_MEMBER_MODAL_ACTION':
-            return __assign(__assign({}, state), { modalIsOpen: !state.modalIsOpen, modalIsInEditMode: false, isAskingForRemoveRsvpConfirmation: false });
+            return __assign(__assign({}, state), { memberModalIsOpen: !state.memberModalIsOpen, modalIsInEditMemberMode: false, isAskingForRemoveRsvpConfirmation: false });
         case 'OPEN_MEMBER_MODAL_ACTION':
-            return __assign(__assign({}, state), { modalIsOpen: true, modalMember: action.member });
+            return __assign(__assign({}, state), { memberModalIsOpen: true, modalMember: action.member });
         case 'FURSVP_EVENT_NOT_FOUND':
             return __assign(__assign({}, state), { isLoading: false });
         case 'USER_LOGGED_OUT_ACTION':
             return __assign(__assign({}, state), { modalMember: undefined, fursvpEvent: undefined, isLoading: true, actingMember: undefined });
         case 'OPEN_NEW_MEMBER_MODAL':
-            return __assign(__assign({}, state), { modalIsOpen: true, modalMember: undefined, modalIsInEditMode: true });
+            return __assign(__assign({}, state), { memberModalIsOpen: true, modalMember: undefined, modalIsInEditMemberMode: true });
         case 'OPEN_EDIT_EXISTING_MEMBER_MODAL':
-            return __assign(__assign({}, state), { modalIsOpen: true, modalIsInEditMode: true });
+            return __assign(__assign({}, state), { memberModalIsOpen: true, modalIsInEditMemberMode: true });
         case 'SAVING_MEMBER':
             return __assign(__assign({}, state), { isSaving: true });
         case 'MEMBER_EDITED':
-            return __assign(__assign({}, state), { isLoading: true, isSaving: false, modalIsInEditMode: false });
+            return __assign(__assign({}, state), { isLoading: true, isSaving: false, modalIsInEditMemberMode: false });
         case 'NEW_MEMBER_ADDED':
-            return __assign(__assign({}, state), { isSaving: false, modalIsOpen: false, modalIsInEditMode: false });
+            return __assign(__assign({}, state), { isSaving: false, memberModalIsOpen: false, modalIsInEditMemberMode: false });
         case 'ASK_FOR_REMOVE_RSVP_CONFIRMATION':
             return __assign(__assign({}, state), { isAskingForRemoveRsvpConfirmation: true });
         case 'REMOVING_RSVP':
@@ -378,13 +398,19 @@ exports.reducer = function (state, incomingAction) {
         case 'RSVP_REMOVED':
             return __assign(__assign({}, state), { isLoading: true, isSaving: false, isAskingForRemoveRsvpConfirmation: false, rsvpRemovedModalIsOpen: true });
         case 'TOGGLE_RSVP_REMOVED_MODAL':
-            return __assign(__assign({}, state), { modalIsOpen: false, modalMember: undefined, modalIsInEditMode: false, rsvpRemovedModalIsOpen: false });
+            return __assign(__assign({}, state), { memberModalIsOpen: false, modalMember: undefined, modalIsInEditMemberMode: false, rsvpRemovedModalIsOpen: false });
         case 'TOGGLE_REMOVE_RSVP_MODAL_ACTION':
             return __assign(__assign({}, state), { isAskingForRemoveRsvpConfirmation: false });
         case 'CANCEL_EDIT_MEMBER':
-            return __assign(__assign({}, state), { modalIsInEditMode: false });
+            return __assign(__assign({}, state), { modalIsInEditMemberMode: false });
         case 'NEW_EVENT_CREATED':
-            return __assign(__assign({}, state), { fursvpEvent: action.event, isLoading: false, id: action.event.id, modalIsOpen: false, modalMember: undefined, requestedAsUser: action.requestedAsUser, actingMember: getActingMember(action.event.members, action.requestedAsUser) });
+            return __assign(__assign({}, state), { fursvpEvent: action.event, isLoading: false, id: action.event.id, memberModalIsOpen: false, modalMember: undefined, requestedAsUser: action.requestedAsUser, actingMember: getActingMember(action.event.members, action.requestedAsUser) });
+        case 'OPEN_EDIT_EVENT_MODAL':
+            return __assign(__assign({}, state), { editEventModalIsOpen: true, editEventModalActiveTab: 'editEventDetailsTab' });
+        case 'TOGGLE_EDIT_EVENT_MODAL':
+            return __assign(__assign({}, state), { editEventModalIsOpen: false });
+        case 'SET_EDIT_EVENT_MODAL_ACTIVE_TAB':
+            return __assign(__assign({}, state), { editEventModalActiveTab: action.tabId });
         default:
             return state;
     }

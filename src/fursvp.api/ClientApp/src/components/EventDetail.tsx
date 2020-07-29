@@ -1,5 +1,11 @@
 ﻿import * as React from 'react';
-import { Container, UncontrolledTooltip, ListGroup, ListGroupItem, Modal, ModalHeader, ModalBody, ModalFooter, Button, ListGroupItemText, ListGroupItemHeading, Form, FormGroup, Label, Input } from 'reactstrap';
+import {
+    Button, Container, FormGroup, Input,
+    Label, ListGroup, ListGroupItem, ListGroupItemText,
+    Modal, ModalHeader, ModalBody, ModalFooter,
+    Nav, NavItem, NavLink, TabContent, TabPane,
+    UncontrolledTooltip
+} from 'reactstrap';
 import { connect } from 'react-redux';
 import { RouteComponentProps, Redirect } from 'react-router';
 import { ApplicationState } from '../store';
@@ -110,6 +116,9 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
         this.editExistingMember = this.editExistingMember.bind(this);
         this.toggleRsvpRemovedModal = this.toggleRsvpRemovedModal.bind(this);
         this.cancelEditMember = this.cancelEditMember.bind(this);
+        this.openEditEventModal = this.openEditEventModal.bind(this);
+        this.toggleEditEventModal = this.toggleEditEventModal.bind(this);
+        this.setEditEventModalActiveTab = this.setEditEventModalActiveTab.bind(this);
     }
 
     // This method is called when the component is first added to the document
@@ -229,8 +238,10 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                     {this.joinResponsesToPrompts(responses, event.form).sort(x => x.prompt.sortOrder).map(promptWithResponse => {
                         return promptWithResponse.responses !== undefined
                             ? <ListGroupItem key={promptWithResponse.prompt.id}>
-                                <ListGroupItemHeading>{promptWithResponse.prompt.prompt}</ListGroupItemHeading>
-                                {promptWithResponse.responses.responses.map(individualResponse => <ListGroupItemText key={individualResponse}>{individualResponse}</ListGroupItemText>)}
+                                <ListGroupItemText>
+                                    {promptWithResponse.prompt.prompt}
+                                    <ul>{promptWithResponse.responses.responses.map(individualResponse => <li key={individualResponse}>{individualResponse}</li>)}</ul>
+                                </ListGroupItemText>
                             </ListGroupItem>
                             : <></>;
                         }
@@ -364,6 +375,32 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
         return false;
     }
 
+    private canAddRsvpWhenClosed(member: Member | undefined): boolean {
+        if (member === undefined) {
+            return false;
+        }
+
+        return member.isAuthor || member.isOrganizer;
+    }
+
+    private renderAddRsvpButtonContent(event: FursvpEventsStore.FursvpEvent, rsvpsAreClosed: boolean, canAddRsvpWhenClosed: boolean): React.ReactNode {
+        if (rsvpsAreClosed && !canAddRsvpWhenClosed) {
+            return <>RSVPs are not open at this time.</>;
+        }
+
+        return (
+            <>
+                Add an RSVP
+                {!rsvpsAreClosed && event.rsvpClosesAtLocal != null
+                    ? <><br /><small>RSVPs are open until <DateTime date={event.rsvpClosesAtLocal} timeZoneOffset={event.timeZoneOffset} id="eventDetailRsvpsCloseAt" /></small></>
+                    : <></>}
+                {rsvpsAreClosed && canAddRsvpWhenClosed
+                    ? <><br /><small>RSVPs are open only to organizers as this time</small></>
+                    : <></>}
+            </>
+        );
+    }
+
     public render() {
         if (this.props.fursvpEvent !== undefined) {
             var event = this.props.fursvpEvent;
@@ -371,6 +408,7 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
             var responses: FursvpEventsStore.FormResponses[] = this.props.modalMember !== undefined ? this.props.modalMember.responses : [];
 
             var rsvpsAreClosed = this.rsvpsAreClosed(event);
+            var canAddRsvpWhenClosed = this.canAddRsvpWhenClosed(this.props.actingMember);
 
             let padlock = <></>;
             if (!event.isPublished) {
@@ -383,7 +421,11 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
             return (
                 <React.Fragment>
                     <h1 id="tabelLabel">
-                        {event.name}{padlock}
+                        {event.name}
+                        {padlock}
+                        {this.props.actingMember !== undefined && (this.props.actingMember.isAuthor || this.props.actingMember.isOrganizer)
+                            ? <>{' '}<Button color="primary" onClick={this.openEditEventModal}>Edit</Button></>
+                            : <></>}
                     </h1>
                     <Container>
                         <span className="text-muted">Starts</span> <DateTime date={event.startsAtLocal} timeZoneOffset={event.timeZoneOffset} id="eventDetail_startsAt" />
@@ -399,15 +441,8 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                     </Container>
                     <Container>
                         <ListGroup>
-                            <ListGroupItem active tag="button" action onClick={this.openNewMemberModal} disabled={rsvpsAreClosed}>
-                                {rsvpsAreClosed ?
-                                    <>RSVPs are not open at this time.</>
-                                    : <>
-                                        Add an RSVP
-                                        {event.rsvpClosesAtLocal != null
-                                            ? <><br /><small>RSVPs are open until <DateTime date={event.rsvpClosesAtLocal} timeZoneOffset={event.timeZoneOffset} id="eventDetailRsvpsCloseAt" /></small></>
-                                            : <></>}
-                                      </>}                        
+                            <ListGroupItem active tag="button" action onClick={this.openNewMemberModal} disabled={rsvpsAreClosed && !canAddRsvpWhenClosed}>
+                                {this.renderAddRsvpButtonContent(event, rsvpsAreClosed, canAddRsvpWhenClosed)}                  
                             </ListGroupItem>
                             {event.members.map((member: FursvpEventsStore.Member) =>
                                 <ListGroupItem key={member.id} tag="button" action onClick={this.showMember.bind(this, member)}>
@@ -417,11 +452,43 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                             )}
                         </ListGroup>
                     </Container>
-                    <Modal isOpen={this.props.modalIsOpen} toggle={this.toggleModal}>
-                        {this.props.modalIsInEditMode
+                    <Modal isOpen={this.props.memberModalIsOpen} toggle={this.toggleModal}>
+                        {this.props.modalIsInEditMemberMode
                             ? this.renderEditMemberModalContent(event, member)
                             : this.renderViewOnlyModalContent(event, member, responses)
                         }
+                    </Modal>
+                    <Modal isOpen={this.props.editEventModalIsOpen} toggle={this.toggleEditEventModal}>
+                        <ModalBody>
+                            <Nav tabs>
+                                <NavItem>
+                                    <NavLink className={this.props.editEventModalActiveTab == 'editEventDetailsTab' ? "active" : ""} onClick={this.setEditEventModalActiveTab.bind(this, 'editEventDetailsTab')}>
+                                        Details
+                                    </NavLink>
+                                </NavItem>
+                                <NavItem>
+                                    <NavLink className={this.props.editEventModalActiveTab == 'editEventFormTab' ? "active" : ""} onClick={this.setEditEventModalActiveTab.bind(this, 'editEventFormTab')}>
+                                        RSVP Form
+                                    </NavLink>
+                                </NavItem>
+                                <NavItem>
+                                    <NavLink className={this.props.editEventModalActiveTab == 'editEventPublishTab' ? "active" : ""} onClick={this.setEditEventModalActiveTab.bind(this, 'editEventPublishTab')}>
+                                        Publish
+                                    </NavLink>
+                                </NavItem>
+                            </Nav>
+                            <TabContent activeTab={this.props.editEventModalActiveTab}>
+                                <TabPane tabId="editEventDetailsTab">
+                                    Details
+                                </TabPane>
+                                <TabPane tabId="editEventFormTab">
+                                    RSVP Form
+                                </TabPane>
+                                <TabPane tabId="editEventPublishTab">
+                                    Publish
+                                </TabPane>
+                            </TabContent>
+                        </ModalBody>
                     </Modal>
                     <Modal isOpen={this.props.isAskingForRemoveRsvpConfirmation} toggle={this.toggleRemoveRsvpModal}>
                         <ModalHeader>Remove RSVP?</ModalHeader>
@@ -535,7 +602,17 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
 
     private showMember(member: FursvpEventsStore.Member) {
         this.props.history.push('/event/' + this.props.id + '/member/' + member.id);
-        this.props.openModal(member);
+        this.props.openMemberModal(member);
+    }
+
+    private openEditEventModal() {
+        this.props.history.push(`/event/${this.props.id}/edit`);
+        this.props.openEditEventModal();
+    }
+
+    private toggleEditEventModal() {
+        this.props.history.push(`/event/${this.props.id}`);
+        this.props.toggleEditEventModal();
     }
 
     private openNewMemberModal() {
@@ -551,7 +628,7 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
     }
 
     private toggleModal() {
-        if (this.props.modalIsOpen && this.props.modalMember !== undefined) {
+        if (this.props.memberModalIsOpen && this.props.modalMember !== undefined) {
             this.props.history.push('/event/' + this.props.id);
             this.props.toggleModal();
         }
@@ -585,7 +662,11 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
     }
 
     private ensureDataFetched() {
-        this.props.requestFursvpEvent(this.props.match.params.eventId, this.props.match.params.memberId);
+        this.props.requestFursvpEvent(this.props.match.params.eventId, this.props.match.params.memberId, this.props.match.path.search("edit") !== -1, this.props.history);
+    }
+
+    private setEditEventModalActiveTab(tabId: string) {
+        this.props.setEditEventModalActiveTab(tabId);
     }
 }
 

@@ -13,6 +13,8 @@ export default () => (
         <Route exact path='/' component={Home} />
         <Route path='/contact' component={Contact} />
         <Route path='/about' component={About} />
-        <Route path='/event/:eventId/(member)?/:memberId?' component={EventDetail} />
+        <Route exact path='/event/:eventId' component={EventDetail} />
+        <Route exact path='/event/:eventId/edit' component={EventDetail} />
+        <Route exact path='/event/:eventId/member/:memberId' component={EventDetail} />
     </Layout>
 );
