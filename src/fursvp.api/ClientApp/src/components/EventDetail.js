@@ -32,6 +32,7 @@ var EventDetailStore = require("../store/EventDetailStore");
 var DateTime_1 = require("./DateTime");
 var UserStore_1 = require("../store/UserStore");
 var formik_1 = require("formik");
+var pickers_1 = require("@material-ui/pickers");
 var RsvpTextInput = function (props) {
     var _a = formik_1.useField({ id: props.id, required: props.required, name: props.id }), field = _a[0], meta = _a[1];
     return (React.createElement(React.Fragment, null,
@@ -64,6 +65,13 @@ var RsvpCheckboxGroup = function (props) {
                 ' ',
                 option);
         })));
+};
+var RsvpDateTimePicker = function (props) {
+    var setFieldValue = formik_1.useFormikContext().setFieldValue;
+    var field = formik_1.useField({ id: props.id, name: props.id })[0];
+    return (React.createElement(pickers_1.DateTimePicker, __assign({}, field, props, { onChange: function (val) {
+            setFieldValue(field.name, val);
+        } })));
 };
 var getNewMemberInitialValues = function (form) {
     var result = {
@@ -389,30 +397,35 @@ var EventDetail = /** @class */ (function (_super) {
                     ? this.renderEditMemberModalContent(event, member)
                     : this.renderViewOnlyModalContent(event, member, responses)),
                 React.createElement(reactstrap_1.Modal, { isOpen: this.props.editEventModalIsOpen, toggle: this.toggleEditEventModal },
-                    React.createElement(reactstrap_1.ModalBody, null,
-                        React.createElement(reactstrap_1.Nav, { tabs: true },
-                            React.createElement(reactstrap_1.NavItem, null,
-                                React.createElement(reactstrap_1.NavLink, { className: this.props.editEventModalActiveTab == 'editEventDetailsTab' ? "active" : "", onClick: this.setEditEventModalActiveTab.bind(this, 'editEventDetailsTab') }, "Details")),
-                            React.createElement(reactstrap_1.NavItem, null,
-                                React.createElement(reactstrap_1.NavLink, { className: this.props.editEventModalActiveTab == 'editEventFormTab' ? "active" : "", onClick: this.setEditEventModalActiveTab.bind(this, 'editEventFormTab') }, "RSVP Form")),
-                            React.createElement(reactstrap_1.NavItem, null,
-                                React.createElement(reactstrap_1.NavLink, { className: this.props.editEventModalActiveTab == 'editEventPublishTab' ? "active" : "", onClick: this.setEditEventModalActiveTab.bind(this, 'editEventPublishTab') }, "Publish"))),
-                        React.createElement(reactstrap_1.TabContent, { activeTab: this.props.editEventModalActiveTab },
-                            React.createElement(reactstrap_1.TabPane, { tabId: "editEventDetailsTab" }, "Details"),
-                            React.createElement(reactstrap_1.TabPane, { tabId: "editEventFormTab" }, "RSVP Form"),
-                            React.createElement(reactstrap_1.TabPane, { tabId: "editEventPublishTab" }, "Publish"))),
-                    React.createElement(reactstrap_1.ModalFooter, null,
-                        React.createElement(reactstrap_1.TabContent, { activeTab: this.props.editEventModalActiveTab },
-                            React.createElement(reactstrap_1.TabPane, { tabId: "editEventDetailsTab" },
-                                React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.setEditEventModalActiveTab.bind(this, 'editEventFormTab') }, "Next")),
-                            React.createElement(reactstrap_1.TabPane, { tabId: "editEventFormTab" },
-                                React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.setEditEventModalActiveTab.bind(this, 'editEventDetailsTab') }, "Back"),
-                                ' ',
-                                React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.setEditEventModalActiveTab.bind(this, 'editEventPublishTab') }, "Next")),
-                            React.createElement(reactstrap_1.TabPane, { tabId: "editEventPublishTab" },
-                                React.createElement(reactstrap_1.Button, { color: "secondary", onClick: this.setEditEventModalActiveTab.bind(this, 'editEventFormTab') }, "Back"),
-                                ' ',
-                                React.createElement(reactstrap_1.Button, { color: "primary", onClick: this.toggleEditEventModal }, "Save"))))),
+                    React.createElement(formik_1.Formik, { initialValues: this.getEditEventFormInitialValues(this.props.fursvpEvent), onSubmit: function (values) { _this.saveEventChanges(values); } }, function (formik) { return (React.createElement(formik_1.Form, { translate: undefined },
+                        React.createElement(reactstrap_1.ModalBody, null,
+                            React.createElement(reactstrap_1.Nav, { tabs: true },
+                                React.createElement(reactstrap_1.NavItem, null,
+                                    React.createElement(reactstrap_1.NavLink, { className: _this.props.editEventModalActiveTab == 'editEventDetailsTab' ? "active" : "", onClick: _this.setEditEventModalActiveTab.bind(_this, 'editEventDetailsTab') }, "Details")),
+                                React.createElement(reactstrap_1.NavItem, null,
+                                    React.createElement(reactstrap_1.NavLink, { className: _this.props.editEventModalActiveTab == 'editEventFormTab' ? "active" : "", onClick: _this.setEditEventModalActiveTab.bind(_this, 'editEventFormTab') }, "RSVP Form")),
+                                React.createElement(reactstrap_1.NavItem, null,
+                                    React.createElement(reactstrap_1.NavLink, { className: _this.props.editEventModalActiveTab == 'editEventPublishTab' ? "active" : "", onClick: _this.setEditEventModalActiveTab.bind(_this, 'editEventPublishTab') }, "Publish"))),
+                            React.createElement(reactstrap_1.TabContent, { activeTab: _this.props.editEventModalActiveTab },
+                                React.createElement(reactstrap_1.TabPane, { tabId: "editEventDetailsTab" },
+                                    React.createElement(reactstrap_1.FormGroup, null,
+                                        React.createElement(RsvpDateTimePicker, { label: "Starts At", id: "eventStartsAt" })),
+                                    React.createElement(reactstrap_1.FormGroup, null,
+                                        React.createElement(RsvpDateTimePicker, { label: "Ends At", id: "eventEndsAt" }))),
+                                React.createElement(reactstrap_1.TabPane, { tabId: "editEventFormTab" }, "RSVP Form"),
+                                React.createElement(reactstrap_1.TabPane, { tabId: "editEventPublishTab" }, "Publish"))),
+                        React.createElement(reactstrap_1.ModalFooter, null,
+                            React.createElement(reactstrap_1.TabContent, { activeTab: _this.props.editEventModalActiveTab },
+                                React.createElement(reactstrap_1.TabPane, { tabId: "editEventDetailsTab" },
+                                    React.createElement(reactstrap_1.Button, { color: "primary", onClick: _this.setEditEventModalActiveTab.bind(_this, 'editEventFormTab') }, "Next")),
+                                React.createElement(reactstrap_1.TabPane, { tabId: "editEventFormTab" },
+                                    React.createElement(reactstrap_1.Button, { color: "secondary", onClick: _this.setEditEventModalActiveTab.bind(_this, 'editEventDetailsTab') }, "Back"),
+                                    ' ',
+                                    React.createElement(reactstrap_1.Button, { color: "primary", onClick: _this.setEditEventModalActiveTab.bind(_this, 'editEventPublishTab') }, "Next")),
+                                React.createElement(reactstrap_1.TabPane, { tabId: "editEventPublishTab" },
+                                    React.createElement(reactstrap_1.Button, { color: "secondary", onClick: _this.setEditEventModalActiveTab.bind(_this, 'editEventFormTab') }, "Back"),
+                                    ' ',
+                                    React.createElement(reactstrap_1.Button, { color: "primary", onClick: _this.toggleEditEventModal }, "Save")))))); })),
                 React.createElement(reactstrap_1.Modal, { isOpen: this.props.isAskingForRemoveRsvpConfirmation, toggle: this.toggleRemoveRsvpModal },
                     React.createElement(reactstrap_1.ModalHeader, null, "Remove RSVP?"),
                     React.createElement(reactstrap_1.ModalBody, null,
@@ -436,6 +449,30 @@ var EventDetail = /** @class */ (function (_super) {
             //Not loading and no event defined means we 404ed
             return React.createElement(react_router_1.Redirect, { to: "/" });
         }
+    };
+    EventDetail.prototype.getEditEventFormInitialValues = function (event) {
+        var result = {
+            eventName: event.name,
+            eventStartsAt: event.startsAtLocal,
+            eventEndsAt: event.endsAtLocal,
+            timeZoneId: event.timeZoneId,
+            location: event.location,
+            otherDetails: event.otherDetails,
+            isPublished: event.isPublished,
+            rsvpOpen: event.rsvpOpen,
+            rsvpClosesAt: event.rsvpClosesAtLocal
+        };
+        for (var _i = 0, _a = event.form; _i < _a.length; _i++) {
+            var prompt = _a[_i];
+            result["editEventPrompt" + prompt.id] = prompt.prompt;
+            result["editEventPromptBehavior" + prompt.id] = prompt.behavior;
+            result["editEventPromptRequired" + prompt.id] = prompt.required;
+            result["editEventPromptSortOrder" + prompt.id] = prompt.sortOrder;
+            for (var i = 0; i < prompt.options.length; i++) {
+                result["editEventPromptOption" + prompt.id + "_" + i] = prompt.options[i];
+            }
+        }
+        return result;
     };
     EventDetail.prototype.getExistingMemberInitialValues = function (prompts, member) {
         var result = {
@@ -522,6 +559,9 @@ var EventDetail = /** @class */ (function (_super) {
     };
     EventDetail.prototype.editExistingMember = function (member, values) {
         this.props.editExistingMember(member, values);
+    };
+    EventDetail.prototype.saveEventChanges = function (values) {
+        this.props.saveEventChanges(values);
     };
     EventDetail.prototype.toggleModal = function () {
         if (this.props.memberModalIsOpen && this.props.modalMember !== undefined) {

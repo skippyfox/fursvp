@@ -178,7 +178,7 @@ export const actionCreators = {
                 dispatch({ type: 'NEW_EVENT_CREATED', event, requestedAsUser: userEmailString });
 
                 if (history) {
-                    history.push('/event/' + event.id);
+                    history.push(`/event/${event.id}/edit`);
                 }
             });
     }

@@ -81,7 +81,7 @@ exports.actionCreators = {
             .then(function (event) {
             dispatch({ type: 'NEW_EVENT_CREATED', event: event, requestedAsUser: userEmailString });
             if (history) {
-                history.push('/event/' + event.id);
+                history.push("/event/" + event.id + "/edit");
             }
         });
     }; }

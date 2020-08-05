@@ -246,6 +246,9 @@ exports.actionCreators = {
             // Handle error
         });
     }; },
+    saveEventChanges: function (values) { return function (dispatch, getState) {
+        // TODO
+    }; },
     addNewMember: function (values) { return function (dispatch, getState) {
         var state = getState();
         if (state.targetEvent === undefined) {

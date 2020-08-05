@@ -396,6 +396,10 @@ export const actionCreators = {
             });
     },
 
+    saveEventChanges: (values: FormikValues): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        // TODO
+    },
+
     addNewMember: (values : FormikValues): AppThunkAction<KnownAction> => (dispatch, getState) => {
         var state = getState();
         if (state.targetEvent === undefined) {

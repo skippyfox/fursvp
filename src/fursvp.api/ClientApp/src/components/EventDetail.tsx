@@ -11,10 +11,11 @@ import { RouteComponentProps, Redirect } from 'react-router';
 import { ApplicationState } from '../store';
 import * as EventDetailStore from '../store/EventDetailStore';
 import * as FursvpEventsStore from '../store/FursvpEvents';
-import DateTime from './DateTime';
+import DateTimeComponent from './DateTime';
 import { getStoredVerifiedEmail } from '../store/UserStore';
 import { Member } from '../store/FursvpEvents';
-import { Formik, Form as FormikForm, useField, FormikValues } from 'formik';
+import { Formik, Form as FormikForm, useField, FormikValues, useFormikContext } from 'formik';
+import { DateTimePicker } from '@material-ui/pickers';
 
 const RsvpTextInput = (props : {label: string, id: string, required: boolean}) => {
     const [field, meta] = useField({ id: props.id, required: props.required, name: props.id});
@@ -66,6 +67,20 @@ const RsvpCheckboxGroup = (props: { options: string[], label: string, id: string
                 return <Container key={props.id + option}><Input type="checkbox" name={props.id} value={option} {...field} />{' '}{option}</Container>;
             })}
         </>
+    );
+};
+
+const RsvpDateTimePicker = (props: { label: string, id: string }) => {
+    const { setFieldValue } = useFormikContext();
+    const [field] = useField({ id: props.id, name: props.id });
+    return (
+        <DateTimePicker
+            {...field}
+            {...props}
+            onChange={(val: any) => {
+                setFieldValue(field.name, val);
+            }}
+        />
     );
 };
 
@@ -246,7 +261,7 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                             : <></>;
                         }
                     )}
-                    <ListGroupItem>✔<DateTime date={member.rsvpedAtLocal} timeZoneOffset={event.timeZoneOffset} id="eventDetail_memberModal_rsvpedAt" /></ListGroupItem>
+                    <ListGroupItem>✔<DateTimeComponent date={member.rsvpedAtLocal} timeZoneOffset={event.timeZoneOffset} id="eventDetail_memberModal_rsvpedAt" /></ListGroupItem>
                 </ListGroup>
             </ModalBody>
             <ModalFooter>
@@ -392,7 +407,7 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
             <>
                 Add an RSVP
                 {!rsvpsAreClosed && event.rsvpClosesAtLocal != null
-                    ? <><br /><small>RSVPs are open until <DateTime date={event.rsvpClosesAtLocal} timeZoneOffset={event.timeZoneOffset} id="eventDetailRsvpsCloseAt" /></small></>
+                    ? <><br /><small>RSVPs are open until <DateTimeComponent date={event.rsvpClosesAtLocal} timeZoneOffset={event.timeZoneOffset} id="eventDetailRsvpsCloseAt" /></small></>
                     : <></>}
                 {rsvpsAreClosed && canAddRsvpWhenClosed
                     ? <><br /><small>RSVPs are open only to organizers as this time</small></>
@@ -428,10 +443,10 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                             : <></>}
                     </h1>
                     <Container>
-                        <span className="text-muted">Starts</span> <DateTime date={event.startsAtLocal} timeZoneOffset={event.timeZoneOffset} id="eventDetail_startsAt" />
+                        <span className="text-muted">Starts</span> <DateTimeComponent date={event.startsAtLocal} timeZoneOffset={event.timeZoneOffset} id="eventDetail_startsAt" />
                     </Container>
                     <Container>
-                        <span className="text-muted">Ends</span> <DateTime date={event.endsAtLocal} timeZoneOffset={event.timeZoneOffset} id="eventDetail_endsAt" />
+                        <span className="text-muted">Ends</span> <DateTimeComponent date={event.endsAtLocal} timeZoneOffset={event.timeZoneOffset} id="eventDetail_endsAt" />
                     </Container>
                     <Container>
                         <span className="text-muted">Location</span> {event.location}
@@ -459,51 +474,62 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                         }
                     </Modal>
                     <Modal isOpen={this.props.editEventModalIsOpen} toggle={this.toggleEditEventModal}>
-                        <ModalBody>
-                            <Nav tabs>
-                                <NavItem>
-                                    <NavLink className={this.props.editEventModalActiveTab == 'editEventDetailsTab' ? "active" : ""} onClick={this.setEditEventModalActiveTab.bind(this, 'editEventDetailsTab')}>
-                                        Details
-                                    </NavLink>
-                                </NavItem>
-                                <NavItem>
-                                    <NavLink className={this.props.editEventModalActiveTab == 'editEventFormTab' ? "active" : ""} onClick={this.setEditEventModalActiveTab.bind(this, 'editEventFormTab')}>
-                                        RSVP Form
-                                    </NavLink>
-                                </NavItem>
-                                <NavItem>
-                                    <NavLink className={this.props.editEventModalActiveTab == 'editEventPublishTab' ? "active" : ""} onClick={this.setEditEventModalActiveTab.bind(this, 'editEventPublishTab')}>
-                                        Publish
-                                    </NavLink>
-                                </NavItem>
-                            </Nav>
-                            <TabContent activeTab={this.props.editEventModalActiveTab}>
-                                <TabPane tabId="editEventDetailsTab">
-                                    Details
-                                </TabPane>
-                                <TabPane tabId="editEventFormTab">
-                                    RSVP Form
-                                </TabPane>
-                                <TabPane tabId="editEventPublishTab">
-                                    Publish
-                                </TabPane>
-                            </TabContent>
-                        </ModalBody>
-                        <ModalFooter>
-                            <TabContent activeTab={this.props.editEventModalActiveTab}>
-                                <TabPane tabId="editEventDetailsTab">
-                                    <Button color="primary" onClick={this.setEditEventModalActiveTab.bind(this, 'editEventFormTab')}>Next</Button>
-                                </TabPane>
-                                <TabPane tabId="editEventFormTab">
-                                    <Button color="secondary" onClick={this.setEditEventModalActiveTab.bind(this, 'editEventDetailsTab')}>Back</Button>
-                                    {' '}<Button color="primary" onClick={this.setEditEventModalActiveTab.bind(this, 'editEventPublishTab')}>Next</Button>
-                                </TabPane>
-                                <TabPane tabId="editEventPublishTab">
-                                    <Button color="secondary" onClick={this.setEditEventModalActiveTab.bind(this, 'editEventFormTab')}>Back</Button>
-                                    {' '}<Button color="primary" onClick={this.toggleEditEventModal}>Save</Button>
-                                </TabPane>
-                            </TabContent>
-                        </ModalFooter>
+                        <Formik initialValues={this.getEditEventFormInitialValues(this.props.fursvpEvent)} onSubmit={(values) => { this.saveEventChanges(values); }}>
+                            {formik => (
+                                <FormikForm translate={undefined}>
+                                    <ModalBody>
+                                        <Nav tabs>
+                                            <NavItem>
+                                                <NavLink className={this.props.editEventModalActiveTab == 'editEventDetailsTab' ? "active" : ""} onClick={this.setEditEventModalActiveTab.bind(this, 'editEventDetailsTab')}>
+                                                    Details
+                                                </NavLink>
+                                            </NavItem>
+                                            <NavItem>
+                                                <NavLink className={this.props.editEventModalActiveTab == 'editEventFormTab' ? "active" : ""} onClick={this.setEditEventModalActiveTab.bind(this, 'editEventFormTab')}>
+                                                    RSVP Form
+                                                </NavLink>
+                                            </NavItem>
+                                            <NavItem>
+                                                <NavLink className={this.props.editEventModalActiveTab == 'editEventPublishTab' ? "active" : ""} onClick={this.setEditEventModalActiveTab.bind(this, 'editEventPublishTab')}>
+                                                    Publish
+                                                </NavLink>
+                                            </NavItem>
+                                        </Nav>
+                                        <TabContent activeTab={this.props.editEventModalActiveTab}>
+                                            <TabPane tabId="editEventDetailsTab">
+                                                <FormGroup>
+                                                    <RsvpDateTimePicker label="Starts At" id="eventStartsAt" />
+                                                </FormGroup>
+                                                <FormGroup>
+                                                    <RsvpDateTimePicker label="Ends At" id="eventEndsAt" />
+                                                </FormGroup>
+                                            </TabPane>
+                                            <TabPane tabId="editEventFormTab">
+                                                RSVP Form
+                                            </TabPane>
+                                            <TabPane tabId="editEventPublishTab">
+                                                Publish
+                                            </TabPane>
+                                        </TabContent>
+                                    </ModalBody>
+                                    <ModalFooter>
+                                        <TabContent activeTab={this.props.editEventModalActiveTab}>
+                                            <TabPane tabId="editEventDetailsTab">
+                                                <Button color="primary" onClick={this.setEditEventModalActiveTab.bind(this, 'editEventFormTab')}>Next</Button>
+                                            </TabPane>
+                                            <TabPane tabId="editEventFormTab">
+                                                <Button color="secondary" onClick={this.setEditEventModalActiveTab.bind(this, 'editEventDetailsTab')}>Back</Button>
+                                                {' '}<Button color="primary" onClick={this.setEditEventModalActiveTab.bind(this, 'editEventPublishTab')}>Next</Button>
+                                            </TabPane>
+                                            <TabPane tabId="editEventPublishTab">
+                                                <Button color="secondary" onClick={this.setEditEventModalActiveTab.bind(this, 'editEventFormTab')}>Back</Button>
+                                                {' '}<Button color="primary" onClick={this.toggleEditEventModal}>Save</Button>
+                                            </TabPane>
+                                        </TabContent>
+                                    </ModalFooter>
+                                </FormikForm>
+                            )}
+                        </Formik>
                     </Modal>
                     <Modal isOpen={this.props.isAskingForRemoveRsvpConfirmation} toggle={this.toggleRemoveRsvpModal}>
                         <ModalHeader>Remove RSVP?</ModalHeader>
@@ -534,6 +560,32 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
             //Not loading and no event defined means we 404ed
             return <Redirect to="/" />;
         }
+    }
+
+    private getEditEventFormInitialValues(event: FursvpEventsStore.FursvpEvent) {
+        var result: any = {
+            eventName: event.name,
+            eventStartsAt: event.startsAtLocal,
+            eventEndsAt: event.endsAtLocal,
+            timeZoneId: event.timeZoneId,
+            location: event.location,
+            otherDetails: event.otherDetails,
+            isPublished: event.isPublished,
+            rsvpOpen: event.rsvpOpen,
+            rsvpClosesAt: event.rsvpClosesAtLocal
+        }
+
+        for (var prompt of event.form) {
+            result["editEventPrompt" + prompt.id] = prompt.prompt;
+            result["editEventPromptBehavior" + prompt.id] = prompt.behavior;
+            result["editEventPromptRequired" + prompt.id] = prompt.required;
+            result["editEventPromptSortOrder" + prompt.id] = prompt.sortOrder;
+            for (var i: number = 0; i < prompt.options.length; i++) {
+                result[`editEventPromptOption${prompt.id}_${i}`] = prompt.options[i];
+            }
+        }
+
+        return result;
     }
 
     private getExistingMemberInitialValues(prompts: FursvpEventsStore.FormPrompt[], member: FursvpEventsStore.Member) {
@@ -640,6 +692,10 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
 
     private editExistingMember(member : Member, values: FormikValues) {
         this.props.editExistingMember(member, values);
+    }
+
+    private saveEventChanges(values: FormikValues) {
+        this.props.saveEventChanges(values);
     }
 
     private toggleModal() {
