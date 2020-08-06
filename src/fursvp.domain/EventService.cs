@@ -30,8 +30,9 @@ namespace Fursvp.Domain
         /// </summary>
         /// <param name="emailAddress">The Event author's email address.</param>
         /// <param name="name">The Event author's name.</param>
+        /// <param name="timeZoneId">The Event's expected time zone.</param>
         /// <returns>The newly created <see cref="Event"/>.</returns>
-        public Event CreateNewEvent(string emailAddress, string name)
+        public Event CreateNewEvent(string emailAddress, string name, string timeZoneId)
         {
             var author = new Member
             {
@@ -44,9 +45,19 @@ namespace Fursvp.Domain
                 RsvpedAtUtc = DateTimeProvider.Now,
             };
 
+            DateTimeProvider.Now.TryToLocal(timeZoneId, out var localNow);
+            localNow.Date
+                .AddDays((4 - (int)localNow.DayOfWeek) % 7 + 2)
+                .AddHours(17)
+                .TryConvertToUtc(timeZoneId, out var defaultStartDate);
+            var defaultEndDate = defaultStartDate.AddHours(6);
+
             var @event = new Event()
             {
                 Id = Guid.NewGuid(),
+                TimeZoneId = timeZoneId,
+                StartsAtUtc = defaultStartDate,
+                EndsAtUtc = defaultEndDate,
             };
 
             @event.Members.Add(author);

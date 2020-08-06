@@ -285,12 +285,13 @@
             </summary>
             <param name="dateTimeProvider">An instance of <see cref="T:Fursvp.Domain.IProvideDateTime"/>.</param>
         </member>
-        <member name="M:Fursvp.Domain.EventService.CreateNewEvent(System.String,System.String)">
+        <member name="M:Fursvp.Domain.EventService.CreateNewEvent(System.String,System.String,System.String)">
             <summary>
             Creates a new <see cref="T:Fursvp.Domain.Event"/>.
             </summary>
             <param name="emailAddress">The Event author's email address.</param>
             <param name="name">The Event author's name.</param>
+            <param name="timeZoneId">The Event's expected time zone.</param>
             <returns>The newly created <see cref="T:Fursvp.Domain.Event"/>.</returns>
         </member>
         <member name="M:Fursvp.Domain.EventService.AddMember(Fursvp.Domain.Event,Fursvp.Domain.Member)">
@@ -385,12 +386,13 @@
             <param name="eventInfo">The <see cref="T:Fursvp.Domain.Event"/> to add a new <see cref="T:Fursvp.Domain.Member"/> to.</param>
             <param name="member">The <see cref="T:Fursvp.Domain.Member"/> to be added to an existing <see cref="T:Fursvp.Domain.Event"/>.</param>
         </member>
-        <member name="M:Fursvp.Domain.IEventService.CreateNewEvent(System.String,System.String)">
+        <member name="M:Fursvp.Domain.IEventService.CreateNewEvent(System.String,System.String,System.String)">
             <summary>
             Creates a new <see cref="T:Fursvp.Domain.Event"/>.
             </summary>
             <param name="emailAddress">The Event author's email address.</param>
             <param name="name">The Event author's name.</param>
+            <param name="timeZoneId">The Event's expected time zone.</param>
             <returns>The newly created <see cref="T:Fursvp.Domain.Event"/>.</returns>
         </member>
         <member name="M:Fursvp.Domain.IEventService.RsvpOpen(Fursvp.Domain.Event)">

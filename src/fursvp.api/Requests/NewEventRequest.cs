@@ -17,5 +17,10 @@ namespace Fursvp.Api.Requests
         /// </summary>
         [Required]
         public string AuthorName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the time zone name.
+        /// </summary>
+        public string TimeZoneId { get; set; }
     }
 }

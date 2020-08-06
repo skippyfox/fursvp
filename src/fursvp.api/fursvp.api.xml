@@ -265,6 +265,11 @@
             Gets or sets the display name for the author.
             </summary>
         </member>
+        <member name="P:Fursvp.Api.Requests.NewEventRequest.TimeZoneId">
+            <summary>
+            Gets or sets the time zone name.
+            </summary>
+        </member>
         <member name="T:Fursvp.Api.Requests.NewMemberRequest">
             <summary>
             The request model representing a new Member for an Event.

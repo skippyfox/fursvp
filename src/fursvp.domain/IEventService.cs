@@ -22,8 +22,9 @@ namespace Fursvp.Domain
         /// </summary>
         /// <param name="emailAddress">The Event author's email address.</param>
         /// <param name="name">The Event author's name.</param>
+        /// <param name="timeZoneId">The Event's expected time zone.</param>
         /// <returns>The newly created <see cref="Event"/>.</returns>
-        Event CreateNewEvent(string emailAddress, string name);
+        Event CreateNewEvent(string emailAddress, string name, string timeZoneId);
 
         /// <summary>
         /// Determines whether attendees can RSVP to an <see cref="Event"/>.

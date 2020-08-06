@@ -3,6 +3,7 @@ import { AppThunkAction } from '.';
 import { getStoredVerifiedEmail, getStoredAuthToken, UserLoggedOutAction, OpenLoginModalAction } from './UserStore';
 import { ReceiveFursvpEventAction } from './EventDetailStore';
 import { History } from 'history';
+import { DateTime } from 'Luxon';
 
 // -----------------
 // STATE - This defines the type of data maintained in the Redux store.
@@ -168,7 +169,8 @@ export const actionCreators = {
                 'Authorization': 'Bearer ' + authToken
             },
             body: JSON.stringify({
-                "authorName": values.authorName
+                "authorName": values.authorName,
+                "timeZoneId": DateTime.local().zoneName
             })
         };
 
