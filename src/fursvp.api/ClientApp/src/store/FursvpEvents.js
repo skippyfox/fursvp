@@ -19,7 +19,7 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var UserStore_1 = require("./UserStore");
-var Luxon_1 = require("Luxon");
+var luxon_1 = require("luxon");
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
 // They don't directly mutate state, but they can have external side-effects (such as loading data).
@@ -75,7 +75,7 @@ exports.actionCreators = {
             },
             body: JSON.stringify({
                 "authorName": values.authorName,
-                "timeZoneId": Luxon_1.DateTime.local().zoneName
+                "timeZoneId": luxon_1.DateTime.local().zoneName
             })
         };
         fetch("api/event", requestOptions)

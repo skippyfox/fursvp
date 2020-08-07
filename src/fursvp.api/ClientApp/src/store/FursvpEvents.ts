@@ -3,7 +3,7 @@ import { AppThunkAction } from '.';
 import { getStoredVerifiedEmail, getStoredAuthToken, UserLoggedOutAction, OpenLoginModalAction } from './UserStore';
 import { ReceiveFursvpEventAction } from './EventDetailStore';
 import { History } from 'history';
-import { DateTime } from 'Luxon';
+import { DateTime } from 'luxon';
 
 // -----------------
 // STATE - This defines the type of data maintained in the Redux store.

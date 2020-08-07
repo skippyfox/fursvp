@@ -497,18 +497,23 @@ class EventDetail extends React.PureComponent<EventDetailProps> {
                                         </Nav>
                                         <TabContent activeTab={this.props.editEventModalActiveTab}>
                                             <TabPane tabId="editEventDetailsTab">
-                                                <FormGroup>
-                                                    <RsvpDateTimePicker label="Starts At" id="eventStartsAt" />
-                                                </FormGroup>
-                                                <FormGroup>
-                                                    <RsvpDateTimePicker label="Ends At" id="eventEndsAt" />
-                                                </FormGroup>
+                                                <FormGroup><RsvpTextInput label="Event Name" id="eventName" required /></FormGroup>
+                                                <FormGroup><RsvpDateTimePicker label="Starts At" id="eventStartsAt" /></FormGroup>
+                                                <FormGroup><RsvpDateTimePicker label="Ends At" id="eventEndsAt" /></FormGroup>
+                                                <FormGroup><RsvpTextInput label="Time Zone" id="timeZoneId" required /></FormGroup>
+                                                <FormGroup><RsvpTextInput label="Location" id="location" required /></FormGroup>
+                                                <FormGroup><RsvpTextInput label="Other Details" id="otherDetails" required /></FormGroup>
                                             </TabPane>
                                             <TabPane tabId="editEventFormTab">
                                                 RSVP Form
                                             </TabPane>
                                             <TabPane tabId="editEventPublishTab">
-                                                Publish
+                                                <FormGroup><RsvpCheckbox label="Publish" id="isPublished" /></FormGroup>
+                                                <FormGroup><RsvpCheckbox label="Open RSVPs" id="rsvpOpen" /></FormGroup>
+                                                {formik.values.rsvpOpen
+                                                    ? <FormGroup><RsvpDateTimePicker label="Close RSVPs At" id="rsvpClosesAt" /></FormGroup>
+                                                    : <></>
+                                                }
                                             </TabPane>
                                         </TabContent>
                                     </ModalBody>

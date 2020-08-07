@@ -47,7 +47,7 @@ namespace Fursvp.Domain
 
             DateTimeProvider.Now.TryToLocal(timeZoneId, out var localNow);
             localNow.Date
-                .AddDays((4 - (int)localNow.DayOfWeek) % 7 + 2)
+                .AddDays((11 - (int)localNow.DayOfWeek) % 7 + 2)
                 .AddHours(17)
                 .TryConvertToUtc(timeZoneId, out var defaultStartDate);
             var defaultEndDate = defaultStartDate.AddHours(6);
