@@ -50,8 +50,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Fursvp.Communication\Fursvp.Communication.csproj" />
-    <ProjectReference Include="..\fursvp.data\Fursvp.Data.csproj" />
-    <ProjectReference Include="..\fursvp.domain\Fursvp.Domain.csproj" />
+    <ProjectReference Include="..\fursvp.data\fursvp.data.csproj" />
+    <ProjectReference Include="..\fursvp.domain\fursvp.domain.csproj" />
   </ItemGroup>
   
   <ItemGroup>
