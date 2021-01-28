@@ -11,12 +11,12 @@ FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 RUN curl -sL https://deb.nodesource.com/setup_10.x |  bash -
 RUN apt-get install -y nodejs
 WORKDIR /src
-COPY ["fursvp.sln", ""]
-COPY ["fursvp.api/fursvp.api.csproj", "fursvp.api/"]
-COPY ["Fursvp.Communication/Fursvp.Communication.csproj", "Fursvp.Communication/"]
-COPY ["fursvp.data/fursvp.data.csproj", "fursvp.data/"]
-COPY ["fursvp.domain/fursvp.domain.csproj", "fursvp.domain/"]
-COPY ["fursvp.helpers/fursvp.helpers.csproj", "fursvp.helpers/"]
+COPY ["../fursvp.sln", ""]
+COPY ["fursvp.api.csproj", "fursvp.api/"]
+COPY ["../Fursvp.Communication/Fursvp.Communication.csproj", "Fursvp.Communication/"]
+COPY ["../fursvp.data/fursvp.data.csproj", "fursvp.data/"]
+COPY ["../fursvp.domain/fursvp.domain.csproj", "fursvp.domain/"]
+COPY ["../fursvp.helpers/fursvp.helpers.csproj", "fursvp.helpers/"]
 RUN dotnet restore
 COPY . .
 WORKDIR "/src/fursvp.api"
