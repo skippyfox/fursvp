@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\fursvp.helpers\Fursvp.Helpers.csproj" />
+    <ProjectReference Include="..\fursvp.helpers\fursvp.helpers.csproj" />
   </ItemGroup>
 
 </Project>

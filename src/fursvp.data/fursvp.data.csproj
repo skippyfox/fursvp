@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\fursvp.domain\Fursvp.Domain.csproj" />
+    <ProjectReference Include="..\fursvp.domain\fursvp.domain.csproj" />
   </ItemGroup>
 
 </Project>
