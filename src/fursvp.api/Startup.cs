@@ -63,7 +63,7 @@ namespace Fursvp.Api
             services.AddDomainServices();
             services.AddFursvpDataWithFirestore();
 
-            if (Environment.IsDevelopment())
+            if (Environment.IsDevelopment() || string.IsNullOrEmpty(Configuration["SendGrid:ApiKey"]))
             {
                 services.AddSingleton<IEmailer, SuppressAndLogEmailer>();
             }
