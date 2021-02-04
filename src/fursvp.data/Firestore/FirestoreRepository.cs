@@ -10,6 +10,7 @@ namespace Fursvp.Data.Firestore
     using System.Threading.Tasks;
     using Fursvp.Domain;
     using Google.Cloud.Firestore;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// Interfaces with Google Firestore to access documents representing a domain entity.
@@ -18,15 +19,19 @@ namespace Fursvp.Data.Firestore
     public class FirestoreRepository<T> : IRepository<T>
         where T : IEntity<T>
     {
-        private const string ProjectId = "fursvp-dev"; // TODO - put into config variable
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FirestoreRepository{T}"/> class.
         /// </summary>
         /// <param name="mapper">An instance of <see cref="IDictionaryMapper{T}"/> to map between the domain entity and the Firestore document.</param>
-        public FirestoreRepository(IDictionaryMapper<T> mapper)
+        public FirestoreRepository(IOptions<FirestoreOptions> options, IDictionaryMapper<T> mapper)
         {
-            Db = FirestoreDb.Create(ProjectId);
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            Db = FirestoreDb.Create(options.Value.ProjectId);
             Collection = Db.Collection(typeof(T).Name);
             Mapper = mapper;
         }

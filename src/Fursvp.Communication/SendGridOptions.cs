@@ -11,9 +11,9 @@ namespace Fursvp.Communication
     public class SendGridOptions
     {
         /// <summary>
-        /// The value "SendGrid".
+        /// Specifies the portion of env file to import
         /// </summary>
-        public const string SendGrid = "SendGrid";
+        public const string SectionName = "SendGrid";
 
         /// <summary>
         /// Gets or sets the SendGrid API key.
