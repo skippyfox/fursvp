@@ -10,6 +10,7 @@ namespace Fursvp.Api
     using Fursvp.Api.Filters;
     using Fursvp.Api.Responses;
     using Fursvp.Communication;
+    using Fursvp.Data.Firestore;
     using Fursvp.Domain.Authorization;
     using Fursvp.Domain.Authorization.ReadAuthorization;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -61,6 +62,7 @@ namespace Fursvp.Api
             });
 
             services.AddDomainServices();
+            services.Configure<FirestoreOptions>(Configuration.GetSection(FirestoreOptions.SectionName));
             services.AddFursvpDataWithFirestore();
 
             if (Environment.IsDevelopment() || string.IsNullOrEmpty(Configuration["SendGrid:ApiKey"]))
@@ -70,7 +72,7 @@ namespace Fursvp.Api
             else
             {
                 services.AddSingleton<IEmailer, SendGridEmailer>();
-                services.Configure<SendGridOptions>(Configuration.GetSection(SendGridOptions.SendGrid));
+                services.Configure<SendGridOptions>(Configuration.GetSection(SendGridOptions.SectionName));
             }
 
             services.AddLogging(lc =>
