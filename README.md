@@ -41,11 +41,34 @@ Google Forms is an almost perfect RSVP tool. It lacks two notable features: A pu
 ## How do I get started? How can I help?
 If you're reading this in mid-2020, this source is nearly functional! We could probably use some help! If you'd like to be a contributor, well, THANKS! Having outside help is the biggest reasons this project is open source. Check the Issues section to see what's still needed.
 
-You'll likely want to have a copy of Visual Studio and Docker Desktop installed to get started. You can work against a Google Firestore database by copying your service account key to %appdata%\Microsoft\UserSecrets\fursvp\firestore.json.
-
 We don't have an established set of Contributing Guidelines yet, but we do have a [Code of Conduct](CODE_OF_CONDUCT.md). [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 
 Until this code is functional, you can check out the old closed-source fursvp.com.
+
+### What you'll need
+At a minimum, you will need Docker (or Docker Desktop) to run this codebase. 
+
+Having Visual Studio is recommended, but the project can be built entirely within containers. Visual Studio provides you the option of running it outside of a container. You can work against a Google Firestore database by copying your service account key to %appdata%\Microsoft\UserSecrets\fursvp\firestore.json.
+
+### Building With Docker
+
+```bash
+cd src
+docker build -t fursvp .
+docker run -p 80:80 --env-file=fursvp.api/settings.env fursvp:latest
+```
+
+To persist data in Firebase, some additional configuration is needed.
+
+1. Edit src/fursvp.api/settings.env and set GOOGLE_APPLICATION_CREDENTIALS=/tmp/keys/gcp.json
+2. Export a variable with the path of your GCP service account json
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS=/local/path/to/gcp.json
+```
+3. Mount the path as shown below
+```bash
+docker run -p 80:80 --env-file fursvp.api/settings.env -v$GOOGLE_APPLICATION_CREDENTIALS:/tmp/keys/gcp.json:ro fursvp:latest
+```
 
 ## License
 This project is licensed under the MIT License - see the LICENSE.md file for details
