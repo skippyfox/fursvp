@@ -182,7 +182,7 @@ If you didn't request this, simply ignore this message.",
         private string CreateVerificationToken(string emailAddress, out string sessionId)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(Configuration["AuthorizationIssuerSigningKey"]);
+            var key = Encoding.ASCII.GetBytes(Configuration["AuthorizationIssuerSigningKey"] ?? "00000000-0000-0000-0000-000000000000");
             sessionId = Guid.NewGuid().ToString();
             var tokenDescriptor = new SecurityTokenDescriptor
             {

@@ -62,8 +62,18 @@ namespace Fursvp.Api
             });
 
             services.AddDomainServices();
-            services.Configure<FirestoreOptions>(Configuration.GetSection(FirestoreOptions.SectionName));
-            services.AddFursvpDataWithFirestore();
+
+            var firestoreOptions = Configuration.GetSection(FirestoreOptions.SectionName);
+            if (string.IsNullOrEmpty(firestoreOptions.GetValue<string>("ProjectId")))
+            {
+                System.Console.WriteLine("Live datasource not configured.");
+                services.AddFursvpDataWithFakeRepository();
+            }
+            else
+            {
+                services.Configure<FirestoreOptions>(firestoreOptions);
+                services.AddFursvpDataWithFirestore();
+            }
 
             if (Environment.IsDevelopment() || string.IsNullOrEmpty(Configuration["SendGrid:ApiKey"]))
             {
@@ -93,6 +103,8 @@ namespace Fursvp.Api
             services.AddScoped<IUrlHelper>(x => x.GetRequiredService<IUrlHelperFactory>().GetUrlHelper(x.GetService<IActionContextAccessor>().ActionContext));
             services.AddHttpContextAccessor(); // For authorization / access to user info.
             services.AddSingleton<IUserAccessor, ClaimsPrincipalUserAccessor>();
+
+            var rawKey = Configuration["AuthorizationIssuerSigningKey"] ?? "00000000-0000-0000-0000-000000000000";
             services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -100,7 +112,7 @@ namespace Fursvp.Api
             })
             .AddJwtBearer(x =>
             {
-                var key = Encoding.ASCII.GetBytes(Configuration["AuthorizationIssuerSigningKey"]);
+                var key = Encoding.ASCII.GetBytes(rawKey);
                 x.SaveToken = true;
                 x.TokenValidationParameters = new TokenValidationParameters
                 {
